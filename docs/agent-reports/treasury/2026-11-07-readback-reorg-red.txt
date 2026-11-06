@@ -1,0 +1,29 @@
+✔ deposit history paginates from creation, uses receipt-bound logs, and resumes after reload (5.425875ms)
+✔ unknown balance and bad receipts never become zero or a verified deposit (0.991167ms)
+✔ simulation/no mined trace cannot create a GS020 evidence record (0.749666ms)
+✔ only a canonical failed receipt with an actual transaction trace can publish rejected evidence (2.398834ms)
+✖ a reorg during a read invalidates the entire balance and deposit projection (2.546209ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 4
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 875.101917
+
+✖ failing tests:
+
+test at tests/treasury/readback-port.test.mjs:51:1
+✖ a reorg during a read invalidates the entire balance and deposit projection (2.546209ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at async TestContext.<anonymous> (file:///Users/amang/Code/NovemberRush/ethglobal/vestige/vestige-treasury/tests/treasury/readback-port.test.mjs:56:3)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /READBACK_REORG/,
+    operator: 'rejects',
+    diff: 'simple'
+  }

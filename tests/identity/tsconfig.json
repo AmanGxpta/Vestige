@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "skipLibCheck": true,
+    "noEmit": true,
+    "types": ["node"],
+    "typeRoots": ["./node_modules/@types"],
+    "baseUrl": ".",
+    "paths": {
+      "viem": ["./node_modules/viem"],
+      "viem/*": ["./node_modules/viem/*"],
+      "@worldcoin/idkit-core/*": ["./node_modules/@worldcoin/idkit-core/dist/*"],
+      "vitest": ["./node_modules/vitest"],
+      "vitest/*": ["./node_modules/vitest/*"]
+    }
+  },
+  "include": ["./**/*.ts", "../../src/modules/identity/**/*.ts", "../../src/modules/agreements/**/*.ts", "../../app/api/identity/**/*.ts", "../../app/api/agreements/**/*.ts"],
+  "exclude": ["./node_modules"]
+}

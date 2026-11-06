@@ -1,0 +1,55 @@
+{
+  "kind": "INFRASTRUCTURE_REVIEW_PLAN",
+  "codeHashes": {
+    "singleton": "0xb1f926978a0f44a2c0ec8fe822418ae969bd8c3f18d61e5103100339894f81ff",
+    "factory": "0x50c3cdc4074750a7a974204a716c999edd37482f907608d960b2b025ee0b3317"
+  },
+  "chainId": 1874,
+  "observedAt": "2026-11-06T22:51:27.646Z",
+  "blockNumber": "12409117",
+  "blockHash": "0x51a209e2b513fea2c5aba35da4dbc6b65cfb345eae53bac0b7e9041576ebb8e6",
+  "sender": "0x10d8C1d6359F0694203924182d3da83843a4e052",
+  "nonce": 0,
+  "pendingNonce": 0,
+  "wbtWei": "800000000000000000",
+  "gasPriceWei": "5001000000",
+  "broadcastAuthorized": false,
+  "deployments": [
+    {
+      "contract": "contracts/SeatRegistry.sol:SeatRegistry",
+      "nonce": 0,
+      "predictedAddress": "0xe91BF256Afa7c5453e715c39Ab2431EAd492bcBA",
+      "constructorArgs": [
+        "0x84068C51A9236A869E5F05FBA96323E97597DDEd"
+      ],
+      "encodedConstructorArgs": "0x00000000000000000000000084068c51a9236a869e5f05fba96323e97597dded",
+      "proposedGasCeiling": "400000"
+    },
+    {
+      "contract": "contracts/SafeSetup.sol:SafeSetup",
+      "nonce": 1,
+      "predictedAddress": "0x153406cd0509E71d302eD49E787051Bb98231558",
+      "constructorArgs": [
+        "0x29fcB43b46531BcA003ddC8FCB67FFE91900C762"
+      ],
+      "encodedConstructorArgs": "0x00000000000000000000000029fcb43b46531bca003ddc8fcb67ffe91900c762",
+      "proposedGasCeiling": "2500000"
+    }
+  ],
+  "verification": {
+    "compiler": "v0.8.24+commit.e11b9ed9",
+    "optimizer": true,
+    "runs": 200,
+    "evmVersion": "paris",
+    "verifier": "blockscout",
+    "url": "https://explorer.testnet.whitechain.io/api/"
+  },
+  "approvalRequired": [
+    "source/build",
+    "bounded funding",
+    "gas ceilings vs simulation",
+    "OP L1 measured policy",
+    "exact nonce/constructors before any signing"
+  ],
+  "warning": "Predicted addresses are not deployed contracts. No receipt/manifest exists."
+}

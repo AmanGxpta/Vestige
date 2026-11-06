@@ -1,0 +1,50 @@
+Compiling 6 files with Solc 0.8.24
+Solc 0.8.24 finished in 1.49s
+Compiler run successful!
+
+Ran 1 test for test/WhitechainFork.t.sol:WhitechainForkTest
+[SKIP: skipped] setUp() (gas: 0)
+Suite result: ok. 0 passed; 0 failed; 1 skipped; finished in 9.03ms (0.00ns CPU time)
+
+Ran 5 tests for test/SeatRegistry.t.sol:SeatRegistryTest
+[PASS] testNullifierCannotTakeSecondSeat() (gas: 105068)
+[PASS] testOnlyAttester() (gas: 34151)
+[PASS] testRejectZeroInputs() (gas: 180241)
+[PASS] testSameHumanDifferentVenture() (gas: 155237)
+[PASS] testWalletCannotAcquireAnotherNullifier() (gas: 102738)
+Suite result: ok. 5 passed; 0 failed; 0 skipped; finished in 11.71ms (9.27ms CPU time)
+
+Ran 6 tests for test/SafeSetup.t.sol:SafeSetupTest
+[PASS] testAtomicSetupAttachesBoundGuard() (gas: 1222083)
+[PASS] testHelperCannotBeCalledDirectly() (gas: 32607)
+[PASS] testHelperRejectsWrongSingleton() (gas: 3176730)
+[PASS] testSetupRejectsFallbackHandler() (gas: 344702)
+[PASS] testSetupRejectsThresholdOne() (gas: 307623)
+[PASS] testSetupRejectsUnverifiedOwner() (gas: 317319)
+Suite result: ok. 6 passed; 0 failed; 0 skipped; finished in 11.74ms (11.10ms CPU time)
+
+Ran 21 tests for test/VestigeGuard.t.sol:VestigeGuardTest
+[PASS] testBaselineEnabledModuleBypassesTransactionGuard() (gas: 4135459)
+[PASS] testCannotAddUnverifiedOwner() (gas: 138515)
+[PASS] testCannotChangeFallbackHandler() (gas: 140264)
+[PASS] testCannotEnableModule() (gas: 138221)
+[PASS] testCannotSwapToUnverifiedOwner() (gas: 162974)
+[PASS] testDelegatecallCannotWriteSafeStorage() (gas: 246076)
+[PASS] testEmptySelfCallForbidden() (gas: 136487)
+[PASS] testEvenVerifiedThirdOwnerCannotBeAdded() (gas: 212931)
+[PASS] testFuzzSelfCallForbidden(bytes4) (runs: 256, μ: 137295, ~: 137310)
+[PASS] testGuardCannotBeRemoved() (gas: 137965)
+[PASS] testGuardReplacementBlocked() (gas: 406238)
+[PASS] testMultiSendCannotHideGuardRemoval() (gas: 355986)
+[PASS] testOneSignatureFailsGS020() (gas: 91140)
+[PASS] testOnlyBoundSafeMayInvokeHooks() (gas: 20989)
+[PASS] testRejectGuardForSafeWithPreexistingModule() (gas: 3984347)
+[PASS] testRemoveOwnerCannotReduceThreshold() (gas: 159957)
+[PASS] testSelfApproveHashForbidden() (gas: 137928)
+[PASS] testThresholdCannotDrop() (gas: 137983)
+[PASS] testTwoOwnersCanPay() (gas: 186492)
+[PASS] testUnregisteredModuleCannotExecuteEitherEntryPoint() (gas: 82993)
+[PASS] testVerifiedSeatSwapAllowed() (gas: 302961)
+Suite result: ok. 21 passed; 0 failed; 0 skipped; finished in 36.85ms (34.79ms CPU time)
+
+Ran 4 test suites in 40.44ms (69.33ms CPU time): 32 tests passed, 0 failed, 1 skipped (33 total tests)

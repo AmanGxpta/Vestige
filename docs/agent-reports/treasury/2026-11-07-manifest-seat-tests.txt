@@ -1,0 +1,16 @@
+✔ missing approved manifest never fabricates a registered treasury (0.516041ms)
+✔ approved nested schema maps losslessly to flat relayer fingerprints (0.639625ms)
+✔ infrastructure schema cannot masquerade as a treasury (0.145875ms)
+✔ published ABI index matches exact file bytes and Solidity function/event exports (2.535333ms)
+✔ unconfigured or unrelated receipt never confirms a seat (1.7285ms)
+✔ successful attestation requires exact receipt, two confirmations and independent seat readback (3.300458ms)
+✔ pending, reorged, failed, wrong sender and missing readback cannot confirm (3.311833ms)
+✔ ambiguous attestation and disabled port never automatically retry or send (0.88275ms)
+ℹ tests 8
+ℹ suites 0
+ℹ pass 8
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 461.89225

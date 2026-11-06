@@ -1,0 +1,11 @@
+No files changed, compilation skipped
+
+Ran 5 tests for test/WhitechainFork.t.sol:WhitechainForkTest
+[PASS] testCannotRedirectSignedFunding() (gas: 80907)
+[PASS] testDeployedSafeAndTokenDomain() (gas: 60653)
+[PASS] testExpiredAuthorization() (gas: 70079)
+[PASS] testExternalRelayerCannotReceiveForSafe() (gas: 69562)
+[PASS] testGaslessFundingAndReplay() (gas: 210539)
+Suite result: ok. 5 passed; 0 failed; 0 skipped; finished in 830.23ms (22.74ms CPU time)
+
+Ran 1 test suite in 834.76ms (830.23ms CPU time): 5 tests passed, 0 failed, 0 skipped (5 total tests)

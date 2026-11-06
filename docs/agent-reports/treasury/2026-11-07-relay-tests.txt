@@ -1,0 +1,34 @@
+✔ reservation persists across process-like restarts without storing signatures (49.007042ms)
+✔ retained crash lock and corrupt state fail closed (1.549375ms)
+✔ unknown venture cannot choose a relay destination (0.710792ms)
+✔ treasury activation rejects unsafe configuration (2.939666ms)
+✔ funding recipient and expiry are bound to policy (2.945709ms)
+✔ a signed authorization cannot change its amount (20.0365ms)
+✔ one owner cannot relay a payment (1.459916ms)
+✔ the same authorization cannot be submitted twice (4.466208ms)
+✔ rate-limited requests never send (2.359917ms)
+✔ daily WBT budget cannot be oversubscribed (2.55275ms)
+✔ low gas balance rejects before submission (2.46675ms)
+✔ simulation failures cost no submitted gas (2.282208ms)
+✔ valid funding simulates with the actual sender then submits exact token call (2.39875ms)
+✔ duplicate owners, outsider signers, altered payments and stale nonces fail (13.719166ms)
+✔ two owners relay sorted signatures and never authorize a delegatecall or refund (7.201458ms)
+✔ unsafe modules, guard, seats, handler, singleton, code or network fail closed (2.821542ms)
+✔ an ambiguous broadcast remains reserved and is never automatically retried (4.136333ms)
+✔ a missing receipt or failed independent check cannot become EXECUTED (2.017334ms)
+✔ concurrent submissions cannot oversubscribe one durable reservation (3.316542ms)
+✔ gas quote spikes and excessive estimates never broadcast (3.835541ms)
+✔ wallet and venture limits each independently reject without submission (3.745959ms)
+✔ wrong-chain token domains and malformed amounts cannot reach the signer (1.499834ms)
+✔ known mined failure is recorded as FAILED instead of EXECUTED (1.986292ms)
+✔ the gas sender cannot be a founder or the seat attester (0.86125ms)
+✔ an unresolved sender nonce blocks other intents until reconciliation (3.901ms)
+✔ relay sends are disabled unless configuration and fee policy are explicitly reviewed (3.690792ms)
+ℹ tests 26
+ℹ suites 0
+ℹ pass 26
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 483.305666

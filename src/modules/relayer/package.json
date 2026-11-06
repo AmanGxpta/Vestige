@@ -1,0 +1,11 @@
+{
+  "name": "vestige-restricted-relayer",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test ../../../tests/treasury/*.test.mjs"
+  },
+  "dependencies": {
+    "viem": "2.57.16"
+  }
+}

@@ -1,0 +1,202 @@
+{
+  "schema": "vestige.canonical-vectors/1",
+  "algorithm": "vestige restricted canonical JSON (CONTRACTS v0 @30d1ef6); docHash = keccak256(UTF-8(canonicalJson))",
+  "generatedBy": "C1 tests/identity/vectors/build-canonical-vectors.ts",
+  "valid": [
+    {
+      "name": "key order independent",
+      "input": {
+        "b": 1,
+        "a": [
+          true,
+          null,
+          "x"
+        ],
+        "c": {
+          "z": 1,
+          "y": 2
+        }
+      },
+      "canonical": "{\"a\":[true,null,\"x\"],\"b\":1,\"c\":{\"y\":2,\"z\":1}}",
+      "docHash": "0x60026f7c6111555530e0d760e2e7c34564ee563b93b59c2fa9df963a7cbfa4e5"
+    },
+    {
+      "name": "array order preserved",
+      "input": {
+        "list": [
+          3,
+          1,
+          2
+        ]
+      },
+      "canonical": "{\"list\":[3,1,2]}",
+      "docHash": "0x7c88deb53d49e28cd2543aad48a84c0631fe41af9147f8faa923757c04b24436"
+    },
+    {
+      "name": "composed é (U+00E9)",
+      "input": {
+        "n": "é"
+      },
+      "canonical": "{\"n\":\"é\"}",
+      "docHash": "0x3a19a0c4fc4ff2a903dfb5c198df5e03d1407cbe21b190ae5f5901ef9398eeae"
+    },
+    {
+      "name": "decomposed e + U+0301 normalises to composed",
+      "input": {
+        "n": "é"
+      },
+      "canonical": "{\"n\":\"é\"}",
+      "docHash": "0x3a19a0c4fc4ff2a903dfb5c198df5e03d1407cbe21b190ae5f5901ef9398eeae"
+    },
+    {
+      "name": "decomposed key normalises before sorting",
+      "input": {
+        "é": 1,
+        "f": 2,
+        "d": 3
+      },
+      "canonical": "{\"d\":3,\"f\":2,\"é\":1}",
+      "docHash": "0xd5a2516f521033f3e39c0e3f501ff5463600ed5de639a87d411117b818812f87"
+    },
+    {
+      "name": "UTF-16 code unit order (uppercase before lowercase, astral after BMP)",
+      "input": {
+        "a": 1,
+        "B": 2,
+        "😀": 3,
+        "～": 4
+      },
+      "canonical": "{\"B\":2,\"a\":1,\"😀\":3,\"～\":4}",
+      "docHash": "0x66e5f12aafd69c049f8a334d7a96a9a5ddcf2a1b6a7db79f36818dd7ab898389"
+    },
+    {
+      "name": "integers incl. negative and max safe",
+      "input": {
+        "n": [
+          -5,
+          0,
+          9007199254740991
+        ]
+      },
+      "canonical": "{\"n\":[-5,0,9007199254740991]}",
+      "docHash": "0xceb33686954617dbbdb730ef8e204291b9230e2fb301cc8aa7fb11a9008416e0"
+    },
+    {
+      "name": "escapes",
+      "input": {
+        "s": "quote\" backslash\\ newline\n tab\t ctrl\u0001"
+      },
+      "canonical": "{\"s\":\"quote\\\" backslash\\\\ newline\\n tab\\t ctrl\\u0001\"}",
+      "docHash": "0x9f13ce8f17c5892ab84590b09fdbf8ced98b7e37f78f698e83eb83fa27293625"
+    },
+    {
+      "name": "empty containers",
+      "input": {
+        "o": {},
+        "a": []
+      },
+      "canonical": "{\"a\":[],\"o\":{}}",
+      "docHash": "0x1b15a022cd18f1e7f6bdc81da016fdde1aa2607c7e09ff681c7880dddcdbd519"
+    }
+  ],
+  "special": [
+    {
+      "name": "undefined object property omitted",
+      "js": "({ a: 1, b: undefined })",
+      "canonical": "{\"a\":1}",
+      "docHash": "0x25e7c2a96531eb50246780c1f25742e489bf55210e26981dc02992bb585feb97"
+    },
+    {
+      "name": "negative zero → 0",
+      "js": "({ z: -0 })",
+      "canonical": "{\"z\":0}",
+      "docHash": "0x36568cb431df46e6d2e2e27963d820b0bb7c56f573c4739d88ee2b25abf15a52"
+    },
+    {
+      "name": "16 levels of nesting accepted",
+      "js": "JSON.parse('['.repeat(16) + ']'.repeat(16))",
+      "canonical": "[[[[[[[[[[[[[[[[]]]]]]]]]]]]]]]]",
+      "docHash": "0x304dace60d3a137244ebf579ad2879559f2d515a70149c04e4d1cddded7ce7cf"
+    }
+  ],
+  "invalid": [
+    {
+      "name": "float",
+      "js": "({ x: 0.5 })",
+      "error": "AGREEMENT_INVALID"
+    },
+    {
+      "name": "unsafe integer",
+      "js": "({ x: 9007199254740992 })",
+      "error": "AGREEMENT_INVALID"
+    },
+    {
+      "name": "NaN",
+      "js": "({ x: NaN })",
+      "error": "AGREEMENT_INVALID"
+    },
+    {
+      "name": "bigint",
+      "js": "({ x: 10n })",
+      "error": "AGREEMENT_INVALID"
+    },
+    {
+      "name": "Date (non-plain object)",
+      "js": "({ x: new Date(0) })",
+      "error": "AGREEMENT_INVALID"
+    },
+    {
+      "name": "undefined array element",
+      "js": "({ x: [1, undefined] })",
+      "error": "AGREEMENT_INVALID"
+    },
+    {
+      "name": "sparse array",
+      "js": "({ x: [1, , 2] })",
+      "error": "AGREEMENT_INVALID"
+    },
+    {
+      "name": "duplicate key after NFC",
+      "js": "({ \"\\u00e9\": 1, \"e\\u0301\": 2 })",
+      "error": "AGREEMENT_INVALID"
+    },
+    {
+      "name": "17 levels of nesting",
+      "js": "JSON.parse('['.repeat(17) + ']'.repeat(17))",
+      "error": "AGREEMENT_INVALID"
+    }
+  ],
+  "foundingTerms": {
+    "note": "buildTermsDoc trims text fields, lowercases wallets, sorts founders by wallet, fixes schema + disclaimer; notes default to \"\". Validation happens before NFC.",
+    "input": {
+      "ventureId": "0x1111111111111111111111111111111111111111111111111111111111111111",
+      "verifiedFounders": [
+        "0x00000000000000000000000000000000000000a1",
+        "0x00000000000000000000000000000000000000b2"
+      ],
+      "fields": {
+        "effectiveDate": "2026-11-07",
+        "decisionRule": "  Both founders must approve spending.  ",
+        "notes": "Café ☕ é",
+        "founders": [
+          {
+            "wallet": "0x00000000000000000000000000000000000000B2",
+            "role": "CTO",
+            "contribution": "Engineering",
+            "ownershipBps": 4000,
+            "vestingIntent": "4y, 1y cliff"
+          },
+          {
+            "wallet": "0x00000000000000000000000000000000000000A1",
+            "role": "CEO",
+            "contribution": "Product",
+            "ownershipBps": 6000,
+            "vestingIntent": "4y, 1y cliff"
+          }
+        ]
+      }
+    },
+    "canonical": "{\"decisionRule\":\"Both founders must approve spending.\",\"disclaimer\":\"Workspace agreement between founders. Not a legal incorporation, not legal advice, and not an equity or token issuance.\",\"effectiveDate\":\"2026-11-07\",\"founders\":[{\"contribution\":\"Product\",\"ownershipBps\":6000,\"role\":\"CEO\",\"vestingIntent\":\"4y, 1y cliff\",\"wallet\":\"0x00000000000000000000000000000000000000a1\"},{\"contribution\":\"Engineering\",\"ownershipBps\":4000,\"role\":\"CTO\",\"vestingIntent\":\"4y, 1y cliff\",\"wallet\":\"0x00000000000000000000000000000000000000b2\"}],\"notes\":\"Café ☕ é\",\"schema\":\"vestige.founding-terms/1\",\"ventureId\":\"0x1111111111111111111111111111111111111111111111111111111111111111\"}",
+    "docHash": "0xa9f898adb114f2819b96f63de7af26b776d5ac1066a7deefbe5fc9ddf24a50c7"
+  }
+}
