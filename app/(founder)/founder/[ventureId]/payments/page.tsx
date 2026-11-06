@@ -31,11 +31,11 @@ function PaymentCard({ p, decimals, owners, source }: { p: Payment; decimals: nu
           <h3>
             {amount} USDT → <span className="mono">{shortHex(p.recipient)}</span>
           </h3>
-          <StatusPill status={executing ? "PENDING" : p.status}>{executing ? "Executing on Whitechain…" : undefined}</StatusPill>
+          <StatusPill status={executing ? "PENDING" : p.status} mock={source === "DEV_MOCK"}>{executing ? "Executing on Whitechain…" : undefined}</StatusPill>
         </div>
       }
     >
-      <div className="stack" data-status={p.status}>
+      <div className="stack" data-status={p.status} data-testid="payment-body">
         <dl className="kv">
           <dt>For</dt>
           <dd>{p.reason}</dd>

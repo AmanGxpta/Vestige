@@ -33,7 +33,7 @@ function Workspace({ children }: { children: ReactNode }) {
             <h1 data-testid="venture-name">{v.displayName}</h1>
             <div className="row small">
               <span className="mono" data-testid="venture-ens">{v.ensName}</span>
-              <StatusPill status={v.ensStatus} />
+              <StatusPill status={v.ensStatus} mock={v.source === "DEV_MOCK"} />
               <span className="faint mono tiny" title={v.ventureId}>id {shortHex(v.ventureId, 8, 6)}</span>
             </div>
           </div>
@@ -50,7 +50,7 @@ function Workspace({ children }: { children: ReactNode }) {
           </Notice>
         )}
       </header>
-      <div className="split" style={{ gridTemplateColumns: "260px minmax(0, 1fr)" }}>
+      <div className="split split-nav">
         <nav className="card" aria-label="Venture steps" style={{ padding: 8 }}>
           <div className="steps">
             {steps.map((s, i) => {

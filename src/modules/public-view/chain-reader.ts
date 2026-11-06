@@ -25,6 +25,8 @@ export const whitechainSepolia = defineChain({
 /** keccak256("guard_manager.guard.address") — Safe v1.3+/v1.4.1 GuardManager slot. */
 export const SAFE_GUARD_SLOT: Hex = "0x4a204f620c8c5ccdca3fd54d003badd85ba500436a431f0cbda4f558c93c34c8";
 const SENTINEL: Address = "0x0000000000000000000000000000000000000001";
+/** Max eth_getLogs span accepted by rpc.testnet.whitechain.io (verified 2026-11-06). */
+const LOG_WINDOW = 10_000n;
 
 export const ENS_TEXT_KEYS = ["vestige.agreement", "vestige.status", "vestige.humans", "vestige.guard", "vestige.treasury"] as const;
 export type EnsTextKey = (typeof ENS_TEXT_KEYS)[number];
@@ -232,11 +234,13 @@ export async function readPublicChainReport(ensName: string, cfg: ReaderConfig, 
   const transfers = await step<TokenTransfer[]>(wcProv("USDT Transfer logs (to/from Safe)", cfg.usdtAddress, bn), async () => {
     if (bn === undefined) throw new Error("block number unknown");
     const lookback = cfg.logLookbackBlocks ?? 50_000n;
-    const fromBlock = bn > lookback ? bn - lookback : 0n;
-    const [inbound, outbound] = await Promise.all([
-      wc.getLogs({ address: cfg.usdtAddress, event: TRANSFER_EVENT, args: { to: safe }, fromBlock, toBlock: bn }),
-      wc.getLogs({ address: cfg.usdtAddress, event: TRANSFER_EVENT, args: { from: safe }, fromBlock, toBlock: bn }),
-    ]);
+    const start = bn > lookback ? bn - lookback : 0n;
+    // Whitechain's public RPC rejects eth_getLogs spans > 10,000 blocks ("query exceeds max block range 10000").
+    const windows: [bigint, bigint][] = [];
+    for (let from = start; from <= bn; from += LOG_WINDOW) windows.push([from, from + LOG_WINDOW - 1n > bn ? bn : from + LOG_WINDOW - 1n]);
+    const scan = async (args: { to: Address } | { from: Address }) =>
+      (await Promise.all(windows.map(([fromBlock, toBlock]) => wc.getLogs({ address: cfg.usdtAddress, event: TRANSFER_EVENT, args, fromBlock, toBlock })))).flat();
+    const [inbound, outbound] = await Promise.all([scan({ to: safe }), scan({ from: safe })]);
     const map = (l: (typeof inbound)[number], direction: "IN" | "OUT"): TokenTransfer => ({
       from: l.args.from as Address,
       to: l.args.to as Address,

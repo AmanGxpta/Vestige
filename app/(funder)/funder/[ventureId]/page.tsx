@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useState } from "react";
-import { AdapterErrorNotice, Button, Card, Field, HashLink, LoadingCard, Notice, StatusPill } from "@/components/ui";
+import { AdapterErrorNotice, Button, Card, CheckIcon, Field, HashLink, LoadingCard, Notice, StatusPill } from "@/components/ui";
 import { RelayerExplainer } from "@/components/RelayerExplainer";
 import { ADAPTER_KIND } from "@/src/modules/ui/config";
 import { formatTokenAmount, parseTokenAmount } from "@/src/modules/ui/format";
@@ -31,6 +31,7 @@ export default function FundVenturePage() {
   const decimals = t.tokenDecimals ?? 6;
   const active = tr?.verificationStatus === "VERIFIED";
   const raw = parseTokenAmount(amount, decimals);
+  const mock = v.source === "DEV_MOCK";
   const isFounder = !!address && v.seats.some((s) => s.wallet.toLowerCase() === address.toLowerCase());
 
   return (
@@ -46,18 +47,18 @@ export default function FundVenturePage() {
         <Card title="Before you fund" testId="card-funder-summary">
           <ul className="checks">
             <li>
-              <span className={`check-icon check-${verifiedSeats(v).length >= 2 ? "VERIFIED" : "UNKNOWN"}`}>{verifiedSeats(v).length >= 2 ? "✓" : "?"}</span>
+              <CheckIcon status={verifiedSeats(v).length >= 2 ? "VERIFIED" : "UNKNOWN"} mock={mock} />
               <span><strong className="small">Two distinct verified humans</strong><br /><span className="small muted">{verifiedSeats(v).length} of 2 founders verified with World ID</span></span>
               <span />
             </li>
             <li>
-              <span className={`check-icon check-${termsFullySigned(v) ? "VERIFIED" : "UNKNOWN"}`}>{termsFullySigned(v) ? "✓" : "?"}</span>
+              <CheckIcon status={termsFullySigned(v) ? "VERIFIED" : "UNKNOWN"} mock={mock} />
               <span><strong className="small">Founding terms signed by both</strong><br /><span className="small muted">{v.agreement ? `Version ${v.agreement.version}` : "Not drafted"}</span></span>
               <span />
             </li>
             <li>
-              <span className={`check-icon check-${active ? "VERIFIED" : "UNKNOWN"}`}>{active ? "✓" : "?"}</span>
-              <span><strong className="small">2-of-2 treasury active on Whitechain</strong><br /><span className="small muted">{active ? "Owners, threshold and Guard read back from the chain" : "Not active yet"}</span></span>
+              <CheckIcon status={active ? "VERIFIED" : "UNKNOWN"} mock={mock} />
+              <span><strong className="small">2-of-2 treasury active on Whitechain</strong><br /><span className="small muted">{active ? (mock ? "Simulated readback (DEV MOCK) — live mode reads owners, threshold and Guard from Whitechain" : "Owners, threshold and Guard read back from the chain") : "Not active yet"}</span></span>
               <span />
             </li>
           </ul>
@@ -78,7 +79,7 @@ export default function FundVenturePage() {
                 const human = formatTokenAmount(raw, decimals);
                 const r = await fund.run(async () => {
                   const signature = await requestSignature({
-                    title: `Approve sending ${human} USDT to ${v.displayName}'s treasury`,
+                    title: `Approve sending ${human} USDT to the ${v.displayName} treasury`,
                     lines: [
                       { label: "Amount", value: `${human} USDT` },
                       { label: "To", value: `${v.ensName} treasury` },
@@ -132,7 +133,7 @@ export default function FundVenturePage() {
               {t.deposits.map((d) => (
                 <li key={d.txHash} className="row">
                   <span>{formatTokenAmount(d.amountRaw, decimals)} USDT</span>
-                  <StatusPill status={d.status}>{d.status === "VERIFIED" ? "Settled on Whitechain" : "Settling…"}</StatusPill>
+                  <StatusPill status={d.status} mock={mock}>{d.status === "VERIFIED" ? (mock ? "Settled (simulated)" : "Settled on Whitechain") : "Settling…"}</StatusPill>
                   <HashLink value={d.txHash} chainId={1874} source={t.source} />
                 </li>
               ))}

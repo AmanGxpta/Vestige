@@ -32,7 +32,8 @@ export function RejectedAttemptProof({ txHash }: { txHash?: Hex }) {
       <div className="stack small">
         <p className="muted">
           The relayer refuses a 1-of-2 payment before sending it. To prove the rule lives in the treasury contract and not just in our software, a
-          single-signer transaction was sent straight to the Safe from a test wallet. The Safe rejected it on-chain (GS020).
+          single-signer transaction is sent straight to the Safe from a separate test wallet; the Safe must reject it on-chain (GS020). The result
+          below is read from the transaction receipt on Whitechain.
         </p>
         {!txHash ? (
           <Notice tone="warn" title="Awaiting the real failed transaction" testId="rejected-attempt-missing">

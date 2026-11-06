@@ -59,12 +59,14 @@ export default function VerifyPage() {
 
           {seat?.worldProofStatus === "VERIFIED" ? (
             <div className="stack">
-              <Notice tone="success" title="You're verified as a unique human" testId="verify-success">
-                The vestige server checked your World ID proof for this venture.
+              <Notice tone={v.source === "DEV_MOCK" ? "mock" : "success"} title={v.source === "DEV_MOCK" ? "Simulated verification accepted (DEV MOCK)" : "You're verified as a unique human"} testId="verify-success">
+                {v.source === "DEV_MOCK"
+                  ? "No real World ID proof was checked. With the live backend, the vestige server verifies your proof for this venture."
+                  : "The vestige server checked your World ID proof for this venture."}
               </Notice>
               <div className="row">
                 <span className="small">Seat on Whitechain:</span>
-                <StatusPill status={seat.onchainSeatStatus}>{seat.onchainSeatStatus === "VERIFIED" ? "Attested in SeatRegistry" : seat.onchainSeatStatus === "PENDING" ? "Attesting…" : "Not attested"}</StatusPill>
+                <StatusPill status={seat.onchainSeatStatus} mock={v.source === "DEV_MOCK"}>{seat.onchainSeatStatus === "VERIFIED" ? "Attested in SeatRegistry" : seat.onchainSeatStatus === "PENDING" ? "Attesting…" : "Not attested"}</StatusPill>
                 {seat.attestationTxHash && <HashLink value={seat.attestationTxHash} chainId={1874} source={v.source} />}
               </div>
               <p className="tiny faint">

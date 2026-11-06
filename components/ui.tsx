@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ButtonHTMLAttributes, type ReactNode } from "react";
+import { useId, useState, type ButtonHTMLAttributes, type ReactNode } from "react";
 import { explorerAddress, explorerTx } from "@/src/modules/ui/config";
 import { shortHex } from "@/src/modules/ui/format";
 import type { DataSource, EvidenceLabel } from "@/src/modules/ui/types";
@@ -17,8 +17,9 @@ type BtnProps = ButtonHTMLAttributes<HTMLButtonElement> & {
 export function Button({ variant = "primary", size = "md", loading, disabledReason, block, className, children, disabled, ...rest }: BtnProps) {
   const cls = ["btn", variant !== "primary" && `btn-${variant}`, size === "sm" && "btn-sm", block && "btn-block", className].filter(Boolean).join(" ");
   const isDisabled = disabled || loading || !!disabledReason;
+  const reasonId = useId();
   const btn = (
-    <button className={cls} disabled={isDisabled} aria-busy={loading || undefined} title={disabledReason || undefined} {...rest}>
+    <button className={cls} disabled={isDisabled} aria-busy={loading || undefined} aria-describedby={disabledReason ? reasonId : undefined} {...rest}>
       {loading && <span className="spinner" aria-hidden />}
       {children}
     </button>
@@ -27,7 +28,7 @@ export function Button({ variant = "primary", size = "md", loading, disabledReas
   return (
     <span className="btn-wrap" style={block ? { width: "100%" } : undefined}>
       {btn}
-      <span className="btn-reason" data-testid="disabled-reason">
+      <span className="btn-reason" id={reasonId} data-testid="disabled-reason">
         {disabledReason}
       </span>
     </span>
@@ -92,10 +93,29 @@ const STATUS_TEXT: Record<string, string> = {
   BLOCKED: "Not connected",
   NONE: "Not started",
 };
-export function StatusPill({ status, children }: { status: string; children?: ReactNode }) {
+const SUCCESS_LIKE = new Set(["VERIFIED", "EXECUTED", "ACTIVE", "READY"]);
+/** `mock` marks values that came from the DEV MOCK adapter: success states get hatched + "MOCK" so they can never read as verified. */
+export function StatusPill({ status, children, mock }: { status: string; children?: ReactNode; mock?: boolean }) {
+  const isMock = !!mock && SUCCESS_LIKE.has(status);
   return (
-    <span className={`pill pill-${status}`} data-status={status} data-testid="status-pill">
+    <span className={`pill pill-${status}${isMock ? " pill-mock" : ""}`} data-status={status} data-mock={isMock || undefined} data-testid="status-pill">
       {children ?? STATUS_TEXT[status] ?? status}
+      {isMock && <span className="pill-mock-tag">MOCK</span>}
+    </span>
+  );
+}
+
+/** A ✓/?/✕ check marker; mock-sourced ticks are hatched and tagged. */
+export function CheckIcon({ status, mock, size = 22 }: { status: "VERIFIED" | "FAILED" | "UNKNOWN" | "PENDING" | "NONE"; mock?: boolean; size?: number }) {
+  const glyph = { VERIFIED: "✓", FAILED: "✕", UNKNOWN: "?", PENDING: "…", NONE: "–" }[status];
+  return (
+    <span
+      className={`check-icon check-${status}${mock && status === "VERIFIED" ? " check-mock" : ""}`}
+      style={{ width: size, height: size, fontSize: Math.round(size / 2) }}
+      title={mock && status === "VERIFIED" ? "DEV MOCK — simulated, not verified" : undefined}
+      data-mock={(mock && status === "VERIFIED") || undefined}
+    >
+      {glyph}
     </span>
   );
 }

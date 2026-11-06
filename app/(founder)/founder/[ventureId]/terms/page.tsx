@@ -189,7 +189,7 @@ export default function TermsPage() {
                     onClick={async () => {
                       const r = await sign.run(async () => {
                         const signature = await requestSignature({
-                          title: `Sign ${v.displayName}'s founding terms, version ${agreement.version}`,
+                          title: `Sign the founding terms of ${v.displayName}, version ${agreement.version}`,
                           lines: [
                             { label: "Venture", value: v.ensName },
                             { label: "Version", value: String(agreement.version) },

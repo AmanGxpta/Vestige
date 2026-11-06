@@ -1,15 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { AdapterErrorNotice, Card, LoadingCard, Notice, StatusPill } from "@/components/ui";
+import { AdapterErrorNotice, Card, CheckIcon, LoadingCard, Notice } from "@/components/ui";
 import { useAdapterQuery } from "@/src/modules/ui/provider";
 
-function Check({ ok, label, testId }: { ok: boolean; label: string; testId: string }) {
+function Check({ ok, label, testId, mock }: { ok: boolean; label: string; testId: string; mock?: boolean }) {
   return (
     <span className="row small" style={{ gap: 6 }} data-testid={testId} data-ok={ok}>
-      <span className={`check-icon ${ok ? "check-VERIFIED" : ""}`} style={ok ? { width: 18, height: 18, fontSize: 10 } : { width: 18, height: 18, fontSize: 10, background: "var(--line)", color: "var(--muted)" }}>
-        {ok ? "✓" : "–"}
-      </span>
+      <CheckIcon status={ok ? "VERIFIED" : "NONE"} mock={mock} size={18} />
       {label}
     </span>
   );
@@ -60,10 +58,10 @@ export default function FunderListPage() {
                         {v.source === "DEV_MOCK" && <span className="badge badge-mock-tag" style={{ alignSelf: "flex-start" }}>MOCK</span>}
                       </div>
                     </td>
-                    <td><Check ok={v.humansVerified >= 2} label={`${v.humansVerified}/2 verified`} testId="badge-humans" /></td>
-                    <td><Check ok={v.termsSigned} label={v.termsSigned ? "Signed" : "Not signed"} testId="badge-terms" /></td>
-                    <td><Check ok={v.treasuryActive} label={v.treasuryActive ? "Active · Whitechain" : "Not active"} testId="badge-treasury" /></td>
-                    <td><Check ok={v.funded} label={v.funded ? "USDT funded" : "Not funded"} testId="badge-funded" /></td>
+                    <td><Check ok={v.humansVerified >= 2} label={`${v.humansVerified}/2 verified`} testId="badge-humans" mock={v.source === "DEV_MOCK"} /></td>
+                    <td><Check ok={v.termsSigned} label={v.termsSigned ? "Signed" : "Not signed"} testId="badge-terms" mock={v.source === "DEV_MOCK"} /></td>
+                    <td><Check ok={v.treasuryActive} label={v.treasuryActive ? "Active · Whitechain" : "Not active"} testId="badge-treasury" mock={v.source === "DEV_MOCK"} /></td>
+                    <td><Check ok={v.funded} label={v.funded ? "USDT funded" : "Not funded"} testId="badge-funded" mock={v.source === "DEV_MOCK"} /></td>
                     <td>
                       <div className="row" style={{ justifyContent: "flex-end" }}>
                         <Link className="btn btn-secondary btn-sm" href={`/v/${v.ensName}${v.source === "DEV_MOCK" ? "?source=mock" : ""}`}>Evidence</Link>
@@ -77,7 +75,7 @@ export default function FunderListPage() {
           </div>
         </Card>
       )}
-      <StatusPill status="NONE">Badges are summaries — the evidence page is the source of truth.</StatusPill>
+      <p className="small muted">Badges are summaries — the evidence page is the source of truth.</p>
     </div>
   );
 }

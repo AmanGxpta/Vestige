@@ -1,12 +1,12 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { AdapterErrorNotice, Button, Card, EvidenceBadge, HashLink, LoadingCard, Notice, StatusPill } from "@/components/ui";
+import { AdapterErrorNotice, Button, Card, CheckIcon, EvidenceBadge, HashLink, LoadingCard, Notice, StatusPill } from "@/components/ui";
 import { ADAPTER_KIND, CONFIG } from "@/src/modules/ui/config";
 import { formatTokenAmount, relativeTime, shortHex } from "@/src/modules/ui/format";
 import { useVestige } from "@/src/modules/ui/provider";
 import type { AdapterError } from "@/src/modules/ui/adapter";
-import type { EvidenceKind, Hex, PublicOffchainEvidence, ReadStatus } from "@/src/modules/ui/types";
+import type { EvidenceKind, Hex, PublicOffchainEvidence } from "@/src/modules/ui/types";
 import { readPublicChainReport, type PublicChainReport, type Step } from "./chain-reader";
 import { readMockChainReport } from "./mock-chain";
 import { deriveTreasuryVerdict } from "./verdict";
@@ -33,7 +33,7 @@ function StepLine<T>({ s, children }: { s: Step<T>; children?: React.ReactNode }
   return (
     <div className="stack-sm">
       <div className="row">
-        <StatusPill status={s.status} />
+        <StatusPill status={s.status} mock={s.provenance.source === "DEV_MOCK"} />
         {children}
       </div>
       {s.note && <span className="small muted">{s.note}</span>}
@@ -46,7 +46,6 @@ function StepLine<T>({ s, children }: { s: Step<T>; children?: React.ReactNode }
   );
 }
 
-const checkGlyph: Record<ReadStatus, string> = { VERIFIED: "✓", FAILED: "✕", UNKNOWN: "?", PENDING: "…" };
 
 export function PublicEvidenceView({ ensName, requestedSource }: { ensName: string; requestedSource?: string }) {
   const { client } = useVestige();
@@ -120,7 +119,7 @@ export function PublicEvidenceView({ ensName, requestedSource }: { ensName: stri
             {ensName}
           </h1>
           {verdict ? (
-            <StatusPill status={verdict.state === "UNRESOLVED" ? "UNKNOWN" : verdict.state}>
+            <StatusPill status={verdict.state === "UNRESOLVED" ? "UNKNOWN" : verdict.state} mock={isMock}>
               {
                 {
                   ACTIVE: "Treasury active",
@@ -242,7 +241,7 @@ export function PublicEvidenceView({ ensName, requestedSource }: { ensName: stri
                       .filter((c) => !["ens", "link"].includes(c.id))
                       .map((c) => (
                         <li key={c.id} data-testid={`check-${c.id}`} data-status={c.status}>
-                          <span className={`check-icon check-${c.status}`}>{checkGlyph[c.status]}</span>
+                          <CheckIcon status={c.status} mock={isMock} />
                           <span>
                             <strong className="small">{c.label}</strong>
                             <br />

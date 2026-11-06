@@ -50,7 +50,7 @@ export function PromptHost() {
               <dt>From</dt>
               <dd className="mono">{shortHex(pending.address)}</dd>
             </dl>
-            <Notice tone="success">This is a signature, not a transaction. It costs you nothing: no gas, no network switch.</Notice>
+            <Notice tone="success">This is a signature, not a transaction. It costs no gas and moves no money by itself.</Notice>
             <span className="tiny faint">Typed data: {p.typedDataName} (EIP-712)</span>
           </div>
           <div className="modal-foot">

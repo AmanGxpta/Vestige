@@ -96,7 +96,7 @@ export default function StartVenturePage() {
               {list.data.map((v) => (
                 <li key={v.ventureId} className="row-between small">
                   <Link href={`/founder/${v.ventureId}`}>{v.displayName}</Link>
-                  <StatusPill status={v.treasuryActive ? "ACTIVE" : "NONE"}>{v.humansVerified}/2 humans</StatusPill>
+                  <StatusPill status={v.treasuryActive ? "ACTIVE" : "NONE"} mock={v.source === "DEV_MOCK"}>{v.humansVerified}/2 humans</StatusPill>
                 </li>
               ))}
             </ul>

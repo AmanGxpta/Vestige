@@ -33,12 +33,12 @@ export function SeatList({ seats, source, me }: { seats: FounderSeat[]; source: 
                 {s.worldProofStatus === "VERIFIED" ? (
                   <EvidenceBadge label="HUMAN_VERIFIED" source={source} />
                 ) : (
-                  <StatusPill status={s.worldProofStatus === "UNKNOWN" ? "NONE" : s.worldProofStatus}>{worldText[s.worldProofStatus]}</StatusPill>
+                  <StatusPill status={s.worldProofStatus === "UNKNOWN" ? "NONE" : s.worldProofStatus} mock={source === "DEV_MOCK"}>{worldText[s.worldProofStatus]}</StatusPill>
                 )}
               </td>
               <td>
                 <div className="row" style={{ gap: 8 }}>
-                  <StatusPill status={s.onchainSeatStatus === "UNKNOWN" ? "NONE" : s.onchainSeatStatus}>{chainText[s.onchainSeatStatus]}</StatusPill>
+                  <StatusPill status={s.onchainSeatStatus === "UNKNOWN" ? "NONE" : s.onchainSeatStatus} mock={source === "DEV_MOCK"}>{chainText[s.onchainSeatStatus]}</StatusPill>
                   {s.attestationTxHash && <HashLink value={s.attestationTxHash} chainId={1874} source={source} />}
                 </div>
               </td>

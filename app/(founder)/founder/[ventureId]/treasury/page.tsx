@@ -63,7 +63,7 @@ export default function TreasuryPage() {
           title={
             <div className="row">
               <h2 style={{ fontSize: 18 }}>Treasury on Whitechain</h2>
-              <StatusPill status={active ? "ACTIVE" : tr.verificationStatus === "PENDING" ? "PENDING" : "UNVERIFIED"}>
+              <StatusPill status={active ? "ACTIVE" : tr.verificationStatus === "PENDING" ? "PENDING" : "UNVERIFIED"} mock={t!.source === "DEV_MOCK"}>
                 {active ? "Active" : tr.verificationStatus === "PENDING" ? "Confirming on Whitechain…" : "Unverified"}
               </StatusPill>
             </div>
@@ -132,7 +132,7 @@ export default function TreasuryPage() {
                 {t.deposits.map((d) => (
                   <li key={d.txHash} className="row">
                     <span>Deposit {formatTokenAmount(d.amountRaw, t.tokenDecimals ?? 6)} USDT</span>
-                    <StatusPill status={d.status} />
+                    <StatusPill status={d.status} mock={t.source === "DEV_MOCK"} />
                     <HashLink value={d.txHash} chainId={1874} source={t.source} />
                   </li>
                 ))}

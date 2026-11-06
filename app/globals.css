@@ -278,3 +278,15 @@ code, .mono { font-family: var(--mono); font-size: 0.88em; }
 .step-failed .step-dot { background: var(--failed); border-color: var(--failed); color: #fff; }
 .step-partial .step-dot { background: var(--unknown); border-color: var(--unknown); color: #fff; }
 .step-skipped .step-dot { background: var(--self-soft); border-color: var(--line-2); color: var(--faint); }
+.pill-mock { background-image: repeating-linear-gradient(-45deg, transparent, transparent 4px, rgba(155, 28, 107, 0.12) 4px, rgba(155, 28, 107, 0.12) 8px); }
+.pill-mock-tag { font: 700 9.5px/1 var(--mono); color: var(--mock); background: #fff; border: 1px solid #efc3dc; border-radius: 3px; padding: 2px 4px; margin-left: 2px; }
+.check-NONE { background: var(--line); color: var(--muted); }
+.check-mock { background-image: repeating-linear-gradient(-45deg, transparent, transparent 3px, rgba(255, 255, 255, 0.35) 3px, rgba(255, 255, 255, 0.35) 6px); outline: 2px solid var(--mock); outline-offset: 1px; }
+.role-switch { flex-wrap: wrap; }
+.split-nav { grid-template-columns: 260px minmax(0, 1fr); }
+@media (max-width: 900px) { .split-nav { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 560px) {
+  .header-inner { gap: 10px; }
+  .card-head h2 { font-size: 17px !important; }
+  .hash { flex-wrap: wrap; }
+}
