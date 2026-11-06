@@ -10,14 +10,14 @@ async function body(request){
  let parsed;try{parsed=JSON.parse(data||'{}');}catch{fail('INVALID_JSON');}
  if(!parsed||Array.isArray(parsed)||typeof parsed!=='object')fail('INVALID_BODY');return parsed;
 }
-export function createTreasuryHandlers(service,{authURI}){
+export function createTreasuryHandlers(service,{authURI,authenticate=service.authenticate||((request)=>service.store.authenticate(request))}){
  const configured=new URL(authURI);if(configured.username||configured.password||!(configured.protocol==='https:'||configured.protocol==='http:'&&['localhost','127.0.0.1','[::1]'].includes(configured.hostname)))throw new Error('HTTPS_AUTH_ORIGIN_REQUIRED');
  const origin=configured.origin;
  return {async handle(request,action,{id,pid}={}){
   try{
    if(!/^0x[0-9a-f]{64}$/.test(id||''))fail('INVALID_VENTURE_ID');
    const mutation=request.method!=='GET';
-   const actor=mutation||request.headers.has('authorization')?service.store.authenticate(request):null;
+   const actor=mutation||request.headers.has('authorization')?await authenticate(request):null;
    if(!mutation)return response(await service.read(id,actor));
    if(request.headers.get('origin')!==origin||request.headers.get('sec-fetch-site')==='cross-site')fail('ORIGIN_MISMATCH',403);
    const key=request.headers.get('idempotency-key');if(!key||!/^[A-Za-z0-9._:-]{8,128}$/.test(key))fail('IDEMPOTENCY_KEY_REQUIRED');

@@ -1,0 +1,14 @@
+✔ actual current C2 authenticates reads but second founder remains blocked by v0 missing typed data (165.324792ms)
+✔ actual C1 root shares SQLite, reuses session auth, and leaves CR-ID-05 summaries null (19.166208ms)
+✔ candidate C2 payload patch works against actual C1 auth and X proposed handlers across reload and two approvals (35.298292ms)
+✔ candidate C2 preserves an incomplete deposit scan instead of claiming complete history (0.126167ms)
+✔ C1 logout invalidates the actual shared session used by X (18.341875ms)
+✔ candidate actual C2 fund and execution methods use X handlers without signature bytes in readback (55.200833ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 6
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1319.899625
