@@ -3,7 +3,8 @@
 ROLE: X
 BRANCH/WORKTREE: agent/treasury / vestige-treasury
 STATE: IMPLEMENTED_AND_TESTED candidate; API contract/root integration acceptance pending.
-No live signing/broadcast/faucet or deliberate GS020 transaction authorized or performed.
+No live signing/broadcast/faucet or deliberate GS020 transaction was authorized
+for or performed by X in this slice. H's separate funding receipts are noted below.
 
 ## What changed / commits and exact inputs
 
@@ -12,7 +13,7 @@ No live signing/broadcast/faucet or deliberate GS020 transaction authorized or p
 - c675eab: creation-bound manifest provenance, conditional local publisher and
   disabled operator/infrastructure approval packet (report 06).
 - 10af504: isolated draft readback/cache/evidence implementation (report 07).
-- This handoff: same-connection C1/X composition and session authentication;
+- 4adb852: same-connection C1/X composition and session authentication;
   current-source adapter tests; approved CR-ID-05 implementation/ACK, unregistered;
   local-fork deposit/payment projection and exact source/build review commands.
 
@@ -122,7 +123,11 @@ zero value, exact target/selector, nonce/gas/fee bounds. Unknown nonce never ret
 
 Public funding refresh at block12409159: deployer0.8 WBT, attester0.2 WBT, relay0.8 WBT,
 failedTx0.05 WBT; funder100 USDT, funder/payee0 WBT. This supersedes earlier zero
-readiness data. X funded nothing and read no keys/passwords. Funding grants no authority.
+readiness data. H separately committed the real funding receipts at 5c4fbc6 in
+2026-11-07-human-approved-wallet-funding.{md,json}; those authorize funding only.
+X preserved that concurrent H commit, funded nothing and read no keys/passwords.
+No additional funding request for these already-funded roles is required. Their
+funding does not authorize deployment, relay activation or a GS020 transaction.
 
 ## Next exact H action / remaining blockers
 
