@@ -262,6 +262,31 @@ export class AgreementService {
     return v;
   }
 
+  /**
+   * Restart reconciliation for `vestige.agreement`: a complete current version whose
+   * ENS status is not VERIFIED is promoted only on read-back; with `retry`, it is re-sent
+   * (idempotent setText of the current hash; superseded hashes are never published).
+   */
+  async reconcile(opts: { retry?: boolean } = {}): Promise<{ verified: string[]; retried: string[]; stillOpen: string[] }> {
+    const verified: string[] = [], retried: string[] = [], stillOpen: string[] = [];
+    const rows = this.db.all<VersionRow>("SELECT * FROM agreement_versions WHERE superseded_at IS NULL AND ens_status <> 'VERIFIED'");
+    for (const r of rows) {
+      const ventureId = r.venture_id as Bytes32;
+      if (!this.view(ventureId, { includeText: false })?.complete) continue;
+      const v = this.ventures.view(ventureId);
+      const ok = await (this.opts.checkAgreementRecord?.(v.ensName, r.doc_hash as Hex) ?? Promise.resolve(false)).catch(() => false);
+      if (ok) {
+        this.db.run("UPDATE agreement_versions SET ens_status = 'VERIFIED' WHERE venture_id = ? AND version = ?", ventureId, r.version);
+        this.ventures.event({ ventureId, kind: "ens_agreement_record", label: "CHAIN_VERIFIED", status: "VERIFIED", chainId: 11155111, source: "ens-sepolia-readback" });
+        verified.push(`${v.ensName}:v${r.version}`);
+      } else if (opts.retry) {
+        await this.syncAgreementRecord(ventureId, r.version);
+        retried.push(`${v.ensName}:v${r.version}`);
+      } else stillOpen.push(`ens-agreement:${v.ensName}:v${r.version}:${r.ens_status}`);
+    }
+    return { verified, retried, stillOpen };
+  }
+
   /** Writes the fully-signed docHash to `vestige.agreement`; VERIFIED only after receipt + read-back. */
   async syncAgreementRecord(ventureId: Bytes32, version: number) {
     const cur = this.current(ventureId);

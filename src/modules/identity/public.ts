@@ -22,6 +22,8 @@ export interface PublicIdentitySummary {
     onchainSeatStatus: ReadStatus;
     attestationTxHash?: Hex;
     subnameStatus: ReadStatus;
+    /** CR-C2-006: present once World-verified. "staging" ⇒ the UI must show TESTED_IN_SIMULATOR. */
+    worldEnvironment?: "production" | "staging";
   }[];
   humansVerified: number;
   agreement: null | {
@@ -33,7 +35,7 @@ export interface PublicIdentitySummary {
     label: "SIGNED";
     ensRecordStatus: ReadStatus;
   };
-  events: { kind: string; label: EvidenceLabel; status: ReadStatus; chainId?: number; txHash?: Hex; blockNumber?: number; at: string }[];
+  events: { kind: string; label: EvidenceLabel; status: ReadStatus; source: string; chainId?: number; txHash?: Hex; blockNumber?: number; at: string }[];
   source: "vestige-api (off-chain evidence; verify chain facts independently)";
 }
 
@@ -48,8 +50,8 @@ export function publicSummary(db: SqlDb, ventures: VentureService, agreements: A
   const v = ventures.view(ventureId);
   const a = agreements.view(ventureId, { includeText: false });
   const events = db
-    .all<{ kind: string; label: string; status: string; chain_id: number | null; tx_hash: string | null; block_number: number | null; created_at: number }>(
-      "SELECT kind, label, status, chain_id, tx_hash, block_number, created_at FROM identity_events WHERE venture_id = ? ORDER BY id",
+    .all<{ kind: string; label: string; status: string; source: string; chain_id: number | null; tx_hash: string | null; block_number: number | null; created_at: number }>(
+      "SELECT kind, label, status, source, chain_id, tx_hash, block_number, created_at FROM identity_events WHERE venture_id = ? ORDER BY id",
       ventureId,
     )
     .filter((e) => PUBLIC_EVENT_KINDS.has(e.kind))
@@ -57,6 +59,7 @@ export function publicSummary(db: SqlDb, ventures: VentureService, agreements: A
       kind: e.kind,
       label: e.label as EvidenceLabel,
       status: e.status as ReadStatus,
+      source: e.source,
       ...(e.chain_id !== null ? { chainId: e.chain_id } : {}),
       ...(e.tx_hash ? { txHash: e.tx_hash as Hex } : {}),
       ...(e.block_number !== null ? { blockNumber: e.block_number } : {}),
@@ -75,6 +78,7 @@ export function publicSummary(db: SqlDb, ventures: VentureService, agreements: A
       onchainSeatStatus: s.onchainSeatStatus,
       ...(s.attestationTxHash ? { attestationTxHash: s.attestationTxHash } : {}),
       subnameStatus: s.subnameStatus,
+      ...(s.worldEnvironment ? { worldEnvironment: s.worldEnvironment } : {}),
     })),
     humansVerified: v.humansVerified,
     agreement: a

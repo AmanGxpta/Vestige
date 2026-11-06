@@ -45,3 +45,36 @@ describe.skipIf(!live)("LIVE Sepolia ENS plans (read-only dry run)", () => {
     expect(result.parent.dryRun[0]!.detail.toLowerCase()).toContain(parent.predicted.parentRegistry!.slice(2).toLowerCase());
   });
 });
+
+describe.skipIf(!live || !process.env.REVIEW_PLAN)("LIVE re-verification of a reviewed parent plan (read-only)", () => {
+  it("rebuilds the reviewed plan byte-for-byte, re-simulates P1 (registrar) and P2 (owner), reads current state", async () => {
+    const { readFileSync } = await import("node:fs");
+    const reviewed = JSON.parse(readFileSync(process.env.REVIEW_PLAN!, "utf8"));
+    const p = reviewed.plan;
+    const proxyLogic = await client.readContract({ address: ENSV2_SEPOLIA.VerifiableFactory, abi: verifiableFactoryAbi, functionName: "proxyLogic" });
+    const rebuilt = buildParentSetupPlan({ registrar: p.inputs.registrar, owner: p.inputs.owner, proxyLogic, createdAt: p.createdAt });
+    const block = await client.getBlockNumber();
+    const lh = BigInt(keccak256(stringToHex("vestige")));
+    const [status, sub, ownerRoles, balance, parentCode] = await Promise.all([
+      client.readContract({ address: ENSV2_SEPOLIA.ETHRegistry, abi: permissionedRegistryAbi, functionName: "getStatus", args: [lh] }),
+      client.readContract({ address: ENSV2_SEPOLIA.ETHRegistry, abi: permissionedRegistryAbi, functionName: "getSubregistry", args: ["vestige"] }),
+      client.readContract({ address: ENSV2_SEPOLIA.ETHRegistry, abi: permissionedRegistryAbi, functionName: "roles", args: [lh, p.inputs.owner] }).catch((e: Error) => `error:${e.name}`),
+      client.getBalance({ address: p.inputs.registrar }),
+      client.getCode({ address: rebuilt.predicted.parentRegistry! }),
+    ]);
+    const out = {
+      label: "READ_ONLY_REVERIFICATION — no transaction signed or sent",
+      block: block.toString(),
+      reviewedDigest: reviewed.digest,
+      rebuiltDigest: planDigest(rebuilt),
+      identicalCalldata: rebuilt.txs.map((t, i) => t.data === p.txs[i].data && t.to.toLowerCase() === p.txs[i].to.toLowerCase()),
+      state: { vestigeEthStatus: ["AVAILABLE", "RESERVED", "REGISTERED"][status], currentSubregistry: sub, ownerRolesOnVestigeEth: String(ownerRoles), registrarBalanceWei: balance.toString(), predictedParentHasCode: !!parentCode && parentCode !== "0x" },
+      dryRun: await dryRun(client, rebuilt),
+      plan: rebuilt,
+    };
+    writeFileSync(`${repo}docs/agent-reports/identity/evidence/ens-parent-reverify.json`, JSON.stringify(out, null, 2) + "\n");
+    console.log(JSON.stringify({ ...out, plan: undefined }));
+    expect(out.rebuiltDigest).toBe(out.reviewedDigest);
+    expect(out.identicalCalldata).toEqual([true, true]);
+  });
+});

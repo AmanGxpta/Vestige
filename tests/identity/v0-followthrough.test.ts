@@ -263,3 +263,84 @@ describe("World config is pinned (D-016/D-021)", () => {
     expect(worldConfigFromEnv({ ...base, WORLD_RP_SIGNING_KEY: "not-a-key" })).toBeNull();
   });
 });
+
+describe("CR-C2-006 / CR-C2-007 (C1-ACKed, H pending): provenance + listing shape", () => {
+  it("worldEnvironment on seats and public founders; event source exposed; listing {listed, consents[]}", async () => {
+    const h = makeHarness(); // harness World config is staging
+    const api = handlers(h);
+    const A = newWallet(), B = newWallet();
+    const authA = await signIn(h, A), authB = await signIn(h, B);
+    const v = await (await api.createVenture(req(authA, { name: "Northstar Labs", founderLabel: "ada" }))).json();
+    const { inviteToken } = await (await api.createInvite(req(authA, {}), v.ventureId)).json();
+    await api.join(req(authB, { inviteToken, founderLabel: "bob" }), v.ventureId);
+    const wr = await (await api.worldRequest(req(authA, {}), v.ventureId)).json();
+    await api.worldVerify(req(authA, { idkitResult: new FakeHuman().prove(wr) }), v.ventureId);
+    const detail = await (await api.getVenture(req(authA), v.ventureId)).json();
+    const seatA = detail.venture.seats.find((s: { wallet: string }) => s.wallet === lower(A.address));
+    const seatB = detail.venture.seats.find((s: { wallet: string }) => s.wallet === lower(B.address));
+    expect(seatA.worldEnvironment).toBe("staging");
+    expect(seatB.worldEnvironment).toBeUndefined(); // not verified yet → absent, never guessed
+    expect(detail.venture.listing.listed).toBe(false);
+    expect(detail.venture.listing.consents.every((c: { listed: boolean }) => !c.listed)).toBe(true);
+    await api.setListing(req(authB, { listed: true }), v.ventureId);
+    const l = (await (await api.getVenture(req(authA), v.ventureId)).json()).venture.listing;
+    expect(l.listed).toBe(false);
+    expect(l.consents).toEqual(expect.arrayContaining([{ wallet: lower(B.address), listed: true }, { wallet: lower(A.address), listed: false }]));
+    const pub = await (await api.publicSummary(req(), "northstar-labs.vestige.eth")).json();
+    expect(pub.founders.find((f: { wallet: string }) => f.wallet === lower(A.address)).worldEnvironment).toBe("staging");
+    const verified = pub.events.find((e: { kind: string }) => e.kind === "founder_verified");
+    expect(verified.source).toBe("world-id-staging-4.0");
+    for (const e of pub.events) expect(typeof e.source).toBe("string");
+    expect(JSON.stringify(pub)).not.toContain("consents"); // consent detail is founders-only
+  });
+});
+
+describe("reconcileIdentity (resync)", () => {
+  it("read-only by default; retry re-runs only never-broadcast steps; agreement + humans records", async () => {
+    const { reconcileIdentity } = await import("../../src/modules/identity/scripts/reconcile");
+    const h = makeHarness();
+    const { a, b, vid } = await twoFounders(h);
+    await h.flush();
+    // venture name confirmed; now verify both founders while ENS read-back is broken
+    h.ens.readBack = false;
+    h.ventures.checks.founderName = async () => h.ens.readBack;
+    h.ventures.checks.humans = async () => h.ens.readBack;
+    for (const w of [a, b]) {
+      const r = h.ventures.worldRequest(w, vid);
+      await h.ventures.verifyWorld(w, vid, { idkitResult: new FakeHuman().prove(r) });
+    }
+    await h.flush();
+    expect(seatOf(h, vid, a).subnameStatus).toBe("FAILED");
+    const sentBefore = h.ens.founders.length;
+    let rep = await reconcileIdentity(h);
+    expect(rep.mode).toBe("read-only");
+    expect(h.ens.founders.length).toBe(sentBefore); // nothing re-broadcast
+    expect(rep.stillOpen.some((x) => x.startsWith("ens-founder:"))).toBe(true);
+    // a founder step had a tx recorded (memory port returns 0x02) → retry must NOT resend it
+    rep = await reconcileIdentity(h, { retry: true });
+    expect(rep.needsManualReview.filter((x) => x.includes("tx-recorded")).length).toBe(2);
+    expect(h.ens.founders.length).toBe(sentBefore);
+    // read-back recovers (tx actually landed) → promoted without any new write
+    h.ens.readBack = true;
+    rep = await reconcileIdentity(h);
+    expect(rep.ensVerifiedByReadback).toBe(2);
+    expect(seatOf(h, vid, a).subnameStatus).toBe("VERIFIED");
+    expect(h.ens.founders.length).toBe(sentBefore);
+  });
+
+  it("attestation that failed before any tx is re-submitted only in retry mode", async () => {
+    const { reconcileIdentity } = await import("../../src/modules/identity/scripts/reconcile");
+    const h = makeHarness();
+    const { a, vid } = await twoFounders(h);
+    h.attester.failSubmit = true;
+    const r = h.ventures.worldRequest(a, vid);
+    await h.ventures.verifyWorld(a, vid, { idkitResult: new FakeHuman().prove(r) });
+    h.attester.failSubmit = false;
+    await reconcileIdentity(h);
+    expect(h.attester.submitted).toHaveLength(0);
+    const rep = await reconcileIdentity(h, { retry: true });
+    expect(rep.retried.some((x) => x.startsWith("attestation:"))).toBe(true);
+    await h.flush();
+    expect(seatOf(h, vid, a).onchainSeatStatus).toBe("VERIFIED");
+  });
+});

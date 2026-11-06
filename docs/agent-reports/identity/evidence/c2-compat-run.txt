@@ -1,0 +1,25 @@
+C2 compat run: C2 product HEAD 50e4cf4 (committed files, read-only import) vs C1 identity a00016b + this commit's follow-through
+date: 2026-11-06T22:41:08Z
+ RUN  v4.1.12 /Users/amang/Code/NovemberRush/ethglobal/vestige/vestige-identity
+stdout | tests/identity/c2-compat.test.ts > C2 live adapter ↔ C1 handlers (current) > canonical JSON: C2 canonicalize reproduces every C1 vector byte-for-byte
+C2 canonicalize vs C1 vectors: 20/21 agree; mismatches=["invalid-accepted:17 levels of nesting"]
+stdout | tests/identity/c2-compat.test.ts > C2 live adapter ↔ C1 handlers (current) > full founder journey through C2's adapter
+signIn A ok | signIn B ok | createVenture ok | createInvite ok | joinVenture ok | requestWorld 0 ok | verifyWorld 0 ok | requestWorld 1 ok | verifyWorld 1 ok | getVenture ok | setListing A ok | getVenture after consent ok | setListing B ok | listVentures ok | createAgreementVersion ok | signAgreement 0x1c16 ok | signAgreement 0x38cf ok | getPublicEvidence ok
+ × tests/identity/c2-compat.test.ts > C2 live adapter ↔ C1 handlers (current) > canonical JSON: C2 canonicalize reproduces every C1 vector byte-for-byte 10ms
+   → expected [ Array(1) ] to deeply equal []
+ ✓ tests/identity/c2-compat.test.ts > C2 live adapter ↔ C1 handlers (current) > full founder journey through C2's adapter 189ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+ FAIL  tests/identity/c2-compat.test.ts > C2 live adapter ↔ C1 handlers (current) > canonical JSON: C2 canonicalize reproduces every C1 vector byte-for-byte
+AssertionError: expected [ Array(1) ] to deeply equal []
+- Expected
++ Received
+- []
++ [
++   "invalid-accepted:17 levels of nesting",
++ ]
+ ❯ tests/identity/c2-compat.test.ts:25:24
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+ Test Files  1 failed (1)
+      Tests  1 failed | 1 passed (2)
+   Start at  04:11:08
+   Duration  607ms (transform 82ms, setup 0ms, import 319ms, tests 200ms, environment 0ms)

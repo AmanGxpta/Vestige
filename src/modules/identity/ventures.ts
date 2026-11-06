@@ -26,6 +26,8 @@ export interface FounderSeat {
   onchainSeatStatus: ReadStatus;
   subnameStatus: ReadStatus;
   attestationTxHash?: Hex;
+  /** CR-C2-006 (C1-ACKed, H pending): World environment of the accepted proof. "staging" ⇒ TESTED_IN_SIMULATOR. */
+  worldEnvironment?: "production" | "staging";
 }
 
 /** CR-C2-001 public list item: non-PII, cached, with provenance. */
@@ -54,7 +56,10 @@ export interface VentureView {
   seats: FounderSeat[];
   humansVerified: number;
   maxSeats: number;
-  /** CR-C2-001: listed only while every current founder consents. */
+  /**
+   * CR-C2-001; CR-C2-007 resolved to THIS shape (already consumed by C2 live-adapter @50e4cf4):
+   * listed only while every current founder consents.
+   */
   listing: { listed: boolean; consents: { wallet: Address; listed: boolean }[] };
 }
 
@@ -109,6 +114,11 @@ export class VentureService {
   view(ventureIdInput: unknown): VentureView {
     const ventureId = assertVentureId(ventureIdInput);
     const v = this.ventureRow(ventureId);
+    const envs = new Map(
+      this.d.db
+        .all<{ wallet: string; environment: string }>("SELECT wallet, environment FROM identity_world_nullifiers WHERE venture_id = ?", ventureId)
+        .map((r) => [r.wallet, r.environment]),
+    );
     const seats = this.d.db
       .all<SeatRow>("SELECT * FROM identity_seats WHERE venture_id = ? ORDER BY created_at, wallet", ventureId)
       .map((s): FounderSeat => ({
@@ -120,6 +130,7 @@ export class VentureService {
         onchainSeatStatus: s.onchain_status as ReadStatus,
         subnameStatus: s.subname_status as ReadStatus,
         ...(s.attestation_tx_hash ? { attestationTxHash: s.attestation_tx_hash as Hex } : {}),
+        ...(envs.get(s.wallet) === "staging" || envs.get(s.wallet) === "production" ? { worldEnvironment: envs.get(s.wallet) as "staging" | "production" } : {}),
       }));
     return {
       ventureId,
@@ -451,26 +462,72 @@ export class VentureService {
         this.event({ ventureId: s.venture_id, kind: "ens_founder_registered", label: "CHAIN_VERIFIED", status: "VERIFIED", chainId: 11155111, source: "ens-sepolia-readback" });
       } else stillOpen.push(`ens-founder:${name}:${s.subname_status}`);
     }
+    // vestige.humans must equal the live verified count (derived, never from a request).
+    for (const v of this.d.db.all<VentureRow>("SELECT * FROM identity_ventures WHERE ens_status = 'VERIFIED'")) {
+      const n = this.verifiedFounders(v.venture_id as Bytes32).length;
+      const ok = await (this.checks.humans?.(v.ens_name, n) ?? Promise.resolve(false)).catch(() => false);
+      if (!ok) stillOpen.push(`ens-humans:${v.ens_name}:expected=${n}`);
+    }
     return { attestations, ensVerified, stillOpen };
+  }
+
+  /**
+   * Explicit operator retry (never automatic): re-runs an ENS step only when its
+   * read-back is still false AND no transaction was ever recorded for it, so a
+   * step whose tx may have landed is never re-broadcast blindly. Humans records
+   * are idempotent setText writes and are re-sent when the read-back mismatches.
+   */
+  async retryEns(): Promise<{ retried: string[]; skipped: string[] }> {
+    const retried: string[] = [], skipped: string[] = [];
+    const hadTx = (ventureId: string, kind: string, actor?: string) =>
+      !!this.d.db.get(
+        `SELECT 1 AS x FROM identity_events WHERE venture_id = ? AND kind = ? AND tx_hash IS NOT NULL ${actor ? "AND (actor = ? OR actor IS NULL)" : ""}`,
+        ...(actor ? [ventureId, kind, actor] : [ventureId, kind]),
+      );
+    for (const v of this.d.db.all<VentureRow>("SELECT * FROM identity_ventures WHERE ens_status IN ('FAILED','UNKNOWN')")) {
+      const ok = await (this.checks.ventureName?.(v.ens_name, v.venture_id as Bytes32) ?? Promise.resolve(false)).catch(() => false);
+      if (ok) continue;
+      if (hadTx(v.venture_id, "ens_venture_registered")) { skipped.push(`ens-venture:${v.ens_name}:tx-recorded-needs-manual-review`); continue; }
+      await this.syncVentureName(v.venture_id as Bytes32);
+      retried.push(`ens-venture:${v.ens_name}`);
+    }
+    for (const s of this.d.db.all<SeatRow & { slug: string }>(
+      "SELECT s.*, v.slug AS slug FROM identity_seats s JOIN identity_ventures v USING (venture_id) WHERE v.ens_status = 'VERIFIED' AND s.world_status = 'VERIFIED' AND s.subname_status IN ('FAILED','UNKNOWN')",
+    )) {
+      const name = founderEnsName(s.founder_label, s.slug, this.d.parentName);
+      const ok = await (this.checks.founderName?.(name, s.wallet as Address) ?? Promise.resolve(false)).catch(() => false);
+      if (ok) continue;
+      if (hadTx(s.venture_id, "ens_founder_registered", s.wallet)) { skipped.push(`ens-founder:${name}:tx-recorded-needs-manual-review`); continue; }
+      await this.syncFounderName(s.venture_id as Bytes32, s.wallet as Address);
+      retried.push(`ens-founder:${name}`);
+    }
+    for (const v of this.d.db.all<VentureRow>("SELECT * FROM identity_ventures WHERE ens_status = 'VERIFIED'")) {
+      const n = this.verifiedFounders(v.venture_id as Bytes32).length;
+      const ok = await (this.checks.humans?.(v.ens_name, n) ?? Promise.resolve(false)).catch(() => false);
+      if (ok) continue;
+      await this.syncHumansRecord(v.venture_id as Bytes32);
+      retried.push(`ens-humans:${v.ens_name}`);
+    }
+    return { retried, skipped };
   }
 
   // ---------- ENS sync (registrar-signed, never client-triggered values) ----------
 
-  private async ensStep(ventureId: string, kind: string, run: () => Promise<{ txHashes: Hex[] }>, check: () => Promise<boolean>, onStatus: (s: ReadStatus) => void) {
+  private async ensStep(ventureId: string, kind: string, run: () => Promise<{ txHashes: Hex[] }>, check: () => Promise<boolean>, onStatus: (s: ReadStatus) => void, actor?: Address) {
     onStatus("PENDING");
     try {
       const { txHashes } = await run();
       const c = await this.d.ens.confirm({ txHashes, check });
       if (c.state === "CONFIRMED") {
         onStatus("VERIFIED");
-        this.event({ ventureId, kind, label: "CHAIN_VERIFIED", status: "VERIFIED", chainId: c.chainId, txHash: txHashes.at(-1), blockNumber: c.blockNumber, confirmedAt: c.confirmedAt, source: "ens-sepolia" });
+        this.event({ ventureId, kind, label: "CHAIN_VERIFIED", status: "VERIFIED", actor, chainId: c.chainId, txHash: txHashes.at(-1), blockNumber: c.blockNumber, confirmedAt: c.confirmedAt, source: "ens-sepolia" });
       } else {
         onStatus(c.state === "PENDING" ? "PENDING" : "FAILED");
-        this.event({ ventureId, kind, label: "CHAIN_VERIFIED", status: c.state === "PENDING" ? "PENDING" : "FAILED", txHash: txHashes.at(-1), source: "ens-sepolia", detail: c.state === "FAILED" ? c.reason : undefined });
+        this.event({ ventureId, kind, label: "CHAIN_VERIFIED", status: c.state === "PENDING" ? "PENDING" : "FAILED", actor, txHash: txHashes.at(-1), source: "ens-sepolia", detail: c.state === "FAILED" ? c.reason : undefined });
       }
     } catch (e) {
       onStatus("FAILED");
-      this.event({ ventureId, kind, label: "CHAIN_VERIFIED", status: "FAILED", source: "ens-sepolia", detail: (e as Error).message.slice(0, 200) });
+      this.event({ ventureId, kind, label: "CHAIN_VERIFIED", status: "FAILED", actor, source: "ens-sepolia", detail: (e as Error).message.slice(0, 200) });
     }
   }
 
@@ -502,6 +559,7 @@ export class VentureService {
       () => this.d.ens.registerFounder({ slug: v.slug, label: s.founder_label, wallet }),
       () => this.checks.founderName?.(name, wallet) ?? Promise.resolve(false),
       (st) => this.d.db.run("UPDATE identity_seats SET subname_status = ? WHERE venture_id = ? AND wallet = ?", st, ventureId, wallet),
+      wallet,
     );
   }
 

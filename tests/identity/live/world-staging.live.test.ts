@@ -10,11 +10,15 @@
  * Secrets: WORLD_RP_SIGNING_KEY is read from a local file (default <repo>/.env.local,
  * must be mode 600 and gitignored). It is never printed, logged or written to evidence.
  *
- * Run (H or C1, interactive — paste each connector URI into simulator.worldcoin.org):
+ * Run (H or C1, interactive). Each connector URI is never logged or written to disk: it is served
+ * to the simulator tab through a local hub page (see startHandoff); <token> in the progress file is
+ * a local per-run value, not a secret of World. Open http://127.0.0.1:47231/hub?t=<token>:
  *   VESTIGE_WORLD_STAGING=1 WORLD_E2E_OUT=/path/progress.jsonl npm run test:live -- world-staging
  */
 import { appendFileSync, existsSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { execFileSync } from "node:child_process";
+import { createServer } from "node:http";
+import { randomBytes } from "node:crypto";
 import { describe, expect, it } from "vitest";
 import { IDKit, proofOfHuman } from "@worldcoin/idkit-core";
 import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
@@ -49,11 +53,51 @@ function loadSecretFile(path: string): Record<string, string> {
   return out;
 }
 
+const HANDOFF_PORT = Number(process.env.WORLD_HANDOFF_PORT ?? 47231);
+const SIM_ORIGIN = "https://simulator.worldcoin.org";
+
+/**
+ * In-memory hand-off of each connector URI to the simulator tab; never persisted or logged.
+ * The simulator's CSP forbids fetch() to localhost, so a local "hub" page (same origin as this
+ * server) opens simulator.worldcoin.org, keeps the window handle, pulls the current URI from
+ * /next (one read per step) and postMessages it to the simulator with the exact target origin
+ * until the simulator tab acknowledges.
+ */
+function startHandoff(token: string) {
+  let current: string | null = null;
+  const events: string[] = [];
+  const hub = `<!doctype html><meta charset="utf-8"><title>vestige simulator hub</title>
+<button id="open" style="font-size:22px;padding:16px">Open simulator</button><pre id="s">idle</pre>
+<script>
+const T=${JSON.stringify(token)}, SIM=${JSON.stringify(SIM_ORIGIN)}; let w=null, pending=null, n=0;
+const st=(m)=>{document.getElementById('s').textContent=m; fetch('/log?t='+T+'&m='+encodeURIComponent(m));};
+document.getElementById('open').onclick=()=>{ w=window.open(SIM+'/', 'vestige-sim'); st('sim opened '+!!w); };
+window.addEventListener('message',(e)=>{ if(e.origin!==SIM) return; if(e.data&&e.data.vestigeAck){ pending=null; n++; st('acked '+n); } });
+setInterval(async()=>{ if(!pending){ const r=await fetch('/next?t='+T); if(r.status===200){ pending=await r.text(); st('got step uri len='+pending.length); } }
+  if(pending&&w&&!w.closed){ w.postMessage({vestigeConnector:pending}, SIM); } },1000);
+</script>`;
+  const server = createServer((req, res) => {
+    const u = new URL(req.url ?? "/", "http://127.0.0.1");
+    const ok = u.searchParams.get("t") === token;
+    const h = { "cache-control": "no-store", "referrer-policy": "no-referrer" };
+    if (req.method === "GET" && ok && u.pathname === "/hub") { res.writeHead(200, { ...h, "content-type": "text/html; charset=utf-8" }); res.end(hub); return; }
+    if (req.method === "GET" && ok && u.pathname === "/next" && current && !req.headers.origin) { // same-origin GET sends no Origin
+      res.writeHead(200, { ...h, "content-type": "text/plain" }); res.end(current); current = null; return;
+    }
+    if (req.method === "GET" && ok && u.pathname === "/log") { events.push(String(u.searchParams.get("m")).slice(0, 80)); log({ hub: events.at(-1) }); res.writeHead(204, h); res.end(); return; }
+    res.writeHead(404, h); res.end();
+  }).listen(HANDOFF_PORT, "127.0.0.1");
+  return { set: (v: string) => { current = v; }, close: () => server.close() };
+}
+
 const log = (o: Record<string, unknown>) => appendFileSync(OUT, JSON.stringify({ at: new Date().toISOString(), ...o }) + "\n");
 
 describe.skipIf(!RUN)("LIVE World 4.0 staging simulator (TESTED_IN_SIMULATOR)", () => {
   it("two distinct simulated identities seat; identity 1 with a second wallet is refused", async () => {
     writeFileSync(OUT, "");
+    const token = randomBytes(16).toString("hex");
+    const handoff = startHandoff(token);
+    log({ status: "HANDOFF_READY", port: HANDOFF_PORT, token });
     const env = loadSecretFile(process.env.WORLD_ENV_FILE ?? `${repo}.env.local`);
     const key = env.WORLD_RP_SIGNING_KEY;
     if (!key || !/^(0x)?[0-9a-fA-F]{64}$/.test(key)) throw new Error("WORLD_RP_SIGNING_KEY missing or not 32-byte hex (value not shown)");
@@ -116,7 +160,10 @@ describe.skipIf(!RUN)("LIVE World 4.0 staging simulator (TESTED_IN_SIMULATOR)", 
         allow_legacy_proofs: false,
         environment: "staging",
       }).preset(proofOfHuman({ signal: params.signal }));
-      log({ step, identityHint, wallet: w, ventureId: vid, action: params.action, connectorURI: request.connectorURI, status: "WAITING_FOR_SIMULATOR" });
+      // The connector URI is a bearer-like handle to this proof request: never logged or written to disk.
+      // It is placed on the local clipboard only, for pasting into simulator.worldcoin.org ("Paste code").
+      handoff.set(request.connectorURI);
+      log({ step, identityHint, wallet: w, ventureId: vid, status: "WAITING_FOR_SIMULATOR", connector: `via local hub http://127.0.0.1:${HANDOFF_PORT}/hub (not logged)` });
       const done = await request.pollUntilCompletion({ pollInterval: 2000, timeout: 14 * 60_000 });
       if (!done.success) {
         log({ step, status: "IDKIT_FAILED", error: done.error });
@@ -178,6 +225,7 @@ describe.skipIf(!RUN)("LIVE World 4.0 staging simulator (TESTED_IN_SIMULATOR)", 
     evidence.assertions["portal accepted the reused nullifier (uniqueness is C1's job)"] = s4.outcome === "DUPLICATE_HUMAN" ? last?.response?.success === true : null;
     writeFileSync(EVIDENCE, JSON.stringify(evidence, (_k, v) => (typeof v === "bigint" ? v.toString() : v), 2) + "\n");
     log({ status: "DONE", evidence: EVIDENCE });
+    handoff.close();
 
     expect(s1.outcome).toBe("VERIFIED");
     expect(s2.outcome).toBe("VERIFIED");
