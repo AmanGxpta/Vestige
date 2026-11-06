@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
 import { formatTokenAmount, isValidSlug, parseTokenAmount, slugify } from "./format";
-import { canonicalJson, previewDocHash } from "./canonical";
 import { parseTreasuryTextRecord } from "../public-view/chain-reader";
 
 describe("token amounts use bigint, never floats", () => {
@@ -26,16 +25,6 @@ describe("slugs", () => {
     expect(isValidSlug("ab")).toBe(false);
     expect(isValidSlug("-bad")).toBe(false);
     expect(isValidSlug("a--b")).toBe(false);
-  });
-});
-
-describe("canonical JSON preview", () => {
-  it("is key-order independent and hash changes with one word", () => {
-    expect(canonicalJson({ b: 1, a: { d: 2, c: 3 } })).toBe('{"a":{"c":3,"d":2},"b":1}');
-    const f = { contributions: "x", roles: "y", ownershipSplit: "50/50", vestingIntent: "4y", decisionRule: "both", effectiveDate: "2026-11-06" };
-    const id = `0x${"ab".repeat(32)}` as const;
-    expect(previewDocHash(id, 1, f).hash).toBe(previewDocHash(id, 1, { ...f }).hash);
-    expect(previewDocHash(id, 1, f).hash).not.toBe(previewDocHash(id, 1, { ...f, roles: "z" }).hash);
   });
 });
 

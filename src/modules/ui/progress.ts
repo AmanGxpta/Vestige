@@ -1,4 +1,4 @@
-import type { Address, TreasuryState, VentureDetail } from "./types";
+import type { Address, Treasury, TreasuryState, VentureDetail } from "./types";
 
 export type StepState = "done" | "pending" | "todo" | "blocked";
 export type VentureStep = { key: "team" | "verify" | "terms" | "treasury" | "payments"; title: string; sub: string; state: StepState };
@@ -9,6 +9,14 @@ export function seatFor(v: VentureDetail | undefined, wallet?: Address) {
   return v?.seats.find((s) => same(s.wallet, wallet));
 }
 
+/** CONTRACTS v0: ACTIVE only after complete independent chain read-back. */
+export const isTreasuryActive = (tr?: Treasury) => tr?.verificationStatus === "ACTIVE";
+
+export function treasuryStatusText(tr?: Treasury): string {
+  if (!tr) return "Not set up";
+  return { ACTIVE: "Active on Whitechain", PENDING: "Confirming on Whitechain", UNVERIFIED: "Unverified", FAILED: "Failed", UNKNOWN: "Unknown" }[tr.verificationStatus];
+}
+
 /** Signatures only count for the CURRENT version + docHash (FR-3: re-versioning invalidates). */
 export function currentSignatures(v: VentureDetail | undefined) {
   const a = v?.agreement;
@@ -16,10 +24,9 @@ export function currentSignatures(v: VentureDetail | undefined) {
   return a.signatures.filter((s) => s.version === a.version && s.docHash === a.docHash);
 }
 
+/** Server is the authority (C1 AgreementView.complete: every verified founder signed this version). */
 export function termsFullySigned(v: VentureDetail | undefined): boolean {
-  if (!v?.agreement || v.seats.length < 2) return false;
-  const sigs = currentSignatures(v);
-  return v.seats.every((seat) => sigs.some((s) => same(s.signer, seat.wallet)));
+  return !!v?.agreement?.complete && v.seats.length >= 2;
 }
 
 export function verifiedSeats(v: VentureDetail | undefined) {
@@ -56,14 +63,14 @@ export function ventureSteps(v: VentureDetail | undefined, t: TreasuryState | un
     {
       key: "treasury",
       title: "Treasury",
-      sub: !tr ? "Not set up" : tr.verificationStatus === "VERIFIED" ? "Active on Whitechain" : tr.verificationStatus === "PENDING" ? "Confirming on Whitechain" : "Unverified",
-      state: tr?.verificationStatus === "VERIFIED" ? "done" : tr ? "pending" : attested >= 2 ? "todo" : "blocked",
+      sub: treasuryStatusText(tr),
+      state: isTreasuryActive(tr) ? "done" : tr ? "pending" : attested >= 2 ? "todo" : "blocked",
     },
     {
       key: "payments",
       title: "Payments",
       sub: executed ? `${executed} executed` : awaiting ? `${awaiting} awaiting` : "None yet",
-      state: executed ? "done" : tr?.verificationStatus === "VERIFIED" ? "todo" : "blocked",
+      state: executed ? "done" : isTreasuryActive(tr) ? "todo" : "blocked",
     },
   ];
 }
@@ -74,6 +81,6 @@ export function hasPending(v?: VentureDetail, t?: TreasuryState): boolean {
     !!v?.seats.some((s) => s.onchainSeatStatus === "PENDING") ||
     t?.treasury?.verificationStatus === "PENDING" ||
     !!t?.deposits.some((d) => d.status === "PENDING") ||
-    !!t?.payments.some((p) => p.status === "READY" && p.executedTxHash)
+    !!t?.payments.some((p) => (p.status === "READY" && p.executedTxHash) || p.relay?.status === "SUBMITTED" || p.relay?.status === "RESERVED")
   );
 }

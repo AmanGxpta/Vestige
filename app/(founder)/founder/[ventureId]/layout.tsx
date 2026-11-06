@@ -10,6 +10,7 @@ import { seatFor } from "@/src/modules/ui/progress";
 import { VentureProvider, useVenture } from "@/src/modules/ui/venture/VentureContext";
 import type { VentureId } from "@/src/modules/ui/types";
 import { shortHex } from "@/src/modules/ui/format";
+import { ADAPTER_KIND } from "@/src/modules/ui/config";
 
 const HREF: Record<string, string> = { team: "", verify: "/verify", terms: "/terms", treasury: "/treasury", payments: "/payments" };
 
@@ -45,8 +46,9 @@ function Workspace({ children }: { children: ReactNode }) {
           This venture is a verified team workspace, not a company. Founding terms here record intent between founders; they are not a legal entity.
         </Notice>
         {!mySeat && (
-          <Notice tone="warn" title={role === "visitor" ? "You're viewing as a visitor" : "Your wallet doesn't hold a seat in this venture"}>
-            Founder actions are disabled. {role === "visitor" ? "Pick Founder A or Founder B in “Acting as” to act." : ""}
+          <Notice tone="warn" title={!address ? "You're viewing without a wallet" : "Your wallet doesn't hold a seat in this venture"}>
+            Founder actions are disabled.{" "}
+            {ADAPTER_KIND === "dev-mock" ? (role === "visitor" ? "Pick Founder A or Founder B in “Acting as” to act." : "") : !address ? "Connect a founder wallet (top right)." : ""}
           </Notice>
         )}
       </header>

@@ -1,11 +1,10 @@
 /**
  * C2 view-layer types.
  *
- * These MIRROR docs/CONTRACTS.md v0 (status: PROPOSED, not locked). They live in
- * C2's own namespace because `src/shared/**` is H-owned. When H locks the
- * contract and publishes shared types, replace these with re-exports from
- * `src/shared` and delete the duplicates. Do not add fields here that are not in
- * the contract without a CR — UI-only derived fields belong in `view.ts`.
+ * These MIRROR docs/CONTRACTS.md v0 as H-approved at 30d1ef6. They live in C2's
+ * own namespace because `src/shared/**` is H-owned and no shared types package
+ * exists yet. When H publishes shared types, replace these with re-exports.
+ * Fields marked "view" are UI-derived; fields marked CR-C2-006 are proposed.
  */
 
 export type Hex = `0x${string}`;
@@ -22,8 +21,16 @@ export const WHITECHAIN_ENS_COIN_TYPE = 2147485522 as const;
 /** CONTRACTS v0 read status enum. */
 export type ReadStatus = "UNKNOWN" | "PENDING" | "VERIFIED" | "FAILED";
 
-/** CONTRACTS v0 payment status enum. */
+/** CONTRACTS v0 treasury verification — ACTIVE only after complete independent chain read-back. */
+export type TreasuryStatus = "UNKNOWN" | "PENDING" | "ACTIVE" | "UNVERIFIED" | "FAILED";
+
+/** CONTRACTS v0 payment lifecycle. */
 export type PaymentStatus = "AWAITING_APPROVALS" | "READY" | "EXECUTED" | "FAILED";
+/** CONTRACTS v0 relay submission lifecycle — SUBMITTED must never render as executed. */
+export type RelayStatus = "RESERVED" | "UNKNOWN" | "SUBMITTED" | "EXECUTED" | "FAILED";
+
+/** World environment a proof came from. `staging` = TESTED_IN_SIMULATOR, never production uniqueness. */
+export type WorldEnvironment = "production" | "staging";
 
 /** MASTER §3: exact evidence labels. */
 export type EvidenceLabel = "HUMAN_VERIFIED" | "SIGNED" | "CHAIN_VERIFIED" | "SELF_REPORTED";
@@ -44,15 +51,20 @@ export type DataSource = "DEV_MOCK" | "API" | "CHAIN";
 export type FounderSeat = {
   ventureId: VentureId;
   wallet: Address;
+  founderLabel?: string;
   founderSubname: string;
   worldProofStatus: ReadStatus;
   onchainSeatStatus: ReadStatus;
+  subnameStatus?: ReadStatus;
   attestationTxHash?: Hex;
+  /** CR-C2-006 (proposed): which World environment verified this seat. Unknown → treated as unconfirmed. */
+  worldEnvironment?: WorldEnvironment;
 };
 
 export type AgreementSignature = {
   signer: Address;
-  signature: Hex;
+  /** Not returned by C1 (server keeps it); present only in DEV MOCK. */
+  signature?: Hex;
   signedAt: string;
   /** version the signature was made over — must equal the agreement's version to count */
   version: number;
@@ -61,14 +73,17 @@ export type AgreementSignature = {
 
 export type Agreement = {
   ventureId: VentureId;
-  agreementId: string;
+  agreementId: Hex;
   version: number;
-  /** Private. Only shown to founders of the venture, never on the public page. */
-  canonicalJson: string;
+  /** Private. Only returned to current founders; never on the public page. */
+  canonicalJson?: string;
   docHash: Hex;
-  nonce: string;
-  expiry: string;
+  /** Signatures that count for THIS version + docHash. */
   signatures: AgreementSignature[];
+  requiredSigners: Address[];
+  complete: boolean;
+  /** ENS `vestige.agreement` write status (VERIFIED only after receipt + read-back). */
+  ensStatus: ReadStatus;
 };
 
 export type Treasury = {
@@ -79,8 +94,10 @@ export type Treasury = {
   threshold: number;
   guardAddress: Address;
   registryAddress: Address;
-  verificationStatus: ReadStatus;
+  verificationStatus: TreasuryStatus;
   deploymentTxHash: Hex;
+  /** Safe creation block (decimal string); public reader scans logs from here (CR-C2-004). */
+  deploymentBlock?: string;
 };
 
 export type Payment = {
@@ -94,12 +111,18 @@ export type Payment = {
   reason: string;
   signerWallets: Address[];
   status: PaymentStatus;
+  relay?: { operationId: string; status: RelayStatus; txHash?: Hex; error?: string };
+  /** Exact Safe EIP-712 typed data from X's proposal; signed as-is (never rebuilt by C2 in live mode). */
+  safeTypedData?: unknown;
+  safeNonce?: string;
   executedTxHash?: Hex;
 };
 
 export type EvidenceKind =
   | "VENTURE_CREATED"
+  | "FOUNDER_JOINED"
   | "ENS_REGISTERED"
+  | "ENS_RECORD"
   | "FOUNDER_VERIFIED"
   | "SEAT_ATTESTED"
   | "DUPLICATE_REFUSED"
@@ -123,6 +146,8 @@ export type Evidence = {
   blockNumber?: number;
   confirmedAt?: string;
   source: DataSource;
+  /** World evidence from the staging environment (CONTRACTS: separate qualifier, not a label). */
+  qualifier?: "TESTED_IN_SIMULATOR";
 };
 
 /** Contract v0 `GET /api/identity/ventures/:id` — "founder seat + ENS + verification summaries". */
@@ -132,11 +157,14 @@ export type VentureDetail = {
   displayName: string;
   ensName: string;
   ensStatus: ReadStatus;
-  createdAt: string;
+  createdAt?: string;
   seats: FounderSeat[];
-  /** Single-use invite link material. Only returned to Founder A. Shape TBD by C1. */
-  invite?: { code: string; used: boolean };
   agreement?: Agreement;
+  /**
+   * Public-list consent (CR-C2-001). All current founders must opt in; any founder
+   * can withdraw. `null` = the API does not report it yet.
+   */
+  listing?: { listed: boolean; optedIn: Address[] } | null;
   source: DataSource;
 };
 
@@ -148,6 +176,8 @@ export type TreasuryState = {
   tokenDecimals?: number;
   payments: Payment[];
   deposits: { from: Address; amountRaw: string; txHash: Hex; status: ReadStatus }[];
+  /** Receipt-backed evidence from X's readback (e.g. the mined GS020 REJECTED_ATTEMPT). */
+  evidence?: Evidence[];
   source: DataSource;
 };
 
@@ -159,16 +189,32 @@ export type PublicOffchainEvidence = {
   ensName: string;
   ventureId: VentureId;
   humansVerified: number;
-  founders: { founderSubname: string; worldProofStatus: ReadStatus; verifiedAt?: string }[];
-  agreement?: { version: number; docHash: Hex; signaturesForCurrentVersion: number; requiredSignatures: number };
+  founders: {
+    founderSubname: string;
+    wallet?: Address;
+    worldProofStatus: ReadStatus;
+    onchainSeatStatus?: ReadStatus;
+    attestationTxHash?: Hex;
+    verifiedAt?: string;
+    /** CR-C2-006 (proposed). */
+    worldEnvironment?: WorldEnvironment;
+  }[];
+  agreement?: {
+    version: number;
+    docHash: Hex;
+    signaturesForCurrentVersion: number;
+    requiredSignatures: number;
+    complete?: boolean;
+    ensRecordStatus?: ReadStatus;
+  };
   evidence: Evidence[];
   source: DataSource;
 };
 
 /**
- * NOT IN CONTRACT v0 — needed by the funder list (FR-6). Proposed as CR-C2-001
- * (`GET /api/identity/ventures` public summaries, founder-consented). Until
- * accepted, only the DEV MOCK adapter implements it.
+ * CR-C2-001 (approved): `GET /api/identity/ventures` — founder-consented, non-PII
+ * cached summaries. `treasuryActive`/`funded` are null when unknown and are never
+ * authoritative; the public page re-reads ENS + Whitechain.
  */
 export type VentureSummary = {
   ventureId: VentureId;
@@ -176,16 +222,9 @@ export type VentureSummary = {
   ensName: string;
   humansVerified: number;
   termsSigned: boolean;
-  treasuryActive: boolean;
-  funded: boolean;
+  treasuryActive: boolean | null;
+  funded: boolean | null;
+  observedAt?: string;
+  verificationStatus?: ReadStatus | TreasuryStatus;
   source: DataSource;
-};
-
-export type AgreementFields = {
-  contributions: string;
-  roles: string;
-  ownershipSplit: string;
-  vestingIntent: string;
-  decisionRule: string;
-  effectiveDate: string;
 };

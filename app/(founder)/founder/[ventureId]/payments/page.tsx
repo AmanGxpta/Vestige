@@ -3,10 +3,9 @@
 import { useState } from "react";
 import { AdapterErrorNotice, Button, Card, EvidenceBadge, Field, HashLink, Notice, StatusPill } from "@/components/ui";
 import { RejectedAttemptProof } from "@/components/RejectedAttemptProof";
-import { REJECTED_ATTEMPT_TX } from "@/src/modules/ui/config";
 import { formatTokenAmount, isAddress, parseTokenAmount, shortHex } from "@/src/modules/ui/format";
 import { MOCK_ROLES, useVestige } from "@/src/modules/ui/provider";
-import { seatFor } from "@/src/modules/ui/progress";
+import { isTreasuryActive, seatFor } from "@/src/modules/ui/progress";
 import { useAction } from "@/src/modules/ui/useAction";
 import { useVenture } from "@/src/modules/ui/venture/VentureContext";
 import type { Address, Payment, TreasuryState } from "@/src/modules/ui/types";
@@ -14,14 +13,15 @@ import { ADAPTER_KIND } from "@/src/modules/ui/config";
 
 function PaymentCard({ p, decimals, owners, source }: { p: Payment; decimals: number; owners: Address[]; source: TreasuryState["source"] }) {
   const { venture, refreshAll } = useVenture();
-  const { client, address, requestSignature } = useVestige();
+  const { client, address, signer } = useVestige();
   const sign = useAction<TreasuryState>();
   const exec = useAction<TreasuryState>();
   const v = venture.status === "ok" ? venture.data : undefined;
   const isOwner = !!address && owners.some((o) => o.toLowerCase() === address.toLowerCase());
   const iSigned = !!address && p.signerWallets.some((w) => w.toLowerCase() === address.toLowerCase());
   const amount = formatTokenAmount(p.amountRaw, decimals);
-  const executing = p.status === "READY" && !!p.executedTxHash;
+  // Relay SUBMITTED/RESERVED is never shown as executed (CONTRACTS relay lifecycle).
+  const executing = (p.status === "READY" && !!p.executedTxHash) || p.relay?.status === "SUBMITTED" || p.relay?.status === "RESERVED" || p.relay?.status === "UNKNOWN";
 
   return (
     <Card
@@ -90,20 +90,23 @@ function PaymentCard({ p, decimals, owners, source }: { p: Payment; decimals: nu
                 data-testid="payment-sign"
                 disabledReason={!isOwner ? "Only the two founders can approve." : null}
                 onClick={async () => {
-                  const r = await sign.run(async () => {
-                    const signature = await requestSignature({
-                      title: `Approve paying ${amount} USDT from ${v?.displayName ?? "the"} treasury`,
-                      lines: [
-                        { label: "To", value: shortHex(p.recipient, 8, 6) },
-                        { label: "Amount", value: `${amount} USDT` },
-                        { label: "For", value: p.reason },
-                      ],
-                      typedDataName: "SafeTx",
-                      costsGas: false,
-                    });
-                    if (!signature || !address) return null;
-                    return client.signPayment(p.ventureId, p.paymentId, { sig: { signer: address, signature } });
-                  });
+                  const r = await sign.run(() =>
+                    client.signPayment(
+                      p.ventureId,
+                      p.paymentId,
+                      { wallet: address! },
+                      signer({
+                        title: `Approve paying ${amount} USDT from ${v?.displayName ?? "the"} treasury`,
+                        lines: [
+                          { label: "To", value: shortHex(p.recipient, 8, 6) },
+                          { label: "Amount", value: `${amount} USDT` },
+                          { label: "For", value: p.reason },
+                        ],
+                        typedDataName: "SafeTx",
+                        costsGas: false,
+                      }),
+                    ),
+                  );
                   if (r) refreshAll();
                 }}
               >
@@ -145,11 +148,12 @@ export default function PaymentsPage() {
   const t = treasury.data;
   const tr = t.treasury;
   const decimals = t.tokenDecimals ?? 6;
-  const active = tr?.verificationStatus === "VERIFIED";
+  const active = isTreasuryActive(tr);
   const seat = seatFor(v, address);
   const raw = parseTokenAmount(amount, decimals);
   const formError = !recipient || !amount || !reason ? "Fill in recipient, amount and reason." : !isAddress(recipient) ? "Recipient must be a 0x… address." : raw === null || raw <= 0n ? "Enter a positive amount (max 6 decimals)." : null;
-  const evidenceTx = REJECTED_ATTEMPT_TX;
+  // CONTRACTS v0: the rejected 1-of-2 attempt is a receipt-backed evidence record (X readback), not an env var.
+  const evidenceTx = t.evidence?.find((e) => e.kind === "REJECTED_ATTEMPT" && e.txHash && e.chainId === 1874)?.txHash;
 
   if (!active)
     return (

@@ -27,14 +27,18 @@ describe.skipIf(!process.env.VESTIGE_LIVE)("live Whitechain reads", () => {
       { sepolia: stubSepolia },
     );
     const w = r.whitechain!;
-    console.log(JSON.stringify({ block: w.blockNumber.value, code: w.safeCode.status, version: w.version.value, owners: w.owners.value, threshold: w.threshold.value, guard: w.guard.status, modules: w.modules.status, token: w.token.value, seats: w.seats.status, transfers: w.transfers.status }, null, 0));
+    console.log(JSON.stringify({ block: w.blockNumber.value, code: w.safeCode.status, version: w.version.value, owners: w.owners.value, threshold: w.threshold.value, guard: w.guard.status, binding: w.binding.status, safeCodeHash: w.codeHashes.value?.safe, modules: w.modules.status, token: w.token.value, seats: w.seats.status, transfers: w.transfers.status, scanFrom: w.scanFrom, ensVentureId: r.ens.ventureId.status, manifest: r.manifest.status }, null, 0));
     expect(w.blockNumber.status).toBe("VERIFIED");
     expect(w.safeCode.status).toBe("VERIFIED");
     expect(w.version.value).toBe("1.4.1");
     expect(w.token.value?.symbol).toBe("USDT");
     expect(w.token.value?.decimals).toBe(6);
     expect(w.transfers.status).toBe("VERIFIED"); // regression: RPC caps eth_getLogs at 10k blocks
+    expect(r.ens.ventureId.status).toBe("FAILED"); // stub publishes no vestige.ventureId
+    expect(w.binding.status).not.toBe("VERIFIED"); // singleton has no Guard
+    expect(w.codeHashes.value?.safe).toMatch(/^0x[0-9a-f]{64}$/);
     const v = deriveTreasuryVerdict(r);
     expect(v.state).not.toBe("ACTIVE");
+    console.log(JSON.stringify({ verdict: v.state, checks: v.checks.map((c) => `${c.id}:${c.status}`) }));
   }, 60_000);
 });

@@ -10,13 +10,12 @@
  *    signature reset on re-version, relayer refusal of 1-of-2) so the UI's
  *    negative paths can be exercised. That is UI testing, not protocol proof.
  */
-import { keccak256, stringToBytes } from "viem";
-import { err, ok, type Result, type VestigeClient, type WalletSignature, type WorldProofPayload } from "../adapter";
-import { previewDocHash, canonicalJson, agreementDocument } from "../canonical";
+import { keccak256, stringToBytes, type TypedDataDefinition } from "viem";
+import { err, ok, type Result, type TypedDataSigner, type VestigeClient, type WorldProofPayload } from "../adapter";
+import { FOUNDING_TERMS_DOMAIN, FOUNDING_TERMS_TYPES, previewTerms, type FoundingTermsInput } from "../agreement/terms";
 import type {
   Address,
   Agreement,
-  AgreementFields,
   Evidence,
   EvidenceKind,
   EvidenceLabel,
@@ -42,7 +41,7 @@ const TOKEN_DECIMALS = 6;
 const DELAY = { attest: 2500, deploy: 3500, deposit: 2500, execute: 2500 } as const;
 
 type MockSeat = FounderSeat & { simulatedHumanId?: string; label: string; verifiedAt?: string; attestReadyAt?: number };
-type MockVersion = Agreement & { fields: AgreementFields; createdAt: string };
+type MockVersion = Omit<Agreement, "requiredSigners" | "complete" | "ensStatus"> & { createdAt: string };
 type MockPayment = Payment & { createdAt: string; executeReadyAt?: number };
 type MockDeposit = { from: Address; amountRaw: string; txHash: Hex; readyAt: number };
 type MockVenture = {
@@ -52,7 +51,8 @@ type MockVenture = {
   ensName: string;
   createdAt: string;
   createdBy: Address;
-  invite: { code: string; used: boolean };
+  invites: { code: string; used: boolean }[];
+  listingOptIn: Address[];
   seats: MockSeat[];
   versions: MockVersion[];
   treasury?: Treasury & { readyAt: number };
@@ -60,7 +60,7 @@ type MockVenture = {
   payments: MockPayment[];
   evidence: (Evidence & { readyAt?: number })[];
 };
-type MockState = { v: 1; ventures: Record<string, MockVenture> };
+type MockState = { v: 2; ventures: Record<string, MockVenture> };
 
 function randomHex(bytes: number): Hex {
   const a = new Uint8Array(bytes);
@@ -99,7 +99,12 @@ export const browserStorage = (): MockStorage =>
         },
       };
 
-export function createMockAdapter(opts: { storage?: MockStorage; latencyMs?: number } = {}): VestigeClient & { reset(): void } {
+export type MockClient = VestigeClient & {
+  reset(): void;
+  mockAllVentures(): Promise<{ ventureId: VentureId; displayName: string; humansVerified: number }[]>;
+};
+
+export function createMockAdapter(opts: { storage?: MockStorage; latencyMs?: number } = {}): MockClient {
   const storage = opts.storage ?? memoryStorage();
   const latency = opts.latencyMs ?? 450;
   const listeners = new Set<() => void>();
@@ -110,12 +115,12 @@ export function createMockAdapter(opts: { storage?: MockStorage; latencyMs?: num
     if (raw) {
       try {
         const parsed = JSON.parse(raw) as MockState;
-        if (parsed?.v === 1) return (cache = parsed);
+        if (parsed?.v === 2) return (cache = parsed);
       } catch {
         /* fall through to fresh state */
       }
     }
-    return (cache = cache ?? { v: 1, ventures: {} });
+    return (cache = cache ?? { v: 2, ventures: {} });
   };
   const save = (s: MockState) => {
     cache = s;
@@ -143,7 +148,7 @@ export function createMockAdapter(opts: { storage?: MockStorage; latencyMs?: num
     for (const s of v.seats) {
       if (s.attestReadyAt !== undefined) s.onchainSeatStatus = statusAt(s.attestReadyAt, t);
     }
-    if (v.treasury) v.treasury.verificationStatus = statusAt(v.treasury.readyAt, t);
+    if (v.treasury) v.treasury.verificationStatus = statusAt(v.treasury.readyAt, t) === "VERIFIED" ? "ACTIVE" : "PENDING";
     for (const p of v.payments) {
       if (p.executeReadyAt !== undefined && t >= p.executeReadyAt && p.status === "READY") p.status = "EXECUTED";
     }
@@ -152,10 +157,26 @@ export function createMockAdapter(opts: { storage?: MockStorage; latencyMs?: num
 
   const currentVersion = (v: MockVenture) => v.versions[v.versions.length - 1];
 
+  const verifiedWallets = (v: MockVenture) => v.seats.filter((x) => x.worldProofStatus === "VERIFIED").map((x) => x.wallet.toLowerCase() as Address).sort();
+
+  const toAgreement = (v: MockVenture, ver: MockVersion, viewer?: Address): Agreement => {
+    const required = verifiedWallets(v);
+    const counted = ver.signatures.filter((g) => g.version === ver.version && g.docHash === ver.docHash);
+    const isFounder = !!seatOf(v, viewer as Address);
+    const { createdAt: _c, canonicalJson, ...a } = ver;
+    return {
+      ...a,
+      ...(isFounder ? { canonicalJson } : {}),
+      requiredSigners: required,
+      complete: required.length >= 2 && required.every((w) => counted.some((g) => sameAddr(g.signer, w))),
+      ensStatus: "UNKNOWN",
+    };
+  };
+
   const toDetail = (v: MockVenture, viewer?: Address): VentureDetail => {
     settle(v);
     const ver = currentVersion(v);
-    const isFounderA = sameAddr(viewer, v.createdBy);
+    const allIn = v.seats.length >= 2 && v.seats.every((x) => v.listingOptIn.some((w) => sameAddr(w, x.wallet)));
     return {
       ventureId: v.ventureId,
       slug: v.slug,
@@ -164,8 +185,8 @@ export function createMockAdapter(opts: { storage?: MockStorage; latencyMs?: num
       ensStatus: "VERIFIED",
       createdAt: v.createdAt,
       seats: v.seats.map(({ simulatedHumanId: _h, attestReadyAt: _a, label: _l, verifiedAt: _v, ...seat }) => seat),
-      invite: isFounderA ? { ...v.invite } : undefined,
-      agreement: ver ? (({ fields: _f, createdAt: _c, ...a }) => a)(ver) : undefined,
+      agreement: ver ? toAgreement(v, ver, viewer) : undefined,
+      listing: { listed: allIn, optedIn: [...v.listingOptIn] },
       source: "DEV_MOCK",
     };
   };
@@ -191,14 +212,25 @@ export function createMockAdapter(opts: { storage?: MockStorage; latencyMs?: num
   };
 
   const getV = (s: MockState, id: VentureId) => s.ventures[id.toLowerCase()];
-  const seatOf = (v: MockVenture, w: Address) => v.seats.find((s) => sameAddr(s.wallet, w));
+  function seatOf(v: MockVenture, w: Address) {
+    return v.seats.find((s) => sameAddr(s.wallet, w));
+  }
+  /** Ask the (simulated) wallet to sign real-shaped typed data; null → CANCELLED. */
+  const signWith = async (sign: TypedDataSigner, td: TypedDataDefinition) => sign(td);
 
-  const client: VestigeClient & { reset(): void } = {
+  const client: MockClient = {
     kind: "dev-mock",
 
     reset() {
-      save({ v: 1, ventures: {} });
+      save({ v: 2, ventures: {} });
     },
+
+    // DEV MOCK roles stand in for wallets; there is no session to sign into.
+    sessionWallet: () => null,
+    async signIn(wallet) {
+      return ok({ wallet, expiresAt: iso(now() + 12 * 3600_000) });
+    },
+    async signOut() {},
 
     subscribe(listener) {
       listeners.add(listener);
@@ -231,7 +263,8 @@ export function createMockAdapter(opts: { storage?: MockStorage; latencyMs?: num
         ensName,
         createdAt: iso(),
         createdBy: wallet,
-        invite: { code: randomHex(12).slice(2), used: false },
+        invites: [],
+        listingOptIn: [],
         seats: [
           {
             ventureId,
@@ -260,16 +293,31 @@ export function createMockAdapter(opts: { storage?: MockStorage; latencyMs?: num
       return v ? ok(toDetail(v, viewer)) : err("NOT_FOUND", "No venture with that ID.");
     },
 
+    async createInvite(ventureId, { wallet }) {
+      await wait();
+      const s = load();
+      const v = getV(s, ventureId);
+      if (!v) return err("NOT_FOUND", "No venture with that ID.");
+      if (!seatOf(v, wallet)) return err("NOT_A_FOUNDER", "Only this venture's founders can invite.");
+      if (v.seats.length >= 2) return err("NOT_READY", "All founder seats are taken.");
+      const code = randomHex(18).slice(2);
+      v.invites.push({ code, used: false });
+      save(s);
+      return ok({ inviteCode: code });
+    },
+
     async joinVenture(ventureId, { inviteCode, founderLabel, wallet }) {
       await wait();
       const s = load();
       const v = getV(s, ventureId);
       if (!v) return err("NOT_FOUND", "No venture with that ID.");
       if (seatOf(v, wallet)) return err("WALLET_ALREADY_SEATED", "This wallet already holds a seat in this venture.");
-      if (v.invite.used || v.invite.code !== inviteCode) return err("INVITE_INVALID", "This invite link is invalid or has already been used.");
+      const invite = v.invites.find((i) => i.code === inviteCode && !i.used);
+      if (!invite) return err("INVITE_INVALID", "This invite link is invalid or has already been used.");
+      if (v.seats.length >= 2) return err("NOT_READY", "All founder seats are taken.");
       if (!isValidSlug(founderLabel)) return err("INVALID_INPUT", "Founder label must be 3–32 lowercase letters, digits or hyphens.");
       if (v.seats.some((x) => x.label === founderLabel)) return err("INVALID_INPUT", `${founderLabel}.${v.ensName} is taken.`);
-      v.invite.used = true;
+      invite.used = true;
       v.seats.push({
         ventureId: v.ventureId,
         wallet,
@@ -278,8 +326,17 @@ export function createMockAdapter(opts: { storage?: MockStorage; latencyMs?: num
         worldProofStatus: "UNKNOWN",
         onchainSeatStatus: "UNKNOWN",
       });
+      addEvidence(v, "FOUNDER_JOINED", "SELF_REPORTED");
       save(s);
       return ok(toDetail(v, wallet));
+    },
+
+    async requestWorld(ventureId, { wallet }) {
+      await wait();
+      const v = getV(load(), ventureId);
+      if (!v) return err("NOT_FOUND", "No venture with that ID.");
+      if (!seatOf(v, wallet)) return err("NOT_A_FOUNDER", "This wallet does not hold a pending seat in this venture.");
+      return ok({ kind: "dev-mock" as const });
     },
 
     async verifyWorld(ventureId, { wallet, proof }: { wallet: Address; proof: WorldProofPayload }) {
@@ -320,14 +377,25 @@ export function createMockAdapter(opts: { storage?: MockStorage; latencyMs?: num
         ensName: v.ensName,
         ventureId: v.ventureId,
         humansVerified: v.seats.filter((x) => x.worldProofStatus === "VERIFIED").length,
-        founders: v.seats.map((x) => ({ founderSubname: x.founderSubname, worldProofStatus: x.worldProofStatus, verifiedAt: x.verifiedAt })),
+        founders: v.seats.map((x) => ({
+          founderSubname: x.founderSubname,
+          wallet: x.wallet,
+          worldProofStatus: x.worldProofStatus,
+          onchainSeatStatus: x.onchainSeatStatus,
+          verifiedAt: x.verifiedAt,
+        })),
         agreement: ver
-          ? {
-              version: ver.version,
-              docHash: ver.docHash,
-              signaturesForCurrentVersion: ver.signatures.filter((g) => g.version === ver.version && g.docHash === ver.docHash).length,
-              requiredSignatures: v.seats.length,
-            }
+          ? (() => {
+              const a = toAgreement(v, ver);
+              return {
+                version: a.version,
+                docHash: a.docHash,
+                signaturesForCurrentVersion: a.signatures.filter((g) => g.version === a.version && g.docHash === a.docHash).length,
+                requiredSignatures: Math.max(a.requiredSigners.length, 2),
+                complete: a.complete,
+                ensRecordStatus: a.ensStatus,
+              };
+            })()
           : undefined,
         evidence: v.evidence.map(({ readyAt: _r, ...e }) => e),
         source: "DEV_MOCK",
@@ -337,42 +405,66 @@ export function createMockAdapter(opts: { storage?: MockStorage; latencyMs?: num
 
     async listVentures() {
       await wait();
-      const list: VentureSummary[] = Object.values(load().ventures).map((v) => {
-        settle(v);
-        const ver = currentVersion(v);
-        const signed = !!ver && v.seats.length >= 2 && v.seats.every((x) => ver.signatures.some((g) => sameAddr(g.signer, x.wallet) && g.version === ver.version));
-        return {
-          ventureId: v.ventureId,
-          displayName: v.displayName,
-          ensName: v.ensName,
-          humansVerified: v.seats.filter((x) => x.worldProofStatus === "VERIFIED").length,
-          termsSigned: signed,
-          treasuryActive: v.treasury?.verificationStatus === "VERIFIED",
-          funded: v.treasury ? balanceOf(v) > 0n || v.deposits.length > 0 : false,
-          source: "DEV_MOCK",
-        };
-      });
+      const t = iso();
+      const list: VentureSummary[] = Object.values(load().ventures)
+        .filter((v) => v.seats.length >= 2 && v.seats.every((x) => v.listingOptIn.some((w) => sameAddr(w, x.wallet))))
+        .map((v) => {
+          settle(v);
+          const ver = currentVersion(v);
+          return {
+            ventureId: v.ventureId,
+            displayName: v.displayName,
+            ensName: v.ensName,
+            humansVerified: v.seats.filter((x) => x.worldProofStatus === "VERIFIED").length,
+            termsSigned: !!ver && toAgreement(v, ver).complete,
+            treasuryActive: v.treasury ? v.treasury.verificationStatus === "ACTIVE" : false,
+            funded: v.treasury ? v.deposits.some((d) => now() >= d.readyAt) : false,
+            observedAt: t,
+            verificationStatus: "UNKNOWN" as const,
+            source: "DEV_MOCK" as const,
+          };
+        });
       return ok(list);
     },
 
-    async createAgreementVersion(ventureId, { fields, wallet }) {
+    /** DEV MOCK only (not a contract route): every venture in this browser, for the founder sidebar. */
+    async mockAllVentures() {
+      return Object.values(load().ventures).map((v) => ({ ventureId: v.ventureId, displayName: v.displayName, humansVerified: v.seats.filter((x) => x.worldProofStatus === "VERIFIED").length }));
+    },
+
+    async setListing(ventureId, { listed, wallet }) {
       await wait();
       const s = load();
       const v = getV(s, ventureId);
       if (!v) return err("NOT_FOUND", "No venture with that ID.");
-      if (!seatOf(v, wallet)) return err("NOT_A_FOUNDER", "Only founders of this venture can edit its terms.");
-      const version = (currentVersion(v)?.version ?? 0) + 1;
-      const { hash } = previewDocHash(v.ventureId, version, fields);
+      if (!seatOf(v, wallet)) return err("NOT_A_FOUNDER", "Only this venture's founders can change its listing.");
+      v.listingOptIn = v.listingOptIn.filter((w) => !sameAddr(w, wallet));
+      if (listed) v.listingOptIn.push(wallet);
+      save(s);
+      return ok(toDetail(v, wallet));
+    },
+
+    async createAgreementVersion(ventureId, { terms, wallet }: { terms: FoundingTermsInput; wallet: Address }) {
+      await wait();
+      const s = load();
+      const v = getV(s, ventureId);
+      if (!v) return err("NOT_FOUND", "No venture with that ID.");
+      const seat = seatOf(v, wallet);
+      if (!seat) return err("NOT_A_FOUNDER", "Only founders of this venture can edit its terms.");
+      if (seat.worldProofStatus !== "VERIFIED") return err("NOT_VERIFIED", "Verify with World ID before working on the agreement.");
+      const founders = verifiedWallets(v);
+      if (founders.length < 2) return err("NOT_READY", "Both founders must be verified before drafting terms.");
+      const p = previewTerms(v.ventureId, founders, terms);
+      if (!p.ok) return err("INVALID_INPUT", p.problems[0].message);
+      const cur = currentVersion(v);
+      if (cur && cur.docHash === p.hash) return err("INVALID_INPUT", "No changes from the current version.");
       v.versions.push({
         ventureId: v.ventureId,
-        agreementId: `agr-${v.slug}`,
-        version,
-        canonicalJson: canonicalJson(agreementDocument(v.ventureId, version, fields)),
-        docHash: hash,
-        nonce: randomHex(16),
-        expiry: iso(now() + 7 * 24 * 3600 * 1000),
+        agreementId: cur?.agreementId ?? randomHex(32),
+        version: (cur?.version ?? 0) + 1,
+        canonicalJson: p.json,
+        docHash: p.hash,
         signatures: [],
-        fields,
         createdAt: iso(),
       });
       addEvidence(v, "AGREEMENT_VERSION", "SELF_REPORTED");
@@ -380,22 +472,40 @@ export function createMockAdapter(opts: { storage?: MockStorage; latencyMs?: num
       return ok(toDetail(v, wallet));
     },
 
-    async signAgreement(ventureId, { version, docHash, sig }) {
+    async signAgreement(ventureId, { version, docHash, wallet }, sign) {
       await wait();
-      const s = load();
-      const v = getV(s, ventureId);
-      if (!v) return err("NOT_FOUND", "No venture with that ID.");
-      const seat = seatOf(v, sig.signer);
+      const v0 = getV(load(), ventureId);
+      if (!v0) return err("NOT_FOUND", "No venture with that ID.");
+      const seat = seatOf(v0, wallet);
       if (!seat) return err("NOT_A_FOUNDER", "Only founders of this venture can sign its terms.");
       if (seat.worldProofStatus !== "VERIFIED") return err("NOT_VERIFIED", "Verify you are a unique human before signing.");
+      const ver0 = currentVersion(v0);
+      if (!ver0 || ver0.version !== version || ver0.docHash !== docHash)
+        return err("VERSION_SUPERSEDED", "These terms changed since you opened them. Review the new version before signing.");
+      // Same EIP-712 domain/type as C1; nonce/expiry are simulated.
+      const signature = await signWith(sign, {
+        domain: FOUNDING_TERMS_DOMAIN,
+        types: FOUNDING_TERMS_TYPES,
+        primaryType: "FoundingTerms",
+        message: {
+          ventureId: v0.ventureId,
+          agreementId: ver0.agreementId,
+          version: BigInt(version),
+          docHash,
+          nonce: BigInt(randomHex(8)),
+          expiry: BigInt(Math.floor(now() / 1000) + 3600),
+        },
+      });
+      if (!signature) return err("CANCELLED", "Signature cancelled. Nothing was signed.");
+      const s = load();
+      const v = getV(s, ventureId)!;
       const ver = currentVersion(v);
-      if (!ver || ver.version !== version || ver.docHash !== docHash)
-        return err("NOT_READY", "These terms changed since you opened them. Review the new version before signing.");
-      if (ver.signatures.some((g) => sameAddr(g.signer, sig.signer))) return ok(toDetail(v, sig.signer));
-      ver.signatures.push({ signer: sig.signer, signature: sig.signature, signedAt: iso(), version, docHash });
+      if (!ver || ver.version !== version || ver.docHash !== docHash) return err("VERSION_SUPERSEDED", "Terms changed while signing. Sign the new version.");
+      if (ver.signatures.some((g) => sameAddr(g.signer, wallet))) return ok(toDetail(v, wallet));
+      ver.signatures.push({ signer: wallet, signature, signedAt: iso(), version, docHash });
       addEvidence(v, "AGREEMENT_SIGNED", "SIGNED");
       save(s);
-      return ok(toDetail(v, sig.signer));
+      return ok(toDetail(v, wallet));
     },
 
     async getTreasury(ventureId) {
@@ -425,6 +535,7 @@ export function createMockAdapter(opts: { storage?: MockStorage; latencyMs?: num
         registryAddress: randomHex(20) as Address,
         verificationStatus: "PENDING",
         deploymentTxHash: randomHex(32),
+        deploymentBlock: "0",
         readyAt,
       };
       addEvidence(v, "SAFE_DEPLOYED", "CHAIN_VERIFIED", { chainId: WHITECHAIN_CHAIN_ID, txHash: v.treasury.deploymentTxHash, readyAt });
@@ -432,15 +543,34 @@ export function createMockAdapter(opts: { storage?: MockStorage; latencyMs?: num
       return ok(toTreasury(v));
     },
 
-    async fundTreasury(ventureId, { amountRaw, sig }: { amountRaw: string; sig: WalletSignature }) {
+    async fundTreasury(ventureId, { from, to, amountRaw }, sign) {
       await wait();
-      const s = load();
-      const v = getV(s, ventureId);
-      if (!v) return err("NOT_FOUND", "No venture with that ID.");
-      settle(v);
-      if (v.treasury?.verificationStatus !== "VERIFIED") return err("NOT_READY", "This venture's treasury is not active yet.");
+      const v0 = getV(load(), ventureId);
+      if (!v0) return err("NOT_FOUND", "No venture with that ID.");
+      settle(v0);
+      if (v0.treasury?.verificationStatus !== "ACTIVE") return err("NOT_READY", "This venture's treasury is not active yet.");
+      if (!sameAddr(to, v0.treasury.safeAddress)) return err("INVALID_INPUT", "The destination does not match this venture's treasury.");
       if (!/^\d+$/.test(amountRaw) || BigInt(amountRaw) <= 0n) return err("INVALID_INPUT", "Enter an amount greater than zero.");
-      const d: MockDeposit = { from: sig.signer, amountRaw, txHash: randomHex(32), readyAt: now() + DELAY.deposit };
+      // Real EIP-3009 shape on the approved token domain; values simulated.
+      const signature = await signWith(sign, {
+        domain: { name: "Tether USD", version: "1", chainId: WHITECHAIN_CHAIN_ID, verifyingContract: MOCK_TOKEN },
+        types: {
+          TransferWithAuthorization: [
+            { name: "from", type: "address" },
+            { name: "to", type: "address" },
+            { name: "value", type: "uint256" },
+            { name: "validAfter", type: "uint256" },
+            { name: "validBefore", type: "uint256" },
+            { name: "nonce", type: "bytes32" },
+          ],
+        },
+        primaryType: "TransferWithAuthorization",
+        message: { from, to, value: BigInt(amountRaw), validAfter: 0n, validBefore: BigInt(Math.floor(now() / 1000) + 3600), nonce: randomHex(32) },
+      });
+      if (!signature) return err("CANCELLED", "Signature cancelled. No money moved.");
+      const s = load();
+      const v = getV(s, ventureId)!;
+      const d: MockDeposit = { from, amountRaw, txHash: randomHex(32), readyAt: now() + DELAY.deposit };
       v.deposits.push(d);
       addEvidence(v, "DEPOSIT", "CHAIN_VERIFIED", { chainId: WHITECHAIN_CHAIN_ID, txHash: d.txHash, readyAt: d.readyAt });
       save(s);
@@ -453,7 +583,7 @@ export function createMockAdapter(opts: { storage?: MockStorage; latencyMs?: num
       const v = getV(s, ventureId);
       if (!v) return err("NOT_FOUND", "No venture with that ID.");
       settle(v);
-      if (!v.treasury || v.treasury.verificationStatus !== "VERIFIED") return err("NOT_READY", "The treasury is not active yet.");
+      if (!v.treasury || v.treasury.verificationStatus !== "ACTIVE") return err("NOT_READY", "The treasury is not active yet.");
       if (!v.treasury.ownerAddresses.some((o) => sameAddr(o, wallet))) return err("NOT_A_FOUNDER", "Only treasury owners can propose payments.");
       if (!isAddress(recipient)) return err("INVALID_INPUT", "Recipient must be a 0x… address.");
       if (!/^\d+$/.test(amountRaw) || BigInt(amountRaw) <= 0n) return err("INVALID_INPUT", "Enter an amount greater than zero.");
@@ -476,20 +606,54 @@ export function createMockAdapter(opts: { storage?: MockStorage; latencyMs?: num
       return ok(toTreasury(v));
     },
 
-    async signPayment(ventureId, paymentId, { sig }) {
+    async signPayment(ventureId, paymentId, { wallet }, sign) {
       await wait();
+      const v0 = getV(load(), ventureId);
+      if (!v0) return err("NOT_FOUND", "No venture with that ID.");
+      const p0 = v0.payments.find((x) => x.paymentId === paymentId);
+      if (!p0 || !v0.treasury) return err("NOT_FOUND", "No such payment.");
+      if (!v0.treasury.ownerAddresses.some((o) => sameAddr(o, wallet))) return err("NOT_A_FOUNDER", "Only treasury owners can approve payments.");
+      if (p0.status !== "AWAITING_APPROVALS") return ok(toTreasury(v0));
+      // Safe v1.4.1 SafeTx shape (USDT transfer); values simulated.
+      const signature = await signWith(sign, {
+        domain: { chainId: WHITECHAIN_CHAIN_ID, verifyingContract: v0.treasury.safeAddress },
+        types: {
+          SafeTx: [
+            { name: "to", type: "address" },
+            { name: "value", type: "uint256" },
+            { name: "data", type: "bytes" },
+            { name: "operation", type: "uint8" },
+            { name: "safeTxGas", type: "uint256" },
+            { name: "baseGas", type: "uint256" },
+            { name: "gasPrice", type: "uint256" },
+            { name: "gasToken", type: "address" },
+            { name: "refundReceiver", type: "address" },
+            { name: "nonce", type: "uint256" },
+          ],
+        },
+        primaryType: "SafeTx",
+        message: {
+          to: MOCK_TOKEN,
+          value: 0n,
+          data: "0x",
+          operation: 0,
+          safeTxGas: 0n,
+          baseGas: 0n,
+          gasPrice: 0n,
+          gasToken: "0x0000000000000000000000000000000000000000",
+          refundReceiver: "0x0000000000000000000000000000000000000000",
+          nonce: BigInt(v0.payments.indexOf(p0)),
+        },
+      });
+      if (!signature) return err("CANCELLED", "Approval cancelled. Nothing was signed.");
       const s = load();
-      const v = getV(s, ventureId);
-      if (!v) return err("NOT_FOUND", "No venture with that ID.");
-      const p = v.payments.find((x) => x.paymentId === paymentId);
-      if (!p || !v.treasury) return err("NOT_FOUND", "No such payment.");
-      if (!v.treasury.ownerAddresses.some((o) => sameAddr(o, sig.signer))) return err("NOT_A_FOUNDER", "Only treasury owners can approve payments.");
-      if (p.status !== "AWAITING_APPROVALS") return ok(toTreasury(v));
-      if (!p.signerWallets.some((w) => sameAddr(w, sig.signer))) {
-        p.signerWallets.push(sig.signer);
+      const v = getV(s, ventureId)!;
+      const p = v.payments.find((x) => x.paymentId === paymentId)!;
+      if (!p.signerWallets.some((w) => sameAddr(w, wallet))) {
+        p.signerWallets.push(wallet);
         addEvidence(v, "PAYMENT_APPROVED", "SIGNED");
       }
-      if (p.signerWallets.length >= v.treasury.threshold) p.status = "READY";
+      if (p.signerWallets.length >= (v.treasury?.threshold ?? 2)) p.status = "READY";
       save(s);
       return ok(toTreasury(v));
     },

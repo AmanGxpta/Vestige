@@ -3,7 +3,7 @@
 import { useCallback, useState } from "react";
 import type { AdapterError, Result } from "./adapter";
 
-/** Runs one user action. `null` from the runner means the user cancelled a prompt. */
+/** Runs one user action. `null` or a CANCELLED error means the user closed a prompt; nothing changed. */
 export function useAction<T>() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<AdapterError | null>(null);
@@ -15,6 +15,10 @@ export function useAction<T>() {
     try {
       const r = await fn();
       if (r === null) {
+        setCancelled(true);
+        return undefined;
+      }
+      if (!r.ok && r.error.code === "CANCELLED") {
         setCancelled(true);
         return undefined;
       }

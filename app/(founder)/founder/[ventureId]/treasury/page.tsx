@@ -6,7 +6,7 @@ import { AdapterErrorNotice, Button, Card, EvidenceBadge, HashLink, Notice, Stat
 import { RelayerExplainer } from "@/components/RelayerExplainer";
 import { formatTokenAmount } from "@/src/modules/ui/format";
 import { useVestige } from "@/src/modules/ui/provider";
-import { attestedSeats, seatFor } from "@/src/modules/ui/progress";
+import { attestedSeats, isTreasuryActive, seatFor, treasuryStatusText } from "@/src/modules/ui/progress";
 import { useAction } from "@/src/modules/ui/useAction";
 import { useVenture } from "@/src/modules/ui/venture/VentureContext";
 import type { TreasuryState } from "@/src/modules/ui/types";
@@ -24,7 +24,7 @@ export default function TreasuryPage() {
   const tr = t?.treasury;
   const seat = seatFor(v, address);
   const attested = attestedSeats(v).length;
-  const active = tr?.verificationStatus === "VERIFIED";
+  const active = isTreasuryActive(tr);
   const ownersMatchSeats = !!tr && tr.ownerAddresses.length === 2 && tr.ownerAddresses.every((o) => v.seats.some((s) => s.wallet.toLowerCase() === o.toLowerCase()));
 
   return (
@@ -39,8 +39,12 @@ export default function TreasuryPage() {
             <ul className="small stack-sm" style={{ margin: 0, paddingLeft: 18 }}>
               <li>Owners: the two founder wallets ({attested}/2 attested on Whitechain)</li>
               <li>Token: Whitechain test USDT</li>
-              <li>You don&apos;t sign a transaction or pay gas — vestige&apos;s relayer deploys it.</li>
+              <li>You don&apos;t sign a transaction or pay gas — vestige&apos;s operator deploys it after H approves the exact parameters.</li>
             </ul>
+            <Notice tone="warn" title="No recovery path, by design" testId="no-recovery">
+              The Guard refuses owner changes except a swap to another verified-human seat, and there is no admin or recovery key. If a founder loses their
+              wallet key, the funds in this treasury can become permanently inaccessible. Keep your key safe.
+            </Notice>
             {deploy.error && <AdapterErrorNotice error={deploy.error} />}
             <div>
               <Button
@@ -63,8 +67,8 @@ export default function TreasuryPage() {
           title={
             <div className="row">
               <h2 style={{ fontSize: 18 }}>Treasury on Whitechain</h2>
-              <StatusPill status={active ? "ACTIVE" : tr.verificationStatus === "PENDING" ? "PENDING" : "UNVERIFIED"} mock={t!.source === "DEV_MOCK"}>
-                {active ? "Active" : tr.verificationStatus === "PENDING" ? "Confirming on Whitechain…" : "Unverified"}
+              <StatusPill status={tr.verificationStatus === "UNKNOWN" ? "UNKNOWN" : tr.verificationStatus} mock={t!.source === "DEV_MOCK"}>
+                {active ? "Active" : tr.verificationStatus === "PENDING" ? "Confirming on Whitechain…" : treasuryStatusText(tr)}
               </StatusPill>
             </div>
           }
@@ -123,10 +127,10 @@ export default function TreasuryPage() {
         <Card title="Get funded" testId="card-funding-link">
           <div className="stack">
             <p className="small">
-              Send your funder this link. They approve a USDT deposit by signing one message — no gas token, no network switch. The deposit goes
-              straight to your Safe.
+              Send your funder this link. They approve a USDT deposit by signing one message on Whitechain — no gas token needed, though their wallet may
+              ask to switch network. The deposit goes straight to your Safe.
             </p>
-            <input className="input mono small" readOnly value={`${origin}/funder/${ventureId}`} aria-label="Funding link" data-testid="funding-link" />
+            <input className="input mono small" readOnly value={`${origin}/funder/${v.ensName}`} aria-label="Funding link" data-testid="funding-link" />
             {t && t.deposits.length > 0 && (
               <ul className="stack-sm small" style={{ listStyle: "none", padding: 0, margin: 0 }}>
                 {t.deposits.map((d) => (

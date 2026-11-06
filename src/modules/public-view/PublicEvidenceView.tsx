@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { AdapterErrorNotice, Button, Card, CheckIcon, EvidenceBadge, HashLink, LoadingCard, Notice, StatusPill } from "@/components/ui";
+import { AdapterErrorNotice, Button, Card, CheckIcon, EvidenceBadge, HashLink, HumanBadge, LoadingCard, Notice, StatusPill } from "@/components/ui";
 import { ADAPTER_KIND, CONFIG } from "@/src/modules/ui/config";
 import { formatTokenAmount, relativeTime, shortHex } from "@/src/modules/ui/format";
 import { useVestige } from "@/src/modules/ui/provider";
@@ -9,13 +9,16 @@ import type { AdapterError } from "@/src/modules/ui/adapter";
 import type { EvidenceKind, Hex, PublicOffchainEvidence } from "@/src/modules/ui/types";
 import { readPublicChainReport, type PublicChainReport, type Step } from "./chain-reader";
 import { readMockChainReport } from "./mock-chain";
+import { loadManifest } from "./manifest";
 import { deriveTreasuryVerdict } from "./verdict";
 
 type Phase = "ens" | "whitechain" | "offchain" | "done";
 
 const KIND_TEXT: Record<EvidenceKind, string> = {
   VENTURE_CREATED: "Venture created",
+  FOUNDER_JOINED: "Co-founder joined",
   ENS_REGISTERED: "ENS name registered",
+  ENS_RECORD: "ENS record updated",
   FOUNDER_VERIFIED: "Founder verified as a unique human",
   SEAT_ATTESTED: "Seat attested on Whitechain",
   DUPLICATE_REFUSED: "Duplicate human refused a second seat",
@@ -64,7 +67,8 @@ export function PublicEvidenceView({ ensName, requestedSource }: { ensName: stri
     setOff(null);
     // Off-chain API request starts in parallel but is only *joined* after the chain reads.
     const offP = client.getPublicEvidence(ensName);
-    const ventureIdSource = async (): Promise<Hex | undefined> => {
+    // API ventureId is a cross-check only; the reader takes ventureId from ENS (CR-C2-002).
+    const apiVentureIdSource = async (): Promise<Hex | undefined> => {
       const r = await offP;
       return r.ok ? r.value.ventureId : undefined;
     };
@@ -75,9 +79,9 @@ export function PublicEvidenceView({ ensName, requestedSource }: { ensName: stri
           sepoliaRpcUrl: CONFIG.sepoliaRpcUrl,
           whitechainRpcUrl: CONFIG.whitechainRpcUrl,
           usdtAddress: CONFIG.usdtAddress,
-          registryAddress: CONFIG.registryAddress,
           universalResolver: CONFIG.ensUniversalResolver,
-          ventureIdSource,
+          manifest: loadManifest(CONFIG.manifestUrl),
+          apiVentureIdSource,
         });
     clearTimeout(t);
     if (runRef.current !== id) return;
@@ -93,7 +97,7 @@ export function PublicEvidenceView({ ensName, requestedSource }: { ensName: stri
     void load();
   }, [load, run]);
 
-  const verdict = report ? deriveTreasuryVerdict(report, { expectedGuard: CONFIG.expectedGuard }) : null;
+  const verdict = report ? deriveTreasuryVerdict(report) : null;
   const texts = report?.ens.texts.value ?? {};
   const w = report?.whitechain;
   const offv = off?.ok ? off.value : undefined;
@@ -149,7 +153,7 @@ export function PublicEvidenceView({ ensName, requestedSource }: { ensName: stri
         {(
           [
             ["ens", "Resolve the name on Ethereum Sepolia", "ENS resolver, ENSIP-11 Whitechain address, vestige records"],
-            ["whitechain", "Read the treasury on Whitechain", "Safe owners, threshold, Guard, modules, SeatRegistry, USDT"],
+            ["whitechain", "Read the treasury on Whitechain", "Safe owners, threshold, Guard binding, code, modules, SeatRegistry, USDT — checked against the reviewed manifest"],
             ["offchain", "Join off-chain evidence from vestige", "World ID results and agreement signatures — no personal data"],
           ] as const
         ).map(([key, title, sub], i) => {
@@ -160,7 +164,7 @@ export function PublicEvidenceView({ ensName, requestedSource }: { ensName: stri
           const outcome: "ok" | "failed" | "skipped" | "partial" | undefined = !reached
             ? undefined
             : key === "ens"
-              ? report?.ens.treasury.status === "VERIFIED" ? "ok" : "failed"
+              ? report?.ens.treasury.status === "VERIFIED" ? "ok" : report?.ens.resolver.status === "VERIFIED" ? "partial" : "failed"
               : key === "whitechain"
                 ? !report?.whitechain ? "skipped" : verdict?.state === "ACTIVE" ? "ok" : "partial"
                 : off?.ok ? "ok" : "failed";
@@ -210,6 +214,16 @@ export function PublicEvidenceView({ ensName, requestedSource }: { ensName: stri
                 </dd>
                 {report.ens.texts.status === "VERIFIED" && (
                   <>
+                    <dt>vestige.ventureId</dt>
+                    <dd data-testid="ens-venture-id" data-status={report.ens.ventureId.status}>
+                      {report.ens.ventureId.value ? (
+                        <span className="mono small" title={report.ens.ventureId.value}>
+                          {shortHex(report.ens.ventureId.value, 10, 8)}
+                        </span>
+                      ) : (
+                        <span className="faint">{report.ens.ventureId.note ?? "not set"}</span>
+                      )}
+                    </dd>
                     <dt>vestige.status</dt>
                     <dd>{texts["vestige.status"] ? <code>{texts["vestige.status"]}</code> : <span className="faint">not set</span>}</dd>
                     <dt>vestige.humans</dt>
@@ -337,7 +351,7 @@ export function PublicEvidenceView({ ensName, requestedSource }: { ensName: stri
                       <div key={f.founderSubname} style={{ display: "contents" }}>
                         <dt className="mono small">{f.founderSubname}</dt>
                         <dd className="row">
-                          {f.worldProofStatus === "VERIFIED" ? <EvidenceBadge label="HUMAN_VERIFIED" source={off.value.source} /> : <StatusPill status={f.worldProofStatus === "UNKNOWN" ? "NONE" : f.worldProofStatus} />}
+                          {f.worldProofStatus === "VERIFIED" ? <HumanBadge source={off.value.source} worldEnvironment={f.worldEnvironment} /> : <StatusPill status={f.worldProofStatus === "UNKNOWN" ? "NONE" : f.worldProofStatus} />}
                         </dd>
                       </div>
                     ))}
@@ -381,7 +395,11 @@ export function PublicEvidenceView({ ensName, requestedSource }: { ensName: stri
                         <div className="row">
                           {e.status !== "VERIFIED" && <StatusPill status={e.status} />}
                           {e.txHash && <HashLink value={e.txHash} chainId={e.chainId} source={e.source} />}
-                          <EvidenceBadge label={e.label} source={e.source} />
+                          <EvidenceBadge
+                            label={e.label}
+                            source={e.source}
+                            qualifier={e.qualifier ?? (e.label === "HUMAN_VERIFIED" && e.source !== "DEV_MOCK" ? "ENV_UNREPORTED" : undefined)}
+                          />
                         </div>
                       </div>
                     </li>
@@ -417,8 +435,26 @@ export function PublicEvidenceView({ ensName, requestedSource }: { ensName: stri
                 <dd className="mono tiny">{isMock ? "DEV MOCK" : CONFIG.whitechainRpcUrl}</dd>
                 <dt>Test USDT</dt>
                 <dd className="mono tiny">{CONFIG.usdtAddress}</dd>
+                <dt>Deployment manifest</dt>
+                <dd className="tiny" data-testid="manifest-source">
+                  {report.manifest.status === "LOADED"
+                    ? `${report.manifest.url} · approved ${report.manifest.manifest.approvedAt.slice(0, 10)}`
+                    : report.manifest.status === "NOT_CONFIGURED"
+                      ? "not configured — Guard, registry and code cannot be confirmed"
+                      : report.manifest.status === "INVALID"
+                        ? `rejected: ${report.manifest.problems[0]}`
+                        : `unreachable: ${report.manifest.error}`}
+                </dd>
                 <dt>SeatRegistry</dt>
-                <dd className="mono tiny">{CONFIG.registryAddress ?? "not configured (deployment manifest pending)"}</dd>
+                <dd className="mono tiny">{w?.binding.value?.registry ?? "read from the Guard (not available)"}</dd>
+                {w?.scanFrom && (
+                  <>
+                    <dt>Transfers scanned from</dt>
+                    <dd className="tiny">
+                      block {w.scanFrom.block} {w.scanFrom.fromManifest ? "(manifest deploymentBlock)" : "(recent blocks only — no manifest)"}
+                    </dd>
+                  </>
+                )}
                 <dt>Off-chain evidence</dt>
                 <dd className="tiny">{ADAPTER_KIND === "dev-mock" ? "DEV MOCK adapter" : "vestige API (C1)"}</dd>
               </dl>

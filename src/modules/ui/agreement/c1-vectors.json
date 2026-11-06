@@ -1,0 +1,245 @@
+{
+  "generatedFrom": "agent/identity@1b502e6 src/modules/agreements/{canonical,terms}.ts",
+  "canonical": [
+    {
+      "name": "sorted-keys-nested",
+      "inputJs": "sorted-keys-nested",
+      "result": {
+        "ok": true,
+        "json": "{\"a\":{\"c\":\"x\",\"d\":[3,2,1]},\"b\":1}",
+        "hash": "0x0b401cfaf25801566ff3da167d857a5499c71c7dbe4975ed15c3fc3692c03c1a"
+      }
+    },
+    {
+      "name": "array-order-preserved",
+      "inputJs": "array-order-preserved",
+      "result": {
+        "ok": true,
+        "json": "[3,1,2,{\"y\":0,\"z\":0}]",
+        "hash": "0xa6f2b5205d3a1c9caaae9b0382a93012a94b843e0eb14f19725f98789329d15e"
+      }
+    },
+    {
+      "name": "nfc-composed",
+      "inputJs": "nfc-composed",
+      "result": {
+        "ok": true,
+        "json": "{\"k\":\"café\"}",
+        "hash": "0x91a7b0016ad5b9670047c6ad2c8493ade8f1dc2d6c4c98f2599aa3651a0f71f1"
+      }
+    },
+    {
+      "name": "nfc-decomposed-equals-composed",
+      "inputJs": "nfc-decomposed-equals-composed",
+      "result": {
+        "ok": true,
+        "json": "{\"k\":\"café\"}",
+        "hash": "0x91a7b0016ad5b9670047c6ad2c8493ade8f1dc2d6c4c98f2599aa3651a0f71f1"
+      }
+    },
+    {
+      "name": "nfc-key-normalized",
+      "inputJs": "nfc-key-normalized",
+      "result": {
+        "ok": true,
+        "json": "{\"café\":1}",
+        "hash": "0x8429dc47383226c79d8884a032c68db5e7af1ee9901588588a41721ebb52ac50"
+      }
+    },
+    {
+      "name": "utf16-code-unit-key-order",
+      "inputJs": "utf16-code-unit-key-order",
+      "result": {
+        "ok": true,
+        "json": "{\"a\":3,\"😀\":2,\"～\":1}",
+        "hash": "0x2eec26a741282fd4d4f8229a6007673b4ba5d2c7959045c9db449c756ab88df5"
+      }
+    },
+    {
+      "name": "negative-zero",
+      "inputJs": "negative-zero",
+      "result": {
+        "ok": true,
+        "json": "{\"n\":0}",
+        "hash": "0x32da3d6bab12d207c6160340e6cf54fc5a7d855e6135520d62c6c8594315fc21"
+      }
+    },
+    {
+      "name": "integers",
+      "inputJs": "integers",
+      "result": {
+        "ok": true,
+        "json": "{\"a\":0,\"b\":-42,\"c\":9007199254740991}",
+        "hash": "0x7f3f0e1d0f7fb461e81948551a949e845e32add2de011a409590f8559d7cfc3f"
+      }
+    },
+    {
+      "name": "undefined-property-omitted",
+      "inputJs": "undefined-property-omitted",
+      "result": {
+        "ok": true,
+        "json": "{\"a\":1}",
+        "hash": "0x25e7c2a96531eb50246780c1f25742e489bf55210e26981dc02992bb585feb97"
+      }
+    },
+    {
+      "name": "literals",
+      "inputJs": "literals",
+      "result": {
+        "ok": true,
+        "json": "{\"f\":false,\"n\":null,\"s\":\"\",\"t\":true}",
+        "hash": "0x23cc2672b61c0bb4f387409589a7948988f6b39370e7d846b0c62d88dbc36778"
+      }
+    },
+    {
+      "name": "escapes",
+      "inputJs": "escapes",
+      "result": {
+        "ok": true,
+        "json": "{\"s\":\"quote\\\" backslash\\\\ nl\\n tab\\t   \\u0001\"}",
+        "hash": "0xfcdf92f71c2841c4b1051ea6c34d0b26fe21a9d55689504d53fef83f856d2acd"
+      }
+    },
+    {
+      "name": "lone-surrogate",
+      "inputJs": "lone-surrogate",
+      "result": {
+        "ok": true,
+        "json": "{\"s\":\"\\ud800\"}",
+        "hash": "0xa9ab61c924eb1d2696fb0e6c579f486ad515f86bf18a332e44eda7c8125e7a6a"
+      }
+    },
+    {
+      "name": "invalid-duplicate-after-nfc",
+      "inputJs": "invalid-duplicate-after-nfc",
+      "result": {
+        "ok": false,
+        "error": "Duplicate keys after normalisation."
+      }
+    },
+    {
+      "name": "invalid-float",
+      "inputJs": "invalid-float",
+      "result": {
+        "ok": false,
+        "error": "Agreement numbers must be whole numbers (use basis points)."
+      }
+    },
+    {
+      "name": "invalid-unsafe-integer",
+      "inputJs": "invalid-unsafe-integer",
+      "result": {
+        "ok": false,
+        "error": "Agreement numbers must be whole numbers (use basis points)."
+      }
+    },
+    {
+      "name": "invalid-nan",
+      "inputJs": "invalid-nan",
+      "result": {
+        "ok": false,
+        "error": "Agreement numbers must be whole numbers (use basis points)."
+      }
+    },
+    {
+      "name": "invalid-undefined-array-element",
+      "inputJs": "invalid-undefined-array-element",
+      "result": {
+        "ok": false,
+        "error": "Agreement contains a non-JSON value."
+      }
+    },
+    {
+      "name": "nesting-16-arrays-ok",
+      "inputJs": "nesting-16-arrays-ok",
+      "result": {
+        "ok": true,
+        "json": "[[[[[[[[[[[[[[[[1]]]]]]]]]]]]]]]]",
+        "hash": "0xd8973ad58cbdb4c1bf4ba086c547060ad243467b6c6bb89a29b63a448d46a754"
+      }
+    },
+    {
+      "name": "invalid-nesting-17-arrays",
+      "inputJs": "invalid-nesting-17-arrays",
+      "result": {
+        "ok": false,
+        "error": "Agreement is nested too deeply."
+      }
+    },
+    {
+      "name": "sparse-array",
+      "note": "CONTRACTS: sparse arrays are invalid",
+      "inputJs": "sparse-array",
+      "result": {
+        "ok": true,
+        "json": "[1,,2]",
+        "hash": "0xa85c82fdf089787deb416469a0f24e00b970a34cccdeb34880655049c0b5d403"
+      }
+    }
+  ],
+  "documents": [
+    {
+      "name": "two-founders-basic",
+      "ventureId": "0xabababababababababababababababababababababababababababababababab",
+      "verifiedFounders": [
+        "0xAaAa000000000000000000000000000000000001",
+        "0xbBbB000000000000000000000000000000000002"
+      ],
+      "input": {
+        "effectiveDate": "2026-11-06",
+        "decisionRule": "Both founders must approve any payment or change to these terms.",
+        "founders": [
+          {
+            "wallet": "0xbBbB000000000000000000000000000000000002",
+            "role": "COO",
+            "contribution": "Go-to-market",
+            "ownershipBps": 5000,
+            "vestingIntent": "4 years, 1-year cliff"
+          },
+          {
+            "wallet": "0xAaAa000000000000000000000000000000000001",
+            "role": "CEO",
+            "contribution": "Product and engineering",
+            "ownershipBps": 5000,
+            "vestingIntent": "4 years, 1-year cliff"
+          }
+        ]
+      },
+      "ok": true,
+      "canonicalJson": "{\"decisionRule\":\"Both founders must approve any payment or change to these terms.\",\"disclaimer\":\"Workspace agreement between founders. Not a legal incorporation, not legal advice, and not an equity or token issuance.\",\"effectiveDate\":\"2026-11-06\",\"founders\":[{\"contribution\":\"Product and engineering\",\"ownershipBps\":5000,\"role\":\"CEO\",\"vestingIntent\":\"4 years, 1-year cliff\",\"wallet\":\"0xaaaa000000000000000000000000000000000001\"},{\"contribution\":\"Go-to-market\",\"ownershipBps\":5000,\"role\":\"COO\",\"vestingIntent\":\"4 years, 1-year cliff\",\"wallet\":\"0xbbbb000000000000000000000000000000000002\"}],\"notes\":\"\",\"schema\":\"vestige.founding-terms/1\",\"ventureId\":\"0xabababababababababababababababababababababababababababababababab\"}",
+      "docHash": "0x21f242b5e6398ead5004d2a469db2254f63ad41ca1e7c544b86d7cb465f79c87"
+    },
+    {
+      "name": "trim-nfc-notes-untrimmed",
+      "ventureId": "0xabababababababababababababababababababababababababababababababab",
+      "verifiedFounders": [
+        "0xAaAa000000000000000000000000000000000001",
+        "0xbBbB000000000000000000000000000000000002"
+      ],
+      "input": {
+        "effectiveDate": "2026-12-01",
+        "decisionRule": "  Unanimous.  ",
+        "notes": "  René keeps notes as typed.  ",
+        "founders": [
+          {
+            "wallet": "0xaaaa000000000000000000000000000000000001",
+            "role": " Créative ",
+            "contribution": "Design",
+            "ownershipBps": 6000,
+            "vestingIntent": "3y"
+          },
+          {
+            "wallet": "0xBBBB000000000000000000000000000000000002",
+            "role": "Eng",
+            "contribution": "Code",
+            "ownershipBps": 4000,
+            "vestingIntent": "3y"
+          }
+        ]
+      },
+      "ok": true,
+      "canonicalJson": "{\"decisionRule\":\"Unanimous.\",\"disclaimer\":\"Workspace agreement between founders. Not a legal incorporation, not legal advice, and not an equity or token issuance.\",\"effectiveDate\":\"2026-12-01\",\"founders\":[{\"contribution\":\"Design\",\"ownershipBps\":6000,\"role\":\"Créative\",\"vestingIntent\":\"3y\",\"wallet\":\"0xaaaa000000000000000000000000000000000001\"},{\"contribution\":\"Code\",\"ownershipBps\":4000,\"role\":\"Eng\",\"vestingIntent\":\"3y\",\"wallet\":\"0xbbbb000000000000000000000000000000000002\"}],\"notes\":\"  René keeps notes as typed.  \",\"schema\":\"vestige.founding-terms/1\",\"ventureId\":\"0xabababababababababababababababababababababababababababababababab\"}",
+      "docHash": "0xaf957bcad1d14df4f26a8e5f36eaf9799e0ed57b0d7a016eb6a630ffa85e747b"
+    }
+  ]
+}

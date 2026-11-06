@@ -1,6 +1,6 @@
 "use client";
 
-import { EvidenceBadge, HashLink, StatusPill } from "./ui";
+import { HashLink, HumanBadge, StatusPill } from "./ui";
 import type { FounderSeat, DataSource, Address } from "@/src/modules/ui/types";
 import { shortHex } from "@/src/modules/ui/format";
 
@@ -31,7 +31,7 @@ export function SeatList({ seats, source, me }: { seats: FounderSeat[]; source: 
               </td>
               <td>
                 {s.worldProofStatus === "VERIFIED" ? (
-                  <EvidenceBadge label="HUMAN_VERIFIED" source={source} />
+                  <HumanBadge source={source} worldEnvironment={s.worldEnvironment} />
                 ) : (
                   <StatusPill status={s.worldProofStatus === "UNKNOWN" ? "NONE" : s.worldProofStatus} mock={source === "DEV_MOCK"}>{worldText[s.worldProofStatus]}</StatusPill>
                 )}

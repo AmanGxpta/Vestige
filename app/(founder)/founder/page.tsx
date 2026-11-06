@@ -3,22 +3,25 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { AdapterErrorNotice, Button, Card, Field, Notice, StatusPill } from "@/components/ui";
+import { AdapterErrorNotice, Button, Card, Field, Notice, SignInNotice, StatusPill } from "@/components/ui";
 import { ADAPTER_KIND } from "@/src/modules/ui/config";
 import { isValidSlug, slugify } from "@/src/modules/ui/format";
 import { useAdapterQuery, useVestige } from "@/src/modules/ui/provider";
+import { ok } from "@/src/modules/ui/adapter";
+import type { MockClient } from "@/src/modules/ui/mock/mock-adapter";
 import { useAction } from "@/src/modules/ui/useAction";
 import type { VentureDetail } from "@/src/modules/ui/types";
 
 export default function StartVenturePage() {
   const router = useRouter();
-  const { client, address, role } = useVestige();
+  const { client, address, role, sessionWallet } = useVestige();
   const [name, setName] = useState("");
   const [slug, setSlug] = useState("");
   const [slugTouched, setSlugTouched] = useState(false);
   const [label, setLabel] = useState("");
   const action = useAction<VentureDetail>();
-  const list = useAdapterQuery((c) => c.listVentures(), []);
+  const list = useAdapterQuery(async (c) => ok(c.kind === "dev-mock" ? await (c as MockClient).mockAllVentures() : []), []);
+  const needsSignIn = ADAPTER_KIND === "live" && !!address && (!sessionWallet || sessionWallet.toLowerCase() !== address.toLowerCase());
 
   const effectiveSlug = slugTouched ? slug : slugify(name).replace(/-labs?$/, "") || "";
   const slugError = effectiveSlug && !isValidSlug(effectiveSlug) ? "3–32 lowercase letters, digits or single hyphens." : null;
@@ -26,8 +29,10 @@ export default function StartVenturePage() {
   const noWallet = !address
     ? ADAPTER_KIND === "dev-mock"
       ? "Pick “Founder A” in “Acting as” (top right) to create a venture."
-      : "Connect a wallet first. (Wallet sign-in is waiting on H's auth decision.)"
-    : null;
+      : "Connect a wallet first (top right)."
+    : needsSignIn
+      ? "Sign in with your wallet first."
+      : null;
   const notFounderA = ADAPTER_KIND === "dev-mock" && address && role !== "founderA" && role !== "founderB" && role !== "founderA2" ? "Switch to a founder role to create a venture." : null;
 
   return (
@@ -72,6 +77,7 @@ export default function StartVenturePage() {
               <input id="v-label" className="input mono" value={label} onChange={(e) => setLabel(e.target.value.toLowerCase())} placeholder="asha" data-testid="founder-label-input" required />
             </Field>
             {action.error && <AdapterErrorNotice error={action.error} />}
+            {needsSignIn && <SignInNotice />}
             <div>
               <Button type="submit" loading={action.busy} disabledReason={noWallet || notFounderA || (!name || !effectiveSlug || !label ? "Fill in all three fields." : slugError || labelError ? "Fix the highlighted field." : null)} data-testid="create-venture-submit">
                 Create venture
@@ -96,7 +102,7 @@ export default function StartVenturePage() {
               {list.data.map((v) => (
                 <li key={v.ventureId} className="row-between small">
                   <Link href={`/founder/${v.ventureId}`}>{v.displayName}</Link>
-                  <StatusPill status={v.treasuryActive ? "ACTIVE" : "NONE"} mock={v.source === "DEV_MOCK"}>{v.humansVerified}/2 humans</StatusPill>
+                  <StatusPill status="NONE" mock>{v.humansVerified}/2 humans</StatusPill>
                 </li>
               ))}
             </ul>

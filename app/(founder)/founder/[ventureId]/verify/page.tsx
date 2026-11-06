@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { AdapterErrorNotice, Button, Card, HashLink, Notice, StatusPill } from "@/components/ui";
 import { SeatList } from "@/components/SeatList";
-import { ADAPTER_KIND } from "@/src/modules/ui/config";
 import { useVestige } from "@/src/modules/ui/provider";
 import { attestedSeats, seatFor } from "@/src/modules/ui/progress";
 import { useAction } from "@/src/modules/ui/useAction";
@@ -22,18 +21,18 @@ export default function VerifyPage() {
   const verify = async () => {
     if (!address) return;
     const r = await action.run(async () => {
-      const proof = await requestWorldProof({ ventureName: v.displayName, wallet: address });
+      // C1 issues RP-signed, server-pinned IDKit params (action/signal/environment); C2 only renders them.
+      const req = await client.requestWorld(v.ventureId, { wallet: address });
+      if (!req.ok) return req;
+      const proof = await requestWorldProof({ ventureName: v.displayName, wallet: address, request: req.value });
       if (!proof) return null;
       return client.verifyWorld(v.ventureId, { wallet: address, proof });
     });
     if (r) refreshAll();
   };
 
-  const disabledReason = !seat
-    ? "Only a founder with a pending seat can verify."
-    : ADAPTER_KIND !== "dev-mock"
-      ? "World ID (IDKit) is rendered from C1's identity module — not connected yet."
-      : null;
+  const disabledReason = !seat ? "Only a founder with a pending seat can verify." : null;
+  const env = seat?.worldEnvironment;
 
   return (
     <>
@@ -59,10 +58,26 @@ export default function VerifyPage() {
 
           {seat?.worldProofStatus === "VERIFIED" ? (
             <div className="stack">
-              <Notice tone={v.source === "DEV_MOCK" ? "mock" : "success"} title={v.source === "DEV_MOCK" ? "Simulated verification accepted (DEV MOCK)" : "You're verified as a unique human"} testId="verify-success">
+              <Notice
+                tone={v.source === "DEV_MOCK" || env !== "production" ? "mock" : "success"}
+                title={
+                  v.source === "DEV_MOCK"
+                    ? "Simulated verification accepted (DEV MOCK)"
+                    : env === "staging"
+                      ? "Verified in World staging — TESTED IN SIMULATOR"
+                      : env === "production"
+                        ? "You're verified as a unique human"
+                        : "World ID proof accepted — environment not reported"
+                }
+                testId="verify-success"
+              >
                 {v.source === "DEV_MOCK"
                   ? "No real World ID proof was checked. With the live backend, the vestige server verifies your proof for this venture."
-                  : "The vestige server checked your World ID proof for this venture."}
+                  : env === "staging"
+                    ? "The vestige server accepted a World ID staging (simulator) proof. It shows the flow works; it does not prove a real unique human."
+                    : env === "production"
+                      ? "The vestige server checked your World ID proof for this venture."
+                      : "The vestige server accepted your proof, but did not report whether it came from World's production or staging environment, so it is shown as unconfirmed."}
               </Notice>
               <div className="row">
                 <span className="small">Seat on Whitechain:</span>

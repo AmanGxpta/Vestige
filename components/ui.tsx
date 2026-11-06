@@ -3,6 +3,7 @@
 import { useId, useState, type ButtonHTMLAttributes, type ReactNode } from "react";
 import { explorerAddress, explorerTx } from "@/src/modules/ui/config";
 import { shortHex } from "@/src/modules/ui/format";
+import { useVestige } from "@/src/modules/ui/provider";
 import type { DataSource, EvidenceLabel } from "@/src/modules/ui/types";
 
 /* ---------------- Button: every disabled action states why ---------------- */
@@ -127,22 +128,46 @@ const LABEL_HELP: Record<EvidenceLabel, string> = {
   CHAIN_VERIFIED: "Backed by a transaction receipt on Sepolia or Whitechain and an independent read.",
   SELF_REPORTED: "Entered by the team. Not independently verified.",
 };
-export function EvidenceBadge({ label, source }: { label: EvidenceLabel; source: DataSource }) {
+/**
+ * `qualifier` (CONTRACTS v0): TESTED_IN_SIMULATOR is a separate evidence-source
+ * qualifier, not a fifth label. ENV_UNREPORTED = the API did not say which World
+ * environment verified this human, so it must not read as production uniqueness.
+ */
+export type EvidenceQualifier = "TESTED_IN_SIMULATOR" | "ENV_UNREPORTED";
+const QUALIFIER_TEXT: Record<EvidenceQualifier, { tag: string; help: string }> = {
+  TESTED_IN_SIMULATOR: { tag: "TESTED IN SIMULATOR", help: "Verified in World's staging environment (simulator). Proves the flow, not that a real unique human verified." },
+  ENV_UNREPORTED: { tag: "WORLD ENV NOT REPORTED", help: "The API did not report whether this was a production or staging World ID proof. Treat as unconfirmed." },
+};
+export function EvidenceBadge({ label, source, qualifier }: { label: EvidenceLabel; source: DataSource; qualifier?: EvidenceQualifier }) {
   const mock = source === "DEV_MOCK";
+  const weak = mock || !!qualifier;
   return (
     <span className="row" style={{ gap: 4 }}>
       <span
-        className={`badge badge-${label}${mock ? " badge-mock" : ""}`}
-        title={mock ? `DEV MOCK — would be ${label} with real data. ${LABEL_HELP[label]}` : LABEL_HELP[label]}
+        className={`badge badge-${label}${weak ? " badge-mock" : ""}`}
+        title={mock ? `DEV MOCK — would be ${label} with real data. ${LABEL_HELP[label]}` : qualifier ? `${LABEL_HELP[label]} ${QUALIFIER_TEXT[qualifier].help}` : LABEL_HELP[label]}
         data-testid="evidence-badge"
         data-label={label}
         data-source={source}
+        data-qualifier={qualifier}
       >
         {label}
       </span>
       {mock && <span className="badge badge-mock-tag">MOCK</span>}
+      {!mock && qualifier && (
+        <span className="badge badge-mock-tag" title={QUALIFIER_TEXT[qualifier].help} data-testid="evidence-qualifier">
+          {QUALIFIER_TEXT[qualifier].tag}
+        </span>
+      )}
     </span>
   );
+}
+
+/** HUMAN_VERIFIED with the right qualifier: simulator/unknown environments never render as production. */
+export function HumanBadge({ source, worldEnvironment }: { source: DataSource; worldEnvironment?: "production" | "staging" }) {
+  const qualifier: EvidenceQualifier | undefined =
+    source === "DEV_MOCK" ? undefined : worldEnvironment === "staging" ? "TESTED_IN_SIMULATOR" : worldEnvironment === "production" ? undefined : "ENV_UNREPORTED";
+  return <EvidenceBadge label="HUMAN_VERIFIED" source={source} qualifier={qualifier} />;
 }
 
 /* ---------------- Hash / address with explorer link (real data only) ---------------- */
@@ -192,8 +217,46 @@ export function LoadingCard({ lines = 3 }: { lines?: number }) {
   );
 }
 
+/** Sign in with the connected wallet (EIP-4361-style challenge). Live mode only. */
+export function SignInNotice({ message }: { message?: string }) {
+  const { address, connect, signIn, wallet } = useVestige();
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  return (
+    <Notice tone="info" title={message ?? "Sign in with your wallet"} testId="signin-notice">
+      <span className="small">
+        One free signature proves you control this wallet. It is not a transaction and approves no payment. Your session stays in this tab&apos;s memory only.
+      </span>
+      <span className="row" style={{ marginTop: 8 }}>
+        {!address ? (
+          <Button size="sm" loading={wallet.connecting} onClick={() => void connect()} data-testid="signin-connect">
+            Connect wallet
+          </Button>
+        ) : (
+          <Button
+            size="sm"
+            loading={busy}
+            data-testid="signin-button"
+            onClick={async () => {
+              setBusy(true);
+              setError(null);
+              const r = await signIn();
+              setBusy(false);
+              if (!r.ok && r.error.code !== "CANCELLED") setError(r.error.detail ? `${r.error.message} (${r.error.detail})` : r.error.message);
+            }}
+          >
+            Sign in
+          </Button>
+        )}
+        {(error || wallet.error) && <span className="small" style={{ color: "var(--failed)" }}>{error ?? wallet.error}</span>}
+      </span>
+    </Notice>
+  );
+}
+
 /** Renders an adapter error. BLOCKED is shown as "not connected yet", never as success. */
 export function AdapterErrorNotice({ error }: { error: { code: string; message: string; detail?: string } }) {
+  if (error.code === "UNAUTHENTICATED") return <SignInNotice message={error.message} />;
   if (error.code === "BLOCKED")
     return (
       <Notice tone="warn" title="Not connected yet" testId="blocked-notice">

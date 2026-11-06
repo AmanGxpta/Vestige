@@ -2,13 +2,22 @@
 
 import Link from "next/link";
 import { AdapterErrorNotice, Card, CheckIcon, LoadingCard, Notice } from "@/components/ui";
+import { relativeTime } from "@/src/modules/ui/format";
 import { useAdapterQuery } from "@/src/modules/ui/provider";
+import type { VentureSummary } from "@/src/modules/ui/types";
 
-function Check({ ok, label, testId, mock }: { ok: boolean; label: string; testId: string; mock?: boolean }) {
+/**
+ * Summary badge. These are founder-consented CACHED summaries (CR-C2-001), never
+ * authoritative: API values render as "reported" (no green tick), `null` as unknown,
+ * and only the public evidence page re-reads ENS + Whitechain.
+ */
+function Check({ ok, label, testId, source }: { ok: boolean | null; label: string; testId: string; source: VentureSummary["source"] }) {
+  const mock = source === "DEV_MOCK";
   return (
-    <span className="row small" style={{ gap: 6 }} data-testid={testId} data-ok={ok}>
-      <CheckIcon status={ok ? "VERIFIED" : "NONE"} mock={mock} size={18} />
-      {label}
+    <span className="row small" style={{ gap: 6 }} data-testid={testId} data-ok={ok === null ? "unknown" : ok}>
+      <CheckIcon status={ok === null ? "UNKNOWN" : !ok ? "NONE" : mock ? "VERIFIED" : "PENDING"} mock={mock} size={18} />
+      {ok === null ? "Unknown" : label}
+      {ok && !mock && <span className="tiny faint">(reported)</span>}
     </span>
   );
 }
@@ -26,12 +35,14 @@ export default function FunderListPage() {
       {list.status === "error" && (
         <>
           <AdapterErrorNotice error={list.error} />
-          <Notice tone="info">A venture list needs a listing endpoint that isn&apos;t in the v0 contract (proposed as CR-C2-001). You can still verify any venture by its ENS name.</Notice>
+          <Notice tone="info">The consented venture list (GET /api/identity/ventures, CR-C2-001) is not available here yet. You can still verify any venture by its ENS name.</Notice>
         </>
       )}
       {list.status === "ok" && list.data.length === 0 && (
         <Card>
-          <p className="muted">No ventures yet. <Link href="/founder">Create one as a founder</Link> to see it here.</p>
+          <p className="muted">
+            No listed ventures yet. Ventures appear here only after <strong>all</strong> their founders agree to be listed. <Link href="/v">Verify a venture by its ENS name</Link> instead.
+          </p>
         </Card>
       )}
       {list.status === "ok" && list.data.length > 0 && (
@@ -56,16 +67,17 @@ export default function FunderListPage() {
                         <strong>{v.displayName}</strong>
                         <span className="mono tiny muted">{v.ensName}</span>
                         {v.source === "DEV_MOCK" && <span className="badge badge-mock-tag" style={{ alignSelf: "flex-start" }}>MOCK</span>}
+                        {v.observedAt && <span className="tiny faint">summary {relativeTime(v.observedAt)}</span>}
                       </div>
                     </td>
-                    <td><Check ok={v.humansVerified >= 2} label={`${v.humansVerified}/2 verified`} testId="badge-humans" mock={v.source === "DEV_MOCK"} /></td>
-                    <td><Check ok={v.termsSigned} label={v.termsSigned ? "Signed" : "Not signed"} testId="badge-terms" mock={v.source === "DEV_MOCK"} /></td>
-                    <td><Check ok={v.treasuryActive} label={v.treasuryActive ? "Active · Whitechain" : "Not active"} testId="badge-treasury" mock={v.source === "DEV_MOCK"} /></td>
-                    <td><Check ok={v.funded} label={v.funded ? "USDT funded" : "Not funded"} testId="badge-funded" mock={v.source === "DEV_MOCK"} /></td>
+                    <td><Check ok={v.humansVerified >= 2} label={`${v.humansVerified}/2 verified`} testId="badge-humans" source={v.source} /></td>
+                    <td><Check ok={v.termsSigned} label={v.termsSigned ? "Signed" : "Not signed"} testId="badge-terms" source={v.source} /></td>
+                    <td><Check ok={v.treasuryActive} label={v.treasuryActive ? "Active · Whitechain" : "Not active"} testId="badge-treasury" source={v.source} /></td>
+                    <td><Check ok={v.funded} label={v.funded ? "USDT funded" : "Not funded"} testId="badge-funded" source={v.source} /></td>
                     <td>
                       <div className="row" style={{ justifyContent: "flex-end" }}>
                         <Link className="btn btn-secondary btn-sm" href={`/v/${v.ensName}${v.source === "DEV_MOCK" ? "?source=mock" : ""}`}>Evidence</Link>
-                        <Link className="btn btn-sm" href={`/funder/${v.ventureId}`} data-testid="fund-link">Fund</Link>
+                        <Link className="btn btn-sm" href={`/funder/${v.ensName}`} data-testid="fund-link">Fund</Link>
                       </div>
                     </td>
                   </tr>
