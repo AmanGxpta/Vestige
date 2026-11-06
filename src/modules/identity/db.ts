@@ -1,6 +1,6 @@
 /**
- * Minimal SQL port so services stay engine-agnostic until H locks the DB.
- * Default adapter: Node's built-in `node:sqlite` (no native dependency).
+ * Minimal SQL port. D-009 (APPROVED): SQLite via Node's built-in `node:sqlite`,
+ * WAL, migrations, foreign keys, busy timeout, unique constraints; one host.
  */
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
@@ -28,7 +28,8 @@ export class SqliteDb implements SqlDb {
   private depth = 0;
   constructor(path = ":memory:") {
     this.raw = new DatabaseSync(path);
-    this.raw.exec("PRAGMA foreign_keys = ON; PRAGMA journal_mode = WAL;");
+    // CONTRACTS v0: WAL, foreign keys, busy timeout (single host, persistent disk).
+    this.raw.exec("PRAGMA foreign_keys = ON; PRAGMA journal_mode = WAL; PRAGMA busy_timeout = 5000;");
   }
   run(sql: string, ...params: SqlValue[]) {
     const r = this.raw.prepare(sql).run(...params);
@@ -61,6 +62,7 @@ const here = dirname(fileURLToPath(import.meta.url));
 export const IDENTITY_MIGRATIONS = [
   join(here, "../../../db/migrations/010_identity.sql"),
   join(here, "../../../db/migrations/010_identity_agreements.sql"),
+  join(here, "../../../db/migrations/010_identity_v0_followthrough.sql"),
 ];
 
 /** Applies C1's migrations (idempotent: CREATE ... IF NOT EXISTS). */

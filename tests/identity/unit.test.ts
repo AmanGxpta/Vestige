@@ -14,7 +14,7 @@ import {
 import { buildFounderPlan, buildVenturePlan, recordCalls } from "../../src/modules/identity/ens/registrar";
 import { IdentityError } from "../../src/modules/identity/errors";
 import { founderEnsName, isVentureId, newVentureId, slugFromEnsName, toFounderLabel, toSlug, ventureEnsName } from "../../src/modules/identity/ids";
-import { normalizeNullifier, nullifierToBytes32, worldAction } from "../../src/modules/identity/world";
+import { normalizeNullifier, nullifierHash, worldAction } from "../../src/modules/identity/world";
 
 const code = (fn: () => unknown) => {
   try { fn(); } catch (e) { return (e as IdentityError).code; }
@@ -65,7 +65,14 @@ describe("world primitives", () => {
     expect(code(() => normalizeNullifier("0x" + "f".repeat(65)))).toBe("WORLD_PROOF_INVALID");
     expect(code(() => normalizeNullifier("12a"))).toBe("WORLD_PROOF_INVALID");
     expect(code(() => normalizeNullifier(undefined))).toBe("WORLD_PROOF_INVALID");
-    expect(nullifierToBytes32("255")).toBe(`0x${"0".repeat(62)}ff`);
+  });
+  it("CR-ID-04: on-chain value is keccak256(abi.encode(uint256(nullifier))), same for hex/decimal input", () => {
+    const want = keccak256(encodeAbiParameters([{ type: "uint256" }], [255n]));
+    expect(nullifierHash("255")).toBe(want);
+    expect(nullifierHash("0xff")).toBe(want);
+    // independent fixed vector: keccak256(0x00..ff) (32-byte word)
+    expect(want).toBe(keccak256(`0x${"0".repeat(62)}ff`));
+    expect(nullifierHash("255")).not.toContain("ff".padStart(64, "0"));
   });
 });
 
@@ -118,11 +125,16 @@ describe("ENSv2 encodings and role design", () => {
     expect(p.resolver.data).not.toContain("3333333333333333333333333333333333333333");
   });
   it("venture plan sets vestige.status=workspace in the resolver initializer", () => {
-    const p = buildVenturePlan({ parentRegistry: "0x2222222222222222222222222222222222222222", expiry: 1n }, "northstar", "0x3333333333333333333333333333333333333333");
+    const vid = `0x${"ab".repeat(32)}` as const;
+    const p = buildVenturePlan({ parentRegistry: "0x2222222222222222222222222222222222222222", expiry: 1n }, "northstar", "0x3333333333333333333333333333333333333333", vid);
     expect(p.name).toBe("northstar.vestige.eth");
     const hexOf = (s: string) => Buffer.from(s).toString("hex");
     expect(p.resolver.data).toContain(hexOf(ENS_KEYS.status));
     expect(p.resolver.data).toContain(hexOf("workspace"));
+    // CR-C2-002: vestige.ventureId is written byte-for-byte in the same initializer
+    expect(p.resolver.data).toContain(hexOf(ENS_KEYS.ventureId));
+    expect(p.resolver.data).toContain(hexOf(vid));
+    expect(() => buildVenturePlan({ parentRegistry: "0x2222222222222222222222222222222222222222", expiry: 1n }, "northstar", "0x3333333333333333333333333333333333333333", vid.toUpperCase() as `0x${string}`)).toThrow();
   });
   it("treasury record uses ENSIP-11 coin type 2147485522", () => {
     const [call] = recordCalls("northstar.vestige.eth", { treasury: "0x4444444444444444444444444444444444444444" });

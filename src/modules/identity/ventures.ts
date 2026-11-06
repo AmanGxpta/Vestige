@@ -10,8 +10,8 @@ import { isUniqueViolation, type SqlDb } from "./db";
 import { sha256, systemClock, type Clock } from "./auth";
 import { fail, IdentityError } from "./errors";
 import { assertVentureId, founderEnsName, newVentureId, toFounderLabel, toSlug, ventureEnsName, type Bytes32 } from "./ids";
-import type { EnsPort, SeatAttestationPort } from "./ports";
-import { buildWorldRequest, nullifierToBytes32, verifyWorldProof, worldAction, type WorldConfig, type WorldRequestParams } from "./world";
+import { checkAttestSubmit, checkSeatConfirmation, type EnsPort, type SeatAttestationPort, type TreasurySummaryPort } from "./ports";
+import { buildWorldRequest, nullifierHash, verifyWorldProof, worldAction, type WorldConfig, type WorldRequestParams } from "./world";
 
 export type ReadStatus = "UNKNOWN" | "PENDING" | "VERIFIED" | "FAILED";
 export type EvidenceLabel = "HUMAN_VERIFIED" | "SIGNED" | "CHAIN_VERIFIED" | "SELF_REPORTED";
@@ -28,6 +28,22 @@ export interface FounderSeat {
   attestationTxHash?: Hex;
 }
 
+/** CR-C2-001 public list item: non-PII, cached, with provenance. */
+export interface VentureSummary {
+  ventureId: Bytes32;
+  displayName: string;
+  ensName: string;
+  humansVerified: number;
+  termsSigned: boolean;
+  /** null = unknown. Only ever joined from X's treasury read service, never invented by C1. */
+  treasuryActive: boolean | null;
+  funded: boolean | null;
+  observedAt: string;
+  source: string;
+  /** ENS confirmation status of the venture name (receipt + Universal Resolver read-back). */
+  verificationStatus: ReadStatus;
+}
+
 export interface VentureView {
   ventureId: Bytes32;
   slug: string;
@@ -38,6 +54,8 @@ export interface VentureView {
   seats: FounderSeat[];
   humansVerified: number;
   maxSeats: number;
+  /** CR-C2-001: listed only while every current founder consents. */
+  listing: { listed: boolean; consents: { wallet: Address; listed: boolean }[] };
 }
 
 interface VentureRow { venture_id: string; slug: string; ens_name: string; display_name: string; creator_wallet: string; status: string; ens_status: string }
@@ -51,6 +69,8 @@ export interface VentureDeps {
   world: WorldConfig | null;
   attester: SeatAttestationPort;
   ens: EnsPort;
+  /** Optional X read seam for the public list (PROPOSED CR-ID-05); absent → treasury fields null. */
+  treasury?: TreasurySummaryPort;
   clock?: Clock;
   fetchImpl?: typeof fetch;
   parentName?: string;
@@ -111,7 +131,75 @@ export class VentureService {
       seats,
       humansVerified: seats.filter((s) => s.worldProofStatus === "VERIFIED").length,
       maxSeats: MAX_FOUNDER_SEATS,
+      listing: this.listing(ventureId),
     };
+  }
+
+  // ---------- CR-C2-001 public-list consent ----------
+
+  private listing(ventureId: Bytes32): VentureView["listing"] {
+    const rows = this.d.db.all<{ wallet: string; listed: number | null }>(
+      `SELECT s.wallet AS wallet, c.listed AS listed FROM identity_seats s
+       LEFT JOIN identity_listing_consent c ON c.venture_id = s.venture_id AND c.wallet = s.wallet
+       WHERE s.venture_id = ? ORDER BY s.created_at, s.wallet`,
+      ventureId,
+    );
+    const consents = rows.map((r) => ({ wallet: r.wallet as Address, listed: r.listed === 1 }));
+    return { listed: consents.length > 0 && consents.every((c) => c.listed), consents };
+  }
+
+  /** POST /api/identity/ventures/:id/listing { listed } — each founder sets only their own consent. */
+  setListing(wallet: Address, ventureIdInput: unknown, input: { listed?: unknown }): VentureView["listing"] {
+    const ventureId = assertVentureId(ventureIdInput);
+    this.ventureRow(ventureId);
+    this.requireSeat(ventureId, wallet);
+    if (typeof input?.listed !== "boolean") fail("BAD_REQUEST", "listed must be true or false.");
+    const now = this.clock.now();
+    this.d.db.tx(() => {
+      this.d.db.run(
+        `INSERT INTO identity_listing_consent (venture_id, wallet, listed, updated_at) VALUES (?,?,?,?)
+         ON CONFLICT (venture_id, wallet) DO UPDATE SET listed = excluded.listed, updated_at = excluded.updated_at`,
+        ventureId, wallet, input.listed ? 1 : 0, now,
+      );
+      this.event({ ventureId, kind: input.listed ? "listing_consent_given" : "listing_consent_withdrawn", label: "SELF_REPORTED", status: "VERIFIED", actor: wallet, source: "vestige-api" });
+    });
+    return this.listing(ventureId);
+  }
+
+  /**
+   * GET /api/identity/ventures — founder-consented ventures only, non-PII.
+   * `termsSigned` comes from the caller (AgreementService) to avoid a module cycle.
+   */
+  async publicList(termsSigned: (ventureId: Bytes32) => boolean): Promise<VentureSummary[]> {
+    const ids = this.d.db
+      .all<{ venture_id: string }>(
+        `SELECT v.venture_id FROM identity_ventures v
+         WHERE NOT EXISTS (
+           SELECT 1 FROM identity_seats s LEFT JOIN identity_listing_consent c ON c.venture_id = s.venture_id AND c.wallet = s.wallet
+           WHERE s.venture_id = v.venture_id AND COALESCE(c.listed, 0) <> 1)
+         AND EXISTS (SELECT 1 FROM identity_seats s WHERE s.venture_id = v.venture_id)
+         ORDER BY v.created_at DESC LIMIT 200`,
+      )
+      .map((r) => r.venture_id as Bytes32);
+    const out: VentureSummary[] = [];
+    for (const id of ids) {
+      const v = this.view(id);
+      let t: Awaited<ReturnType<TreasurySummaryPort["summary"]>> | null = null;
+      if (this.d.treasury) t = await this.d.treasury.summary(id).catch(() => null);
+      out.push({
+        ventureId: id,
+        displayName: v.displayName,
+        ensName: v.ensName,
+        humansVerified: v.humansVerified,
+        termsSigned: termsSigned(id),
+        treasuryActive: t?.treasuryActive ?? null,
+        funded: t?.funded ?? null,
+        observedAt: new Date(this.clock.now()).toISOString(),
+        source: t ? `vestige-api+${t.source}` : "vestige-api",
+        verificationStatus: v.ensStatus,
+      });
+    }
+    return out;
   }
 
   /** Founders-only view guard. */
@@ -277,7 +365,8 @@ export class VentureService {
 
   private async submitAttestation(ventureId: Bytes32, wallet: Address, nullifier: string) {
     try {
-      const { txHash, chainId } = await this.d.attester.attestSeat({ ventureId, wallet, nullifierHash: nullifierToBytes32(nullifier) });
+      // CR-ID-04: only the keccak digest leaves C1; the raw nullifier never reaches X or the chain.
+      const { txHash, chainId } = checkAttestSubmit(await this.d.attester.attestSeat({ ventureId, wallet, nullifierHash: nullifierHash(nullifier) }));
       this.d.db.run("UPDATE identity_seats SET attestation_tx_hash = ?, attestation_chain_id = ? WHERE venture_id = ? AND wallet = ?", txHash, chainId, ventureId, wallet);
       this.event({ ventureId, kind: "seat_attestation_submitted", label: "CHAIN_VERIFIED", status: "PENDING", actor: wallet, chainId, txHash, source: "seat-registry" });
       this.defer(() => this.refreshAttestation(ventureId, wallet).then(() => undefined));
@@ -294,7 +383,12 @@ export class VentureService {
   async refreshAttestation(ventureId: Bytes32, wallet: Address): Promise<ReadStatus> {
     const s = this.seat(ventureId, wallet);
     if (!s?.attestation_tx_hash || s.onchain_status !== "PENDING") return (s?.onchain_status as ReadStatus) ?? "UNKNOWN";
-    const c = await this.d.attester.confirm({ ventureId, wallet, txHash: s.attestation_tx_hash as Hex });
+    let c;
+    try {
+      c = checkSeatConfirmation(await this.d.attester.confirm({ ventureId, wallet, txHash: s.attestation_tx_hash as Hex }));
+    } catch {
+      return "PENDING"; // transient read failure: stay PENDING, never promote
+    }
     if (c.state === "PENDING") return "PENDING";
     if (c.state === "FAILED") {
       this.d.db.run("UPDATE identity_seats SET onchain_status = 'FAILED' WHERE venture_id = ? AND wallet = ?", ventureId, wallet);
@@ -307,6 +401,57 @@ export class VentureService {
     );
     this.event({ ventureId, kind: "seat_attested", label: "CHAIN_VERIFIED", status: "VERIFIED", actor: wallet, chainId: c.chainId, txHash: s.attestation_tx_hash, blockNumber: c.blockNumber, confirmedAt: c.confirmedAt, source: "seat-registry" });
     return "VERIFIED";
+  }
+
+  /**
+   * Re-submits an attestation that FAILED before any tx hash was recorded (e.g. X
+   * was unconfigured). Never re-submits when a tx hash exists: that tx must be
+   * reconciled via refreshAttestation first, to avoid double submission.
+   */
+  async retryAttestation(ventureId: Bytes32, wallet: Address): Promise<ReadStatus> {
+    const s = this.seat(ventureId, wallet);
+    if (!s || s.world_status !== "VERIFIED") fail("NOT_VERIFIED_FOUNDER", "Seat is not World-verified.");
+    if (s.attestation_tx_hash) return this.refreshAttestation(ventureId, wallet);
+    const n = this.d.db.get<{ nullifier: string }>("SELECT nullifier FROM identity_world_nullifiers WHERE venture_id = ? AND wallet = ?", ventureId, wallet);
+    if (!n) fail("NOT_VERIFIED_FOUNDER", "Seat is not World-verified.");
+    this.d.db.run("UPDATE identity_seats SET onchain_status = 'PENDING' WHERE venture_id = ? AND wallet = ?", ventureId, wallet);
+    return (await this.submitAttestation(ventureId, wallet, n.nullifier)).status;
+  }
+
+  /**
+   * Durable-job reconciliation after restart (CONTRACTS: pending ENS writes are
+   * durable jobs). Read-only first: a PENDING/FAILED ENS step is promoted to
+   * VERIFIED only when the independent read-back already matches; nothing is
+   * re-broadcast here. PENDING attestations are re-confirmed through X.
+   */
+  async reconcile(): Promise<{ attestations: number; ensVerified: number; stillOpen: string[] }> {
+    let attestations = 0, ensVerified = 0;
+    const stillOpen: string[] = [];
+    for (const s of this.d.db.all<{ venture_id: string; wallet: string }>("SELECT venture_id, wallet FROM identity_seats WHERE onchain_status = 'PENDING'")) {
+      attestations++;
+      const st = await this.refreshAttestation(s.venture_id as Bytes32, s.wallet as Address);
+      if (st !== "VERIFIED") stillOpen.push(`attestation:${s.venture_id}:${s.wallet}:${st}`);
+    }
+    for (const v of this.d.db.all<VentureRow>("SELECT * FROM identity_ventures WHERE ens_status IN ('PENDING','FAILED','UNKNOWN')")) {
+      const ok = await (this.checks.ventureName?.(v.ens_name, v.venture_id as Bytes32) ?? Promise.resolve(false)).catch(() => false);
+      if (ok) {
+        ensVerified++;
+        this.d.db.run("UPDATE identity_ventures SET ens_status = 'VERIFIED' WHERE venture_id = ?", v.venture_id);
+        this.event({ ventureId: v.venture_id, kind: "ens_venture_registered", label: "CHAIN_VERIFIED", status: "VERIFIED", chainId: 11155111, source: "ens-sepolia-readback" });
+      } else stillOpen.push(`ens-venture:${v.ens_name}:${v.ens_status}`);
+    }
+    for (const s of this.d.db.all<SeatRow & { slug: string }>(
+      "SELECT s.*, v.slug AS slug FROM identity_seats s JOIN identity_ventures v USING (venture_id) WHERE s.world_status = 'VERIFIED' AND s.subname_status IN ('PENDING','FAILED','UNKNOWN')",
+    )) {
+      const name = founderEnsName(s.founder_label, s.slug, this.d.parentName);
+      const ok = await (this.checks.founderName?.(name, s.wallet as Address) ?? Promise.resolve(false)).catch(() => false);
+      if (ok) {
+        ensVerified++;
+        this.d.db.run("UPDATE identity_seats SET subname_status = 'VERIFIED' WHERE venture_id = ? AND wallet = ?", s.venture_id, s.wallet);
+        this.event({ ventureId: s.venture_id, kind: "ens_founder_registered", label: "CHAIN_VERIFIED", status: "VERIFIED", chainId: 11155111, source: "ens-sepolia-readback" });
+      } else stillOpen.push(`ens-founder:${name}:${s.subname_status}`);
+    }
+    return { attestations, ensVerified, stillOpen };
   }
 
   // ---------- ENS sync (registrar-signed, never client-triggered values) ----------
@@ -331,7 +476,8 @@ export class VentureService {
 
   /** Optional independent ENS read-back hooks (set by the container when an EnsReader exists). */
   checks: {
-    ventureName?: (ensName: string) => Promise<boolean>;
+    /** Must confirm vestige.status=workspace AND vestige.ventureId === ventureId byte-for-byte. */
+    ventureName?: (ensName: string, ventureId: Bytes32) => Promise<boolean>;
     founderName?: (name: string, wallet: Address) => Promise<boolean>;
     humans?: (ensName: string, n: number) => Promise<boolean>;
   } = {};
@@ -340,8 +486,8 @@ export class VentureService {
     const v = this.ventureRow(ventureId);
     await this.ensStep(
       ventureId, "ens_venture_registered",
-      () => this.d.ens.registerVenture({ slug: v.slug }),
-      () => this.checks.ventureName?.(v.ens_name) ?? Promise.resolve(false),
+      () => this.d.ens.registerVenture({ slug: v.slug, ventureId }),
+      () => this.checks.ventureName?.(v.ens_name, ventureId) ?? Promise.resolve(false),
       (st) => this.d.db.run("UPDATE identity_ventures SET ens_status = ? WHERE venture_id = ?", st, ventureId),
     );
   }

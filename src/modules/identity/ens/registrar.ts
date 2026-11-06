@@ -22,7 +22,7 @@ import {
   zeroAddress,
 } from "viem";
 import { ENS_KEYS, ENSV2_SEPOLIA, VENTURE_STATUS_RECORD, VESTIGE_PARENT_NAME, WHITECHAIN_COIN_TYPE } from "../config";
-import { founderEnsName, ventureEnsName } from "../ids";
+import { founderEnsName, isVentureId, ventureEnsName, type Bytes32 } from "../ids";
 import type { ChainConfirmation, EnsPort, EnsVentureRecords } from "../ports";
 import {
   encodeResolverInit,
@@ -54,12 +54,17 @@ export interface EnsRegistrarConfig {
 /** Venture token roles: transfer admin only, reserved for the governance handover stretch. */
 export const VENTURE_TOKEN_ROLES = REG.CAN_TRANSFER_ADMIN;
 
-export function buildVenturePlan(cfg: EnsRegistrarConfig, slug: string, registrar: Address) {
+export function buildVenturePlan(cfg: EnsRegistrarConfig, slug: string, registrar: Address, ventureId: Bytes32) {
   const name = ventureEnsName(slug, cfg.parentName ?? VESTIGE_PARENT_NAME);
+  if (!isVentureId(ventureId)) throw new Error("ventureId must be the server's lowercase bytes32");
   const registryInit = encodeUserRegistryInit([{ account: registrar, roleBitmap: VENTURE_REGISTRY_REGISTRAR_ROLES }]);
   const resolverInit = encodeResolverInit(
     [{ account: registrar, roleBitmap: VENTURE_RESOLVER_REGISTRAR_ROLES }],
-    [encodeSetText(name, ENS_KEYS.status, VENTURE_STATUS_RECORD), encodeSetText(name, ENS_KEYS.humans, "0")],
+    [
+      encodeSetText(name, ENS_KEYS.status, VENTURE_STATUS_RECORD),
+      encodeSetText(name, ENS_KEYS.ventureId, ventureId),
+      encodeSetText(name, ENS_KEYS.humans, "0"),
+    ],
   );
   return {
     name,
@@ -85,6 +90,10 @@ export function buildFounderPlan(cfg: EnsRegistrarConfig, slug: string, label: s
 export function recordCalls(name: string, r: EnsVentureRecords): Hex[] {
   const calls: Hex[] = [];
   if (r.status) calls.push(encodeSetText(name, ENS_KEYS.status, r.status));
+  if (r.ventureId) {
+    if (!isVentureId(r.ventureId)) throw new Error("ventureId must be the server's lowercase bytes32");
+    calls.push(encodeSetText(name, ENS_KEYS.ventureId, r.ventureId));
+  }
   if (r.humans !== undefined) calls.push(encodeSetText(name, ENS_KEYS.humans, String(r.humans)));
   if (r.agreementHash) calls.push(encodeSetText(name, ENS_KEYS.agreement, r.agreementHash));
   if (r.guard) calls.push(encodeSetText(name, ENS_KEYS.guard, r.guard));
@@ -121,8 +130,8 @@ export class ViemEnsRegistrar implements EnsPort {
     return { hash, proxy: log.args.proxyAddress };
   }
 
-  async registerVenture({ slug }: { slug: string }) {
-    const plan = buildVenturePlan(this.cfg, slug, this.registrar);
+  async registerVenture({ slug, ventureId }: { slug: string; ventureId: Bytes32 }) {
+    const plan = buildVenturePlan(this.cfg, slug, this.registrar, ventureId);
     const reg = await this.deploy(plan.registry);
     const res = await this.deploy(plan.resolver);
     const label = plan.name.split(".")[0]!;
@@ -188,13 +197,14 @@ export class EnsReader {
 
   /** The cross-chain identity bundle for a venture (PRD FR-1 records). */
   async venture(name: string) {
-    const [status, humans, agreement, guard, treasury] = await Promise.all([
+    const [ventureId, status, humans, agreement, guard, treasury] = await Promise.all([
+      this.text(name, ENS_KEYS.ventureId),
       this.text(name, ENS_KEYS.status),
       this.text(name, ENS_KEYS.humans),
       this.text(name, ENS_KEYS.agreement),
       this.text(name, ENS_KEYS.guard),
       this.address(name, WHITECHAIN_COIN_TYPE),
     ]);
-    return { name, status, humans: humans === null ? null : Number(humans), agreement, guard, treasury };
+    return { name, ventureId, status, humans: humans === null ? null : Number(humans), agreement, guard, treasury };
   }
 }

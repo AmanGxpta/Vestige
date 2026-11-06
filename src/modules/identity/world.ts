@@ -14,7 +14,7 @@
  */
 import { signRequest } from "@worldcoin/idkit-core/signing";
 import { hashSignal } from "@worldcoin/idkit-core/hashing";
-import type { Address } from "viem";
+import { encodeAbiParameters, keccak256, type Address } from "viem";
 import { fail, IdentityError } from "./errors";
 import type { Bytes32 } from "./ids";
 
@@ -72,9 +72,13 @@ export function normalizeNullifier(v: unknown): string {
   return n.toString(10);
 }
 
-/** bytes32 representation for on-chain use (see CR-ID-04: X may require keccak of this). */
-export function nullifierToBytes32(decimal: string): Bytes32 {
-  return `0x${BigInt(decimal).toString(16).padStart(64, "0")}`;
+/**
+ * CR-ID-04 (APPROVED): the ONLY nullifier-derived value that leaves C1.
+ * `keccak256(abi.encode(uint256(worldNullifier)))`. The raw nullifier never enters
+ * the chain, the public API or X. The digest is a public correlation value, not anonymity.
+ */
+export function nullifierHash(decimal: string): Bytes32 {
+  return keccak256(encodeAbiParameters([{ type: "uint256" }], [BigInt(normalizeNullifier(decimal))]));
 }
 
 function sameField(a: string | undefined, b: string): boolean {

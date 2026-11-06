@@ -31,7 +31,11 @@ export type IdentityErrorCode =
   | "NONCE_REUSED"
   | "SIGNATURE_EXPIRED"
   | "ALREADY_SIGNED"
-  | "CONFIG_MISSING";
+  | "CONFIG_MISSING"
+  | "RATE_LIMITED"
+  | "ORIGIN_FORBIDDEN"
+  | "IDEMPOTENCY_CONFLICT"
+  | "NONCE_INVALID";
 
 const STATUS: Record<IdentityErrorCode, number> = {
   BAD_REQUEST: 400,
@@ -63,6 +67,10 @@ const STATUS: Record<IdentityErrorCode, number> = {
   SIGNATURE_EXPIRED: 400,
   ALREADY_SIGNED: 409,
   CONFIG_MISSING: 503,
+  RATE_LIMITED: 429,
+  ORIGIN_FORBIDDEN: 403,
+  IDEMPOTENCY_CONFLICT: 409,
+  NONCE_INVALID: 400,
 };
 
 export class IdentityError extends Error {

@@ -15,7 +15,8 @@ import { AgreementService } from "../../src/modules/agreements/service";
 import { AuthService, type Clock } from "../../src/modules/identity/auth";
 import { migrateIdentity, SqliteDb } from "../../src/modules/identity/db";
 import type { IdentityServices } from "../../src/modules/identity/http";
-import type { ChainConfirmation, EnsPort, EnsVentureRecords, SeatAttestationPort } from "../../src/modules/identity/ports";
+import type { ChainConfirmation, EnsPort, EnsVentureRecords, SeatAttestationPort, SeatConfirmation } from "../../src/modules/identity/ports";
+import type { SigningPayload } from "../../src/modules/agreements/service";
 import { VentureService } from "../../src/modules/identity/ventures";
 import type { WorldConfig, WorldRequestParams } from "../../src/modules/identity/world";
 
@@ -73,31 +74,47 @@ export class FakeWorldPortal {
 
 export class MemoryAttester implements SeatAttestationPort {
   submitted: { ventureId: Hex; wallet: Address; nullifierHash: Hex }[] = [];
-  confirmState: ChainConfirmation["state"] = "CONFIRMED";
+  confirmState: SeatConfirmation["state"] = "CONFIRMED";
   failSubmit = false;
+  /** Simulates an off-contract adapter (wrong chain / malformed hash) to test C1's guards. */
+  submitOverride?: () => unknown;
+  confirmOverride?: () => unknown;
   async attestSeat(i: { ventureId: Hex; wallet: Address; nullifierHash: Hex }) {
     if (this.failSubmit) throw new Error("attester down");
     this.submitted.push(i);
-    return { txHash: keccak256(stringToHex(`attest${this.submitted.length}`)), chainId: 1874 };
+    if (this.submitOverride) return this.submitOverride() as { txHash: Hex; chainId: 1874 };
+    return { txHash: keccak256(stringToHex(`attest${this.submitted.length}`)), chainId: 1874 as const };
   }
-  async confirm(): Promise<ChainConfirmation> {
-    if (this.confirmState === "CONFIRMED") return { state: "CONFIRMED", chainId: 1874, blockNumber: 42n, confirmedAt: 1 };
+  async confirm(): Promise<SeatConfirmation> {
+    if (this.confirmOverride) return this.confirmOverride() as SeatConfirmation;
+    if (this.confirmState === "CONFIRMED") return { state: "CONFIRMED", chainId: 1874, blockNumber: 42n, confirmedAt: 1_762_430_400_000 };
     if (this.confirmState === "PENDING") return { state: "PENDING" };
     return { state: "FAILED", reason: "reverted" };
   }
 }
 
+/** What C2 does client-side: JSON payload (decimal strings) → viem signTypedData args. */
+export function toTypedData(p: SigningPayload) {
+  return {
+    domain: p.domain,
+    types: p.types,
+    primaryType: p.primaryType,
+    message: { ...p.message, version: BigInt(p.message.version), nonce: BigInt(p.message.nonce), expiry: BigInt(p.message.expiry) },
+  };
+}
+
 export class MemoryEns implements EnsPort {
   ventures: string[] = [];
+  ventureIds: Hex[] = [];
   founders: { slug: string; label: string; wallet: Address }[] = [];
   records: { slug: string; records: EnsVentureRecords }[] = [];
   readBack = true;
-  async registerVenture(i: { slug: string }) { this.ventures.push(i.slug); return { txHashes: ["0x01" as Hex] }; }
+  async registerVenture(i: { slug: string; ventureId: Hex }) { this.ventures.push(i.slug); this.ventureIds.push(i.ventureId); return { txHashes: ["0x01" as Hex] }; }
   async registerFounder(i: { slug: string; label: string; wallet: Address }) { this.founders.push(i); return { txHashes: ["0x02" as Hex] }; }
   async setVentureRecords(i: { slug: string; records: EnsVentureRecords }) { this.records.push(i); return { txHashes: ["0x03" as Hex] }; }
   async confirm({ check }: { txHashes: Hex[]; check: () => Promise<boolean> }): Promise<ChainConfirmation> {
-    await check();
-    return this.readBack ? { state: "CONFIRMED", chainId: 11155111, blockNumber: 7n, confirmedAt: 1 } : { state: "FAILED", reason: "read-back mismatch" };
+    const ok = await check(); // the memory port honours the independent read-back like the real one
+    return this.readBack && ok ? { state: "CONFIRMED", chainId: 11155111, blockNumber: 7n, confirmedAt: 1 } : { state: "FAILED", reason: "read-back mismatch" };
   }
 }
 
@@ -126,9 +143,10 @@ export function makeHarness(over: { world?: Partial<WorldConfig> } = {}): Harnes
   const tasks: Promise<void>[] = [];
   const defer = (t: () => Promise<void>) => { tasks.push(t()); };
   const ventures = new VentureService({ db, world, attester, ens, clock, fetchImpl: portal.fetch, defer });
-  ventures.checks = { ventureName: async () => true, founderName: async () => true, humans: async () => true };
+  ventures.checks = { ventureName: async (_n, id) => ens.ventureIds.includes(id), founderName: async () => true, humans: async () => true };
   const agreements = new AgreementService(db, ventures, ens, { clock, defer, checkAgreementRecord: async () => true });
   const auth = new AuthService(db, { domain: "vestige.test", uri: "https://vestige.test" }, clock);
+  void (0 as unknown as ChainConfirmation);
   return {
     db, auth, ventures, agreements, clock, portal, attester, ens, world, tasks,
     async flush() { while (tasks.length) await tasks.shift(); },

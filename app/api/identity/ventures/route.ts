@@ -8,3 +8,7 @@ export const dynamic = "force-dynamic";
 export function POST(req: Request) {
   return handlers(getIdentityServices()).createVenture(req);
 }
+
+export function GET(req: Request) {
+  return handlers(getIdentityServices()).listVentures(req);
+}

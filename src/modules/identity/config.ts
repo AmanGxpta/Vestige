@@ -34,6 +34,8 @@ export const ENS_KEYS = {
   status: "vestige.status",
   humans: "vestige.humans",
   guard: "vestige.guard",
+  /** CR-C2-002: the public verifier resolves the server ventureId from ENS. */
+  ventureId: "vestige.ventureId",
   /** Fallback only if ENSIP-11 addr fails live (MASTER §11.1). */
   treasuryFallback: "vestige.treasury",
 } as const;

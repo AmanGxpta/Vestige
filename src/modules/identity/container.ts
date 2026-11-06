@@ -1,7 +1,9 @@
 /**
- * Builds identity services from environment. PROPOSED env names (H locks them in
- * .env.example). Missing chain config → fail-closed ports (status FAILED/UNVERIFIED),
- * never a mock. DEV MOCK ports exist only in tests/identity.
+ * Builds identity services from environment. Env names are LOCKED by CONTRACTS v0
+ * (@30d1ef6 / .env.example). Missing config → fail-closed (CONFIG_MISSING or
+ * FAILED/UNVERIFIED ports), never a mock. DEV MOCK ports exist only in tests/identity.
+ * Secrets (WORLD_RP_SIGNING_KEY, ENS_REGISTRAR_PRIVATE_KEY) are read from the
+ * process environment only and never logged or returned.
  */
 import { createPublicClient, createWalletClient, http, type Hex } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
@@ -34,7 +36,21 @@ export const IDENTITY_ENV = [
 
 let singleton: IdentityServices | null = null;
 
-/** X injects its SeatRegistry attester here at integration (CR-ID-03). */
+/**
+ * World config is all-or-nothing and pinned (D-016/D-021): explicit environment and
+ * protocol are required; unknown values fail closed instead of defaulting.
+ */
+export function worldConfigFromEnv(env: NodeJS.ProcessEnv): WorldConfig | null {
+  const { WORLD_APP_ID: appId, WORLD_RP_ID: rpId, WORLD_RP_SIGNING_KEY: key, WORLD_ENVIRONMENT: environment, WORLD_PROTOCOL_VERSION: protocol } = env;
+  if (!appId || !rpId || !key) return null;
+  if (!/^app_[A-Za-z0-9_]+$/.test(appId) || !/^rp_[A-Za-z0-9]+$/.test(rpId)) return null;
+  if (!/^(0x)?[0-9a-fA-F]{64}$/.test(key)) return null;
+  if (environment !== "staging" && environment !== "production") return null;
+  if (protocol !== "4.0") return null; // 3.0 fallback needs H approval + fresh namespace (D-021)
+  return { appId, rpId, signingKeyHex: key, environment, protocolVersion: "4.0" };
+}
+
+/** X injects its SeatRegistry attester here at integration (CR-ID-03, the only seam). */
 let attesterOverride: SeatAttestationPort | null = null;
 export function registerSeatAttester(p: SeatAttestationPort) {
   attesterOverride = p;
@@ -46,16 +62,7 @@ export function getIdentityServices(env: NodeJS.ProcessEnv = process.env): Ident
   const db = new SqliteDb(env.VESTIGE_DB_PATH ?? "vestige-identity.db");
   migrateIdentity(db);
 
-  const world: WorldConfig | null =
-    env.WORLD_APP_ID && env.WORLD_RP_ID && env.WORLD_RP_SIGNING_KEY
-      ? {
-          appId: env.WORLD_APP_ID,
-          rpId: env.WORLD_RP_ID,
-          signingKeyHex: env.WORLD_RP_SIGNING_KEY,
-          environment: env.WORLD_ENVIRONMENT === "staging" ? "staging" : "production",
-          protocolVersion: env.WORLD_PROTOCOL_VERSION === "3.0" ? "3.0" : "4.0",
-        }
-      : null;
+  const world = worldConfigFromEnv(env);
 
   const parentName = env.VESTIGE_ENS_PARENT ?? "vestige.eth";
   let ens: EnsPort = new UnconfiguredPort("ENS registrar");
@@ -77,7 +84,7 @@ export function getIdentityServices(env: NodeJS.ProcessEnv = process.env): Ident
   if (reader) {
     const r = reader;
     ventures.checks = {
-      ventureName: async (n) => (await r.text(n, ENS_KEYS.status)) === "workspace",
+      ventureName: async (n, id) => (await r.text(n, ENS_KEYS.status)) === "workspace" && (await r.text(n, ENS_KEYS.ventureId)) === id,
       founderName: async (n, w) => (await r.address(n))?.toLowerCase() === w.toLowerCase(),
       humans: async (n, k) => (await r.text(n, ENS_KEYS.humans)) === String(k),
     };
@@ -85,7 +92,8 @@ export function getIdentityServices(env: NodeJS.ProcessEnv = process.env): Ident
   const agreements = new AgreementService(db, ventures, ens, {
     checkAgreementRecord: reader ? async (n, h) => (await reader!.text(n, ENS_KEYS.agreement))?.toLowerCase() === h.toLowerCase() : undefined,
   });
-  const auth = new AuthService(db, { domain: env.VESTIGE_AUTH_DOMAIN ?? "localhost", uri: env.VESTIGE_AUTH_URI ?? "http://localhost:3000" });
+  // No defaults: domain/URI must come from trusted config (CONTRACTS v0); otherwise sign-in fails closed.
+  const auth = new AuthService(db, { domain: env.VESTIGE_AUTH_DOMAIN, uri: env.VESTIGE_AUTH_URI });
   singleton = { db, auth, ventures, agreements, parentName };
   return singleton;
 }

@@ -8,3 +8,7 @@ export const dynamic = "force-dynamic";
 export function POST(req: Request) {
   return handlers(getIdentityServices()).authSession(req);
 }
+
+export function DELETE(req: Request) {
+  return handlers(getIdentityServices()).authLogout(req);
+}
