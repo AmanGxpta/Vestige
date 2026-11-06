@@ -5,16 +5,16 @@
 | ID    | Priority | Status | Requester | Human action                                                                                                       | Expected proof                                 |
 | ----- | -------- | ------ | --------- | ------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------- |
 | H-001 | BLOCKER  | DONE   | all       | Put starter pack in Git repository root, commit baseline, run worktree setup                                       | `git worktree list`, base commit `50efcf2`; renamed identity/treasury worktrees repaired |
-| H-002 | BLOCKER  | OPEN   | C1        | Confirm owned `vestige.eth` Sepolia name / parent controls, ENSv2 registry and resolver at official booth          | Address + non-secret links, notes              |
-| H-003 | BLOCKER  | OPEN   | C1        | Setup World developer app, action / RP signing and simulator in matching env; don't share keys in chat             | App/action public ID; redacted test outcome    |
-| H-004 | BLOCKER  | OPEN   | X         | Provide Whitechain faucet WBT to relayer/test deployer and test USDT to funder; four demo wallets A/B/funder/payee | Public addresses + balances, explorer links    |
+| H-002 | BLOCKER  | PARTIAL | C1        | `vestige.eth` is registered to the owner; approve the reviewed parent setup, then send P2 from the owner wallet | C1 parent plan digest and owner-wallet receipt |
+| H-003 | BLOCKER  | PARTIAL | C1        | World app/RP and 4.0 staging simulator are configured; two distinct staging humans remain unproven | C1 `TESTED_IN_SIMULATOR` evidence; D-024 |
+| H-004 | BLOCKER  | DONE   | X         | Vestige operator wallets and funder received the agreed Whitechain testnet WBT/USDT split | Treasury funding report with six receipts |
 | H-005 | HIGH     | OPEN   | X         | Confirm whitechain RPC + explorer and actual Safe contracts and test token bytecode                                | RPC `eth_getCode` outputs, no private secrets  |
 | H-006 | HIGH     | OPEN   | H         | Verify sponsor track selections, eligibility, live submission cutoff                                               | Official URLs/notes                            |
 | H-007 | HIGH     | OPEN   | H         | Clarify project IP ownership and disclose Hercules connection in writing                                           | Confirmation, public disclosure text           |
 | H-008 | HIGH     | OPEN   | H         | Recruit 2 distinct consenting founders for live proof; find an independent program manager                         | Consent and anonymized meeting notes           |
 | H-009 | HIGH     | OPEN   | X         | Approve execution of deliberately failing one-signature transaction from **test-only funded account**              | Mined failed tx hash, proper error             |
 | H-010 | HIGH     | OPEN   | H         | Integrate/rehearse video, collect verified feedback and submit                                                     | Demo URL, repo ref and submission confirmation |
-| H-011 | HIGH | OPEN | all | Have C1/C2/X read the committed H-approved v0 and ACK compatibility in their own reports; implement the assigned follow-through | Three exact-revision ACKs + tests; only then team freeze complete |
+| H-011 | HIGH | PARTIAL | all | C1 ACK and source are integrated; complete C2/X interface follow-through and integration | C1 merge `b67de31`; remaining owner tests and H acceptance |
 | H-012 | BLOCKER | OPEN | X | Configure all explicit relay fee/rate/balance limits, secure signer and working alerts; measure OP L1 fee allowance | Reviewed config and fee evidence; relay remains disabled until ready |
 
 ## H-001 — Initialize worktrees
