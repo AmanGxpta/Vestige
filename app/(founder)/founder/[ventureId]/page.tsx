@@ -5,7 +5,8 @@ import { useEffect, useState } from "react";
 import { AdapterErrorNotice, Button, Card, Notice, StatusPill } from "@/components/ui";
 import { SeatList } from "@/components/SeatList";
 import { useVestige } from "@/src/modules/ui/provider";
-import { seatFor } from "@/src/modules/ui/progress";
+import { isTreasuryActive, seatFor, termsFullySigned, treasuryStatusText, verifiedSeats } from "@/src/modules/ui/progress";
+import { Icon } from "@/components/brand";
 import { useAction } from "@/src/modules/ui/useAction";
 import { useVenture } from "@/src/modules/ui/venture/VentureContext";
 import type { VentureDetail } from "@/src/modules/ui/types";
@@ -16,7 +17,7 @@ function inviteLink(origin: string, ventureId: string, code: string, ensName: st
 }
 
 export default function TeamPage() {
-  const { venture, ventureId, refreshAll } = useVenture();
+  const { venture, ventureId, refreshAll, treasury } = useVenture();
   const { address, client } = useVestige();
   const [origin, setOrigin] = useState("");
   const [copied, setCopied] = useState(false);
@@ -34,6 +35,32 @@ export default function TeamPage() {
 
   return (
     <>
+      <div className="stat-grid" data-testid="overview-stats">
+        {[
+          { ok: verifiedSeats(v).length >= 2, icon: "users" as const, title: "Founders", sub: `${verifiedSeats(v).length} / 2 verified` },
+          { ok: termsFullySigned(v), icon: "file" as const, title: "Terms", sub: v.agreement ? (termsFullySigned(v) ? `v${v.agreement.version} signed by both` : `v${v.agreement.version} awaiting signatures`) : "Not drafted" },
+          {
+            ok: isTreasuryActive(treasury.data?.treasury),
+            icon: "layers" as const,
+            title: "Treasury",
+            sub: treasury.status === "error" ? "Unavailable" : treasuryStatusText(treasury.data?.treasury),
+          },
+        ].map((s) => (
+          <div key={s.title} className="stat">
+            <span className={`ring${s.ok ? "" : " ring-muted"}`}>
+              <Icon name={s.ok ? "check" : s.icon} size={17} />
+            </span>
+            <span>
+              <strong>{s.title}</strong>
+              <span>
+                {s.sub}
+                {s.ok && v.source === "DEV_MOCK" ? " · MOCK" : ""}
+              </span>
+            </span>
+          </div>
+        ))}
+      </div>
+
       <Card title="Founders" testId="card-founders">
         <SeatList seats={v.seats} source={v.source} me={address} />
       </Card>

@@ -2,7 +2,8 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AdapterErrorNotice, Button, Card, CheckIcon, EvidenceBadge, HashLink, HumanBadge, LoadingCard, Notice, StatusPill } from "@/components/ui";
-import { ADAPTER_KIND, CONFIG } from "@/src/modules/ui/config";
+import { ADAPTER_KIND, CONFIG, explorerAddress } from "@/src/modules/ui/config";
+import { Icon, Mountains, VentureTile } from "@/components/brand";
 import { formatTokenAmount, relativeTime, shortHex } from "@/src/modules/ui/format";
 import { useVestige } from "@/src/modules/ui/provider";
 import type { AdapterError } from "@/src/modules/ui/adapter";
@@ -116,39 +117,52 @@ export function PublicEvidenceView({ ensName, requestedSource }: { ensName: stri
       )}
       {mockRefused && <Notice tone="warn" title="Mock data is disabled in this build. Showing real chain reads." />}
 
-      <header className="stack">
-        <span className="eyebrow">Public evidence · no account needed</span>
-        <div className="row-between">
-          <h1 className="mono" style={{ fontFamily: "var(--mono)", fontSize: "clamp(22px, 3.4vw, 34px)" }} data-testid="public-ens-name">
-            {ensName}
-          </h1>
-          {verdict ? (
-            <StatusPill status={verdict.state === "UNRESOLVED" ? "UNKNOWN" : verdict.state} mock={isMock}>
-              {
-                {
-                  ACTIVE: "Treasury active",
-                  NOT_ACTIVE: "Treasury not active",
-                  UNVERIFIED: "Treasury unverified",
-                  UNRESOLVED: report?.ens.resolver.status === "VERIFIED" ? "No treasury linked" : "Name not resolved",
-                }[verdict.state]
-              }
-            </StatusPill>
-          ) : (
-            <StatusPill status="PENDING">Reading chains…</StatusPill>
-          )}
-        </div>
-        <Notice tone="legal" title="Workspace — not legally incorporated">
-          A vestige venture is a team workspace with verifiable records. It is not a company and confers no legal rights.
-        </Notice>
-        <div className="row small muted">
-          <span>Read {report ? relativeTime(report.startedAt) : "now"}</span>
-          {w?.blockNumber.value && <span>· Whitechain block {w.blockNumber.value}</span>}
-          <Button variant="ghost" size="sm" onClick={() => setRun((r) => r + 1)} disabled={phase !== "done"} data-testid="rerun">
-            Re-run checks
-          </Button>
-        </div>
-      </header>
-
+      <div>
+        <header className="pv-hero" data-testid="pv-hero">
+          <Mountains />
+          <div className="row-between" style={{ alignItems: "flex-start" }}>
+            <div className="row" style={{ gap: 16, flexWrap: "nowrap", minWidth: 0 }}>
+              <VentureTile name={ensName} large />
+              <div className="stack-sm" style={{ gap: 4, minWidth: 0 }}>
+                <span className="eyebrow" style={{ color: "rgba(255,255,255,0.7)" }}>
+                  Public evidence · no account needed
+                </span>
+                <h1 data-testid="public-ens-name" style={{ overflowWrap: "anywhere" }}>
+                  {ensName}
+                </h1>
+                <span className="small muted">
+                  Read {report ? relativeTime(report.startedAt) : "now"}
+                  {w?.blockNumber.value ? ` · Whitechain block ${w.blockNumber.value}` : ""}
+                </span>
+              </div>
+            </div>
+            <div className="row" style={{ gap: 8 }}>
+              {verdict ? (
+                <StatusPill status={verdict.state === "UNRESOLVED" ? "UNKNOWN" : verdict.state} mock={isMock}>
+                  {
+                    {
+                      ACTIVE: "Treasury active",
+                      NOT_ACTIVE: "Treasury not active",
+                      UNVERIFIED: "Treasury unverified",
+                      UNRESOLVED: report?.ens.resolver.status === "VERIFIED" ? "No treasury linked" : "Name not resolved",
+                    }[verdict.state]
+                  }
+                </StatusPill>
+              ) : (
+                <StatusPill status="PENDING">Reading chains…</StatusPill>
+              )}
+              {report?.ens.treasury.value && !isMock && (
+                <a className="btn btn-secondary btn-sm" href={explorerAddress(1874, report.ens.treasury.value.address)} target="_blank" rel="noreferrer">
+                  View on explorer <Icon name="external" size={14} />
+                </a>
+              )}
+              <Button variant="secondary" size="sm" onClick={() => setRun((r) => r + 1)} disabled={phase !== "done"} data-testid="rerun">
+                Re-run checks
+              </Button>
+            </div>
+          </div>
+        </header>
+        <div className="pv-overlap">
       <ol className="card card-pad steps" aria-label="Verification order" style={{ listStyle: "none", margin: 0 }}>
         {(
           [
@@ -186,6 +200,11 @@ export function PublicEvidenceView({ ensName, requestedSource }: { ensName: stri
           );
         })}
       </ol>
+        </div>
+      </div>
+      <Notice tone="legal" title="Workspace — not legally incorporated">
+        A vestige venture is a team workspace with verifiable records. It is not a company and confers no legal rights.
+      </Notice>
 
       {!report ? (
         <LoadingCard lines={4} />
