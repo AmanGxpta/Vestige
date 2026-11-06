@@ -186,6 +186,6 @@ test("live build: public page and funder page read real Sepolia; unregistered na
   await expect(page.getByTestId("public-evidence")).toHaveAttribute("data-phase", "done", { timeout: 45_000 });
   await expect(page.getByTestId("ens-unresolved")).toBeVisible();
   await page.goto("/funder/definitely-not-registered-vestige-e2e.vestige.eth");
-  await expect(page.getByTestId("funder-ens-status")).toContainText("does not resolve", { timeout: 45_000 });
+  await expect(page.getByTestId("funder-ens-status")).toContainText(/does not resolve|not a registered vestige venture/, { timeout: 45_000 });
   await expect(page.getByTestId("fund-submit")).toHaveCount(0);
 });

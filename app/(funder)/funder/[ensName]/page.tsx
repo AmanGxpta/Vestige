@@ -12,6 +12,7 @@ import { useAdapterQuery, useVestige } from "@/src/modules/ui/provider";
 import { useAction } from "@/src/modules/ui/useAction";
 import { ok } from "@/src/modules/ui/adapter";
 import { resolveEnsVenture } from "@/src/modules/public-view/chain-reader";
+import { useChainTreasury } from "@/src/modules/ui/useChainTreasury";
 import type { Address, Hex, TreasuryState, VentureId } from "@/src/modules/ui/types";
 
 type EnsTarget = { status: "loading" } | { status: "ok"; safe: Address; ventureId: Hex; mock: boolean } | { status: "failed"; reason: string };
@@ -51,6 +52,8 @@ export default function FundVenturePage() {
   const fund = useAction<TreasuryState>();
   const [amount, setAmount] = useState("1000");
   const [done, setDone] = useState<string | null>(null);
+  // Live: balance and deposits come from Whitechain for the ENS-resolved Safe, never from our API.
+  const chain = useChainTreasury(ens.status === "ok" ? ens.safe : undefined, treasury.status === "ok" ? treasury.data?.treasury?.deploymentBlock : undefined, done ? 1 : 0);
 
   if (pub.status === "loading") return <LoadingCard lines={4} />;
   const p = pub.status === "ok" ? pub.data : undefined;
@@ -224,6 +227,22 @@ export default function FundVenturePage() {
               </div>
             </form>
           )}
+          {chain.status === "ok" && (
+            <ul className="stack-sm small" style={{ listStyle: "none", padding: 0, margin: "16px 0 0" }} data-testid="chain-deposit-list">
+              {chain.value.transfers.filter((x) => x.direction === "IN").length === 0 && (
+                <li className="faint">No USDT deposits to this Safe since block {chain.value.scanFrom}{chain.value.fromDeployment ? " (deployment)" : " (recent blocks only)"}.</li>
+              )}
+              {chain.value.transfers
+                .filter((x) => x.direction === "IN")
+                .map((x) => (
+                  <li key={x.txHash} className="row">
+                    <span>{formatTokenAmount(x.valueRaw, chain.value.decimals)} USDT</span>
+                    <StatusPill status="VERIFIED">Settled on Whitechain · block {x.blockNumber}</StatusPill>
+                    <HashLink value={x.txHash} chainId={1874} source="CHAIN" />
+                  </li>
+                ))}
+            </ul>
+          )}
           {t && t.deposits.length > 0 && (
             <ul className="stack-sm small" style={{ listStyle: "none", padding: 0, margin: "16px 0 0" }} data-testid="deposit-list">
               {t.deposits.map((d) => (
@@ -240,7 +259,15 @@ export default function FundVenturePage() {
         </Card>
       </div>
       <aside className="stack">
-        {active && t?.balanceRaw !== undefined && (
+        {chain.status === "ok" && (
+          <Card title="Treasury balance">
+            <div style={{ fontSize: 28, fontFamily: "var(--serif)", fontWeight: 600 }} data-testid="funder-balance">
+              {formatTokenAmount(chain.value.balanceRaw, chain.value.decimals)} USDT
+            </div>
+            <span className="tiny faint">Read from Whitechain at block {chain.value.blockNumber} · test USDT — not real money</span>
+          </Card>
+        )}
+        {mock && active && t?.balanceRaw !== undefined && (
           <Card title="Treasury balance">
             <div style={{ fontSize: 28, fontFamily: "var(--serif)", fontWeight: 600 }} data-testid="funder-balance">
               {formatTokenAmount(t.balanceRaw, decimals)} USDT

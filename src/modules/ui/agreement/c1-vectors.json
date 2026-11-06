@@ -1,5 +1,5 @@
 {
-  "generatedFrom": "agent/identity@1b502e6 src/modules/agreements/{canonical,terms}.ts",
+  "generatedFrom": "agent/identity@a00016b src/modules/agreements/{canonical,terms}.ts",
   "canonical": [
     {
       "name": "sorted-keys-nested",
@@ -146,7 +146,7 @@
       "inputJs": "invalid-undefined-array-element",
       "result": {
         "ok": false,
-        "error": "Agreement contains a non-JSON value."
+        "error": "Agreement lists cannot have empty or undefined entries."
       }
     },
     {
@@ -171,9 +171,8 @@
       "note": "CONTRACTS: sparse arrays are invalid",
       "inputJs": "sparse-array",
       "result": {
-        "ok": true,
-        "json": "[1,,2]",
-        "hash": "0xa85c82fdf089787deb416469a0f24e00b970a34cccdeb34880655049c0b5d403"
+        "ok": false,
+        "error": "Agreement lists cannot have empty or undefined entries."
       }
     }
   ],

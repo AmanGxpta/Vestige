@@ -54,7 +54,19 @@ type C1Seat = {
   attestationTxHash?: Hex;
   worldEnvironment?: WorldEnvironment;
 };
-type C1Venture = { ventureId: VentureId; slug: string; ensName: string; displayName: string; status: "workspace"; ensStatus: ReadStatus; seats: C1Seat[]; humansVerified: number; maxSeats: number };
+type C1Venture = {
+  ventureId: VentureId;
+  slug: string;
+  ensName: string;
+  displayName: string;
+  status: "workspace";
+  ensStatus: ReadStatus;
+  seats: C1Seat[];
+  humansVerified: number;
+  maxSeats: number;
+  /** C1 a00016b: listed only while every current founder consents. */
+  listing?: { listed: boolean; consents: { wallet: Address; listed: boolean }[] };
+};
 type C1Agreement = {
   ventureId: VentureId;
   agreementId: Hex;
@@ -119,6 +131,31 @@ const CODE_MAP: Record<string, AdapterErrorCode> = {
   WORLD_SIGNAL_MISMATCH: "INVALID_INPUT",
   WORLD_UNAVAILABLE: "BLOCKED",
   CONFIG_MISSING: "BLOCKED",
+  RATE_LIMITED: "NETWORK",
+  ORIGIN_FORBIDDEN: "NETWORK",
+  IDEMPOTENCY_CONFLICT: "NOT_READY",
+  NONCE_INVALID: "INVALID_INPUT",
+  // X treasury (agent/treasury 1d2ff44 / 4d44fa8 service.mjs, http.mjs)
+  TREASURY_UNCONFIGURED: "BLOCKED",
+  ORIGIN_MISMATCH: "NETWORK",
+  IDEMPOTENCY_KEY_REQUIRED: "INVALID_INPUT",
+  VERIFIED_FOUNDER_REQUIRED: "NOT_VERIFIED",
+  NOT_CURRENT_OWNER: "NOT_A_FOUNDER",
+  TWO_CONFIRMED_SEATS_REQUIRED: "NOT_READY",
+  TWO_SIGNATURES_REQUIRED: "RELAYER_REFUSED",
+  STALE_SAFE_NONCE: "VERSION_SUPERSEDED",
+  PAYMENT_EXECUTION_PENDING: "NOT_READY",
+  PAYMENT_NOT_SIGNABLE: "NOT_READY",
+  PAYMENT_NOT_FOUND: "NOT_FOUND",
+  SAFE_NONCE_ALREADY_PROPOSED: "NOT_READY",
+  PAYER_SESSION_MISMATCH: "UNAUTHENTICATED",
+  SIGNER_SESSION_MISMATCH: "INVALID_INPUT",
+  INVALID_SIGNATURE: "INVALID_INPUT",
+  INVALID_PAYMENT: "INVALID_INPUT",
+  INVALID_AMOUNT: "INVALID_INPUT",
+  INVALID_ADDRESS: "INVALID_INPUT",
+  INVALID_BODY: "INVALID_INPUT",
+  SERVICE_UNAVAILABLE: "NETWORK",
   ALREADY_VERIFIED: "NOT_READY",
   ALREADY_SIGNED: "NOT_READY",
 };
@@ -136,6 +173,22 @@ const KIND_MAP: Record<string, EvidenceKind> = {
   ens_founder_registered: "ENS_REGISTERED",
   ens_humans_record: "ENS_RECORD",
   ens_agreement_record: "ENS_RECORD",
+};
+
+/** X returns `message: code`; give users a sentence. Unknown codes keep the server message. */
+const FRIENDLY: Record<string, string> = {
+  TREASURY_UNCONFIGURED: "The treasury service is not configured on this server yet.",
+  VERIFIED_FOUNDER_REQUIRED: "Only founders whose World ID and on-chain seat are both verified can do this.",
+  NOT_CURRENT_OWNER: "Your wallet is not a current owner of this Safe.",
+  TWO_CONFIRMED_SEATS_REQUIRED: "Both founders need verified, on-chain-attested seats before the treasury can be prepared.",
+  TWO_SIGNATURES_REQUIRED: "vestige refused to send this payment: it does not have both founders' approvals. Nothing was submitted and no gas was spent.",
+  STALE_SAFE_NONCE: "The Safe moved on since this payment was proposed, so its approvals were cleared. Propose it again.",
+  PAYMENT_EXECUTION_PENDING: "This payment is already being executed. Wait for the receipt.",
+  SAFE_NONCE_ALREADY_PROPOSED: "Another payment is already waiting for approval. Approve or let it lapse first.",
+  PAYER_SESSION_MISMATCH: "The signed-in wallet is not the paying wallet.",
+  SIGNER_SESSION_MISMATCH: "That approval was not signed by your signed-in owner wallet.",
+  HUMAN_APPROVAL_REQUIRED: "Deployment request recorded. No transaction is sent until the operator approves the exact deployment.",
+  RATE_LIMITED: "Too many requests. Wait a moment and try again.",
 };
 
 const TREASURY_STATUSES: TreasuryStatus[] = ["UNKNOWN", "PENDING", "ACTIVE", "UNVERIFIED", "FAILED"];
@@ -158,13 +211,13 @@ export function createLiveAdapter(deps: LiveDeps = {}): VestigeClient {
     return session;
   };
 
-  async function call<T>(method: string, route: string, path: string, opts: { body?: unknown; auth?: boolean; idempotent?: boolean } = {}): Promise<Result<T>> {
+  async function call<T>(method: string, route: string, path: string, opts: { body?: unknown; auth?: boolean | "optional"; idempotent?: boolean } = {}): Promise<Result<T>> {
     const headers: Record<string, string> = { accept: "application/json" };
     if (opts.body !== undefined) headers["content-type"] = "application/json";
     if (opts.auth) {
       const s = activeSession();
-      if (!s) return err("UNAUTHENTICATED", "Sign in with your wallet first.");
-      headers.authorization = `Bearer ${s.token}`;
+      if (!s && opts.auth !== "optional") return err("UNAUTHENTICATED", "Sign in with your wallet first.");
+      if (s) headers.authorization = `Bearer ${s.token}`;
     }
     if (opts.idempotent) headers["idempotency-key"] = idemKey();
     let res: Response;
@@ -198,8 +251,9 @@ export function createLiveAdapter(deps: LiveDeps = {}): VestigeClient {
     if (res.ok) return ok(json as T);
     const e = (json as { error?: { code?: string; message?: string } }).error;
     const code = (e?.code && CODE_MAP[e.code]) || (e?.code?.startsWith("RELAY") ? "RELAYER_REFUSED" : "NETWORK");
-    if (code === "UNAUTHENTICATED") clearSession();
-    return err(code, e?.message ?? `Request failed (HTTP ${res.status}).`, e?.code ? `server code ${e.code}` : undefined);
+    if (e?.code === "UNAUTHENTICATED") clearSession();
+    const message = (e?.code && FRIENDLY[e.code]) || (e?.message && e.message !== e.code ? e.message : undefined) || `Request failed (${e?.code ?? `HTTP ${res.status}`}).`;
+    return err(code, message, e?.code ? `server code ${e.code}` : undefined);
   }
 
   const requireSessionFor = (wallet?: Address): Result<Address> => {
@@ -245,7 +299,10 @@ export function createLiveAdapter(deps: LiveDeps = {}): VestigeClient {
     ensStatus: venture.ensStatus,
     seats: venture.seats.map(toSeat),
     ...(agreement ? { agreement: toAgreement(agreement) } : {}),
-    listing: null, // C1 does not report listing state yet (CR-C2-001 follow-through)
+    listing:
+      venture.listing && Array.isArray(venture.listing.consents)
+        ? { listed: venture.listing.listed === true, consents: venture.listing.consents.map((c) => ({ wallet: getAddress(c.wallet), listed: c.listed === true })) }
+        : null,
     source: "API",
   });
 
@@ -254,10 +311,14 @@ export function createLiveAdapter(deps: LiveDeps = {}): VestigeClient {
     return r.ok ? ok(toDetail(r.value.venture, r.value.agreement)) : r;
   };
 
+  /** Server-built SafeTx typed data from proposals this tab made (until X's readback reloads it, CR-C2-009). */
+  const proposalTypedData = new Map<string, unknown>();
   const treasuryState = async (id: VentureId): Promise<Result<TreasuryState>> => {
-    const r = await call<Record<string, unknown>>("GET", "GET /api/treasury/ventures/:id", `/api/treasury/ventures/${id}`);
+    const r = await call<Record<string, unknown>>("GET", "GET /api/treasury/ventures/:id", `/api/treasury/ventures/${id}`, { auth: "optional" });
     if (!r.ok) return r;
-    return ok(toTreasuryState(r.value));
+    const t = toTreasuryState(r.value);
+    for (const p of t.payments) if (!p.safeTypedData && proposalTypedData.has(p.paymentId)) p.safeTypedData = proposalTypedData.get(p.paymentId);
+    return ok(t);
   };
 
   const client: VestigeClient = {
@@ -446,8 +507,16 @@ export function createLiveAdapter(deps: LiveDeps = {}): VestigeClient {
     async deployTreasury(ventureId, { wallet }) {
       const s = requireSessionFor(wallet);
       if (!s.ok) return s;
-      const r = await call<unknown>("POST", "POST /api/treasury/ventures/:id/deploy", `/api/treasury/ventures/${ventureId}/deploy`, { auth: true, idempotent: true, body: {} });
-      return r.ok ? treasuryState(ventureId) : r;
+      const r = await call<{ operationId?: string; status?: string; error?: { code?: string } }>("POST", "POST /api/treasury/ventures/:id/deploy", `/api/treasury/ventures/${ventureId}/deploy`, {
+        auth: true,
+        idempotent: true,
+        body: {},
+      });
+      if (!r.ok) return r;
+      // X returns 202 RESERVED + HUMAN_APPROVAL_REQUIRED: a request, not a deployment.
+      if (r.value.error?.code === "HUMAN_APPROVAL_REQUIRED")
+        return err("NOT_READY", FRIENDLY.HUMAN_APPROVAL_REQUIRED, `operation ${r.value.operationId ?? "?"} · ${r.value.status ?? "RESERVED"}`);
+      return treasuryState(ventureId);
     },
 
     async fundTreasury(ventureId, { from, to, amountRaw }, sign) {
@@ -503,12 +572,14 @@ export function createLiveAdapter(deps: LiveDeps = {}): VestigeClient {
     async proposePayment(ventureId, { recipient, amountRaw, reason, wallet }) {
       const s = requireSessionFor(wallet);
       if (!s.ok) return s;
-      const r = await call<unknown>("POST", "POST /api/treasury/ventures/:id/payments", `/api/treasury/ventures/${ventureId}/payments`, {
+      const r = await call<{ paymentId?: string; typedData?: unknown }>("POST", "POST /api/treasury/ventures/:id/payments", `/api/treasury/ventures/${ventureId}/payments`, {
         auth: true,
         idempotent: true,
         body: { recipient, amountRaw, reason },
       });
-      return r.ok ? treasuryState(ventureId) : r;
+      if (!r.ok) return r;
+      if (r.value.paymentId && r.value.typedData) proposalTypedData.set(r.value.paymentId, r.value.typedData);
+      return treasuryState(ventureId);
     },
 
     async signPayment(ventureId, paymentId, { wallet }, sign) {
@@ -519,6 +590,12 @@ export function createLiveAdapter(deps: LiveDeps = {}): VestigeClient {
       const tr = t.value.treasury;
       const p = t.value.payments.find((x) => x.paymentId === paymentId);
       if (!tr || !p) return err("NOT_FOUND", "No such payment.");
+      if (!p.safeTypedData)
+        return err(
+          "BLOCKED",
+          "Not connected yet",
+          "The treasury readback does not return this payment's approval payload yet (CR-C2-009), so it can only be approved from the tab that proposed it.",
+        );
       const td = p.safeTypedData as TypedDataDefinition | undefined;
       const dom = (td?.domain ?? {}) as { chainId?: number | string; verifyingContract?: string };
       const msg = (td?.message ?? {}) as { to?: string; operation?: number | string; value?: string | number };
@@ -530,6 +607,7 @@ export function createLiveAdapter(deps: LiveDeps = {}): VestigeClient {
       if (!signature) return err("CANCELLED", "Approval cancelled. Nothing was signed.");
       const r = await call<unknown>("POST", "POST /api/treasury/ventures/:id/payments/:pid/sign", `/api/treasury/ventures/${ventureId}/payments/${paymentId}/sign`, {
         auth: true,
+        idempotent: true,
         body: { signature },
       });
       return r.ok ? treasuryState(ventureId) : r;
@@ -602,34 +680,65 @@ export function toPublic(p: C1Public): PublicOffchainEvidence {
   };
 }
 
-/** Tolerant mapping of X's readback; anything unrecognised stays UNKNOWN, never ACTIVE. */
+/**
+ * X readback (agent/treasury 1d2ff44/4d44fa8 `TreasuryService.read`) → view state.
+ * X returns treasury fields FLAT at the top level; an older nested `{ treasury }` shape is
+ * also accepted. Anything unrecognised stays UNKNOWN, never ACTIVE. Balances and deposits
+ * are NOT in X's readback — the UI reads them from Whitechain directly (useChainTreasury).
+ */
 export function toTreasuryState(raw: Record<string, unknown>): TreasuryState {
-  const t = (raw.treasury ?? null) as Record<string, unknown> | null;
-  const status = TREASURY_STATUSES.includes(t?.verificationStatus as TreasuryStatus) ? (t!.verificationStatus as TreasuryStatus) : "UNKNOWN";
-  const treasury: Treasury | undefined =
-    t && isAddr(t.safeAddress)
-      ? {
-          ventureId: t.ventureId as VentureId,
-          safeAddress: t.safeAddress,
-          chainId: WHITECHAIN_CHAIN_ID,
-          ownerAddresses: Array.isArray(t.ownerAddresses) ? (t.ownerAddresses as Address[]) : [],
-          threshold: Number(t.threshold) || 0,
-          guardAddress: t.guardAddress as Address,
-          registryAddress: t.registryAddress as Address,
-          verificationStatus: status,
-          deploymentTxHash: t.deploymentTxHash as Hex,
-          ...(t.deploymentBlock !== undefined ? { deploymentBlock: String(t.deploymentBlock) } : {}),
-        }
-      : undefined;
+  const t = (raw.treasury && typeof raw.treasury === "object" ? raw.treasury : raw) as Record<string, unknown>;
+  const status = TREASURY_STATUSES.includes(t.verificationStatus as TreasuryStatus) ? (t.verificationStatus as TreasuryStatus) : "UNKNOWN";
+  const manifest = (raw.manifest ?? null) as { contracts?: { token?: { address?: string } } } | null;
+  const mTok = manifest?.contracts?.token?.address;
+  const tokenAddress = (isAddr(mTok) ? mTok : "0xcedfB56113143d55b2358b8CFbB0dEB5Ad2f55a7") as Address;
+  const treasury: Treasury | undefined = isAddr(t.safeAddress)
+    ? {
+        ventureId: (t.ventureId ?? raw.ventureId) as VentureId,
+        safeAddress: getAddress(t.safeAddress),
+        chainId: WHITECHAIN_CHAIN_ID,
+        ownerAddresses: Array.isArray(t.ownerAddresses) ? (t.ownerAddresses as Address[]) : [],
+        threshold: Number(t.threshold) || 0,
+        guardAddress: t.guardAddress as Address,
+        registryAddress: t.registryAddress as Address,
+        verificationStatus: status,
+        deploymentTxHash: t.deploymentTxHash as Hex,
+        ...(t.deploymentBlock !== undefined ? { deploymentBlock: String(t.deploymentBlock) } : {}),
+      }
+    : undefined;
+  const rawPayments = Array.isArray(raw.payments) ? (raw.payments as Record<string, unknown>[]) : [];
+  const approvalsReported = rawPayments.every((p) => Array.isArray(p.signerWallets));
+  const payments: Payment[] = rawPayments
+    .filter((p) => typeof p.paymentId === "string")
+    .map((p) => ({
+      paymentId: p.paymentId as string,
+      ventureId: (raw.ventureId ?? t.ventureId) as VentureId,
+      safeTxHash: (isHex32(p.safeTxHash) ? p.safeTxHash : `0x${"00".repeat(32)}`) as Hex,
+      recipient: p.recipient as Address,
+      tokenAddress,
+      amountRaw: String(p.amountRaw ?? "0"),
+      reason: typeof p.reason === "string" ? p.reason : "(reason visible to owners only)",
+      signerWallets: Array.isArray(p.signerWallets) ? (p.signerWallets as Address[]) : [],
+      status: (["AWAITING_APPROVALS", "READY", "EXECUTED", "FAILED"].includes(p.status as string) ? p.status : "FAILED") as Payment["status"],
+      ...(p.typedData || p.safeTypedData ? { safeTypedData: p.typedData ?? p.safeTypedData } : {}),
+      ...(typeof p.safeNonce === "string" ? { safeNonce: p.safeNonce } : {}),
+      ...(isHex32(p.executedTxHash) ? { executedTxHash: p.executedTxHash } : {}),
+    }));
+  const prov = (raw.provenance ?? null) as { blockNumber?: string; source?: string } | null;
+  const ops = Array.isArray(raw.operations) ? (raw.operations as TreasuryState["operations"]) : undefined;
   return {
     treasury,
     balanceRaw: typeof raw.balanceRaw === "string" ? raw.balanceRaw : undefined,
     tokenDecimals: typeof raw.tokenDecimals === "number" ? raw.tokenDecimals : undefined,
-    payments: Array.isArray(raw.payments) ? (raw.payments as Payment[]) : [],
+    payments,
     deposits: Array.isArray(raw.deposits) ? (raw.deposits as TreasuryState["deposits"]) : [],
     evidence: Array.isArray(raw.evidence)
       ? (raw.evidence as Evidence[]).filter((e) => e && typeof e.kind === "string" && (!e.txHash || isHex32(e.txHash))).map((e) => ({ ...e, source: "API" as const }))
       : undefined,
+    operations: ops,
+    worldSource: prov?.source === "WORLD_PRODUCTION" || prov?.source === "TESTED_IN_SIMULATOR" ? prov.source : prov ? "UNKNOWN" : undefined,
+    readAtBlock: prov?.blockNumber,
+    approvalsReported,
     source: "API",
   };
 }

@@ -9,6 +9,7 @@ import { useVestige } from "@/src/modules/ui/provider";
 import { attestedSeats, isTreasuryActive, seatFor, treasuryStatusText } from "@/src/modules/ui/progress";
 import { useAction } from "@/src/modules/ui/useAction";
 import { useVenture } from "@/src/modules/ui/venture/VentureContext";
+import { useChainTreasury } from "@/src/modules/ui/useChainTreasury";
 import type { TreasuryState } from "@/src/modules/ui/types";
 
 export default function TreasuryPage() {
@@ -25,6 +26,8 @@ export default function TreasuryPage() {
   const seat = seatFor(v, address);
   const attested = attestedSeats(v).length;
   const active = isTreasuryActive(tr);
+  const chain = useChainTreasury(active ? tr?.safeAddress : undefined, tr?.deploymentBlock);
+  const requested = t?.operations?.filter((o) => o.status === "RESERVED") ?? [];
   const ownersMatchSeats = !!tr && tr.ownerAddresses.length === 2 && tr.ownerAddresses.every((o) => v.seats.some((s) => s.wallet.toLowerCase() === o.toLowerCase()));
 
   return (
@@ -45,7 +48,18 @@ export default function TreasuryPage() {
               The Guard refuses owner changes except a swap to another verified-human seat, and there is no admin or recovery key. If a founder loses their
               wallet key, the funds in this treasury can become permanently inaccessible. Keep your key safe.
             </Notice>
-            {deploy.error && <AdapterErrorNotice error={deploy.error} />}
+            {deploy.error?.detail?.startsWith("operation") ? (
+              <Notice tone="info" title="Deployment requested — waiting for operator approval" testId="deploy-requested">
+                {deploy.error.message} <span className="tiny faint">({deploy.error.detail})</span>
+              </Notice>
+            ) : (
+              deploy.error && <AdapterErrorNotice error={deploy.error} />
+            )}
+            {!deploy.error && requested.length > 0 && (
+              <Notice tone="info" title="A treasury request is recorded" testId="deploy-recorded">
+                {requested.length} operation{requested.length > 1 ? "s" : ""} RESERVED. No transaction has been sent; the Safe appears here only after deployment and chain read-back.
+              </Notice>
+            )}
             <div>
               <Button
                 loading={deploy.busy}
@@ -115,9 +129,35 @@ export default function TreasuryPage() {
               </dd>
               <dt>Balance</dt>
               <dd data-testid="founder-balance">
-                {t?.balanceRaw !== undefined ? <strong>{formatTokenAmount(t.balanceRaw, t.tokenDecimals ?? 6)} USDT</strong> : <span className="faint">—</span>}
+                {chain.status === "ok" ? (
+                  <>
+                    <strong>{formatTokenAmount(chain.value.balanceRaw, chain.value.decimals)} USDT</strong>
+                    <span className="tiny faint"> · read from Whitechain at block {chain.value.blockNumber}</span>
+                  </>
+                ) : chain.status === "error" ? (
+                  <StatusPill status="UNKNOWN">Could not read balance</StatusPill>
+                ) : t?.balanceRaw !== undefined ? (
+                  <strong>{formatTokenAmount(t.balanceRaw, t.tokenDecimals ?? 6)} USDT</strong>
+                ) : (
+                  <span className="faint">—</span>
+                )}
                 <span className="tiny faint"> (test USDT — not real money)</span>
               </dd>
+              {t?.worldSource && (
+                <>
+                  <dt>World provenance</dt>
+                  <dd data-testid="treasury-world-source">
+                    {t.worldSource === "TESTED_IN_SIMULATOR" ? (
+                      <span className="badge badge-mock-tag">TESTED IN SIMULATOR</span>
+                    ) : t.worldSource === "WORLD_PRODUCTION" ? (
+                      "World production proofs for both seats"
+                    ) : (
+                      <StatusPill status="UNKNOWN">Unknown</StatusPill>
+                    )}
+                    <span className="tiny faint"> · reported by the treasury service{t.readAtBlock ? ` at block ${t.readAtBlock}` : ""}</span>
+                  </dd>
+                </>
+              )}
             </dl>
           </div>
         </Card>

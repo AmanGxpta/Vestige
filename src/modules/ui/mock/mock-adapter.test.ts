@@ -129,7 +129,7 @@ describe("DEV MOCK adapter", () => {
     const { c, id } = await setupTwoFounders();
     expect(must(await c.listVentures())).toHaveLength(0);
     let v = must(await c.setListing(id, { listed: true, wallet: A }));
-    expect(v.listing).toEqual({ listed: false, optedIn: [A] });
+    expect(v.listing).toEqual({ listed: false, consents: [{ wallet: A, listed: true }, { wallet: B, listed: false }] });
     expect(must(await c.listVentures())).toHaveLength(0);
     v = must(await c.setListing(id, { listed: true, wallet: B }));
     expect(v.listing!.listed).toBe(true);

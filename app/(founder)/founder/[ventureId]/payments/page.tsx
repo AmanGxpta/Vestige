@@ -11,7 +11,7 @@ import { useVenture } from "@/src/modules/ui/venture/VentureContext";
 import type { Address, Payment, TreasuryState } from "@/src/modules/ui/types";
 import { ADAPTER_KIND } from "@/src/modules/ui/config";
 
-function PaymentCard({ p, decimals, owners, source }: { p: Payment; decimals: number; owners: Address[]; source: TreasuryState["source"] }) {
+function PaymentCard({ p, decimals, owners, source, approvalsReported = true }: { p: Payment; decimals: number; owners: Address[]; source: TreasuryState["source"]; approvalsReported?: boolean }) {
   const { venture, refreshAll } = useVenture();
   const { client, address, signer } = useVestige();
   const sign = useAction<TreasuryState>();
@@ -40,8 +40,11 @@ function PaymentCard({ p, decimals, owners, source }: { p: Payment; decimals: nu
           <dt>For</dt>
           <dd>{p.reason}</dd>
           <dt>Approvals</dt>
-          <dd className="stack-sm" data-testid="payment-approvals">
-            {owners.map((o) => {
+          <dd className="stack-sm" data-testid="payment-approvals" data-reported={approvalsReported}>
+            {!approvalsReported && (
+              <span className="small faint">Not reported by the treasury readback yet (CR-C2-009). Status: {p.status === "READY" ? "both approvals recorded" : p.status}.</span>
+            )}
+            {approvalsReported && owners.map((o) => {
               const s = v?.seats.find((x) => x.wallet.toLowerCase() === o.toLowerCase());
               const signed = p.signerWallets.some((w) => w.toLowerCase() === o.toLowerCase());
               return (
@@ -51,12 +54,14 @@ function PaymentCard({ p, decimals, owners, source }: { p: Payment; decimals: nu
                 </span>
               );
             })}
-            <span className="tiny faint">
-              {p.signerWallets.length} of {owners.length} — both founders must sign.
-            </span>
+            {approvalsReported && (
+              <span className="tiny faint">
+                {p.signerWallets.length} of {owners.length} — both founders must sign.
+              </span>
+            )}
           </dd>
           <dt>Safe tx hash</dt>
-          <dd className="mono small">{shortHex(p.safeTxHash, 10, 8)}</dd>
+          <dd className="mono small">{/^0x0+$/.test(p.safeTxHash) ? <span className="faint">not reported</span> : shortHex(p.safeTxHash, 10, 8)}</dd>
           {p.executedTxHash && (
             <>
               <dt>Execution</dt>
@@ -219,7 +224,7 @@ export default function PaymentsPage() {
       {t.payments.length === 0 ? (
         <p className="muted small">No payments proposed yet.</p>
       ) : (
-        [...t.payments].reverse().map((p) => <PaymentCard key={p.paymentId} p={p} decimals={decimals} owners={tr!.ownerAddresses} source={t.source} />)
+        [...t.payments].reverse().map((p) => <PaymentCard key={p.paymentId} p={p} decimals={decimals} owners={tr!.ownerAddresses} source={t.source} approvalsReported={t.approvalsReported !== false} />)
       )}
 
       <RejectedAttemptProof txHash={evidenceTx} />

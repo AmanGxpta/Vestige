@@ -260,7 +260,8 @@ export function AdapterErrorNotice({ error }: { error: { code: string; message: 
   if (error.code === "BLOCKED")
     return (
       <Notice tone="warn" title="Not connected yet" testId="blocked-notice">
-        {error.detail ?? error.message}
+        {error.message && error.message !== "Not connected yet" ? error.message : error.detail}
+        {error.message && error.message !== "Not connected yet" && error.detail && <span className="tiny faint"> ({error.detail})</span>}
       </Notice>
     );
   return (

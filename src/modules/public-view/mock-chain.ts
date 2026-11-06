@@ -51,13 +51,13 @@ export async function readMockChainReport(ensName: string, client: VestigeClient
     manifest: { status: "NOT_CONFIGURED" },
   };
   if (!t || !tr.ok) return report;
-  const art = (address: Address, c: string) => ({ address, deploymentTxHash: t.deploymentTxHash, deploymentBlock: 0, runtimeCodeHash: MOCK_HASH(c), abiPath: "DEV MOCK", abiSha256: "0".repeat(64) });
+  const art = (address: Address, c: string) => ({ address, deploymentTxHash: t.deploymentTxHash, deploymentBlock: 0, runtimeCodeHash: MOCK_HASH(c), abiPath: "contracts/abi/DEV_MOCK.json", abiSha256: "0".repeat(64) });
   const manifest: DeploymentManifestV1 = {
     schemaVersion: 1,
     network: "whitechain-sepolia",
     chainId: 1874,
     deploymentBlock: 0,
-    sourceCommit: "0000000",
+    sourceCommit: "0".repeat(40),
     explorerBaseUrl: "https://explorer.testnet.whitechain.io",
     ventureId: pub.value.ventureId,
     ensName: pub.value.ensName,

@@ -177,11 +177,27 @@ export async function readPublicChainReport(ensName: string, cfg: ReaderConfig, 
     return r;
   });
 
-  const texts = await step<Partial<Record<EnsTextKey, string | null>>>(ensProv("resolver.text", name), async () => {
+  let texts = await step<Partial<Record<EnsTextKey, string | null>>>(ensProv("resolver.text", name), async () => {
     if (resolver.status !== "VERIFIED") return { fail: "Skipped: no resolver." };
     const entries = await Promise.all(ENS_TEXT_KEYS.map(async (k) => [k, await sep.getEnsText({ name, key: k, ...ur })] as const));
     return Object.fromEntries(entries);
   });
+
+  // ENSIP-10 wildcard: the Universal Resolver returns the PARENT's resolver for any
+  // unregistered subname (observed on Sepolia 2026-11-07 once vestige.eth was registered).
+  // A resolver inherited from the parent with no records of the name's own is "not registered".
+  const labels = name.split(".");
+  if (resolver.status === "VERIFIED" && labels.length > 2 && texts.status === "VERIFIED" && Object.values(texts.value ?? {}).every((v) => !v)) {
+    const parent = labels.slice(1).join(".");
+    const parentResolver = await sep.getEnsResolver({ name: parent, ...ur }).catch(() => undefined);
+    const ownAddr = await sep.getEnsAddress({ name, coinType: BigInt(WHITECHAIN_ENS_COIN_TYPE), ...ur }).catch(() => null);
+    if (parentResolver && parentResolver.toLowerCase() === resolver.value!.toLowerCase() && (!ownAddr || ownAddr === zeroAddress)) {
+      const note = `${name} is not registered: the only resolver found is ${parent}'s (wildcard lookup) and the name has no records of its own.`;
+      const r0 = resolver;
+      Object.assign(resolver, { status: "FAILED", note, value: r0.value } satisfies Partial<Step<Address>>);
+      texts = { status: "FAILED", note: "Skipped: name not registered.", provenance: texts.provenance };
+    }
+  }
 
   const treasury = await step<{ address: Address; via: "ENSIP-11" | "TEXT_FALLBACK" }>(
     ensProv(`resolver.addr(node, ${WHITECHAIN_ENS_COIN_TYPE})`, name),
@@ -354,11 +370,55 @@ export async function resolveEnsVenture(
       sep.getEnsText({ name, key: "vestige.treasury", ...ur }),
       sep.getEnsAddress({ name, coinType: BigInt(WHITECHAIN_ENS_COIN_TYPE), ...ur }),
     ]);
-    if (!vid || !/^0x[0-9a-f]{64}$/.test(vid)) return { ok: false, reason: `${name} does not publish a valid vestige.ventureId.` };
+    if (!vid) return { ok: false, reason: `${name} is not a registered vestige venture: no vestige.ventureId record (a parent resolver may still answer by wildcard).` };
+    if (!/^0x[0-9a-f]{64}$/.test(vid)) return { ok: false, reason: `${name} publishes a malformed vestige.ventureId.` };
     const safe = addr && addr !== zeroAddress ? getAddress(addr) : parseTreasuryTextRecord(fallback);
     if (!safe) return { ok: false, reason: `${name} has no Whitechain treasury address.` };
     return { ok: true, safe, ventureId: vid as Hex };
   } catch (e) {
     return { ok: false, reason: `Could not read ENS: ${errMsg(e)}` };
   }
+}
+
+export type TreasuryActivity = { blockNumber: string; balanceRaw: string; decimals: number; transfers: TokenTransfer[]; scanFrom: string; fromDeployment: boolean };
+
+/**
+ * Balance + USDT transfers for a Safe, read directly from Whitechain (CHAIN source). X's
+ * readback does not carry balances/deposits; the founder and funder screens use this so
+ * money facts never depend on our API. Logs from `fromBlock` (deploymentBlock) in ≤10k windows.
+ */
+export async function readTreasuryActivity(
+  safe: Address,
+  cfg: Pick<ReaderConfig, "whitechainRpcUrl" | "usdtAddress" | "logLookbackBlocks"> & { fromBlock?: bigint },
+  client?: PublicClient,
+): Promise<TreasuryActivity> {
+  const wc = client ?? (createPublicClient({ chain: whitechainSepolia, transport: http(cfg.whitechainRpcUrl, { timeout: 12_000 }) }) as PublicClient);
+  const bn = await wc.getBlockNumber();
+  const [balance, decimals] = await Promise.all([
+    wc.readContract({ address: cfg.usdtAddress, abi: ERC20_ABI, functionName: "balanceOf", args: [safe], blockNumber: bn }),
+    wc.readContract({ address: cfg.usdtAddress, abi: ERC20_ABI, functionName: "decimals", blockNumber: bn }),
+  ]);
+  const lookback = cfg.logLookbackBlocks ?? FALLBACK_LOOKBACK;
+  const start = cfg.fromBlock !== undefined ? cfg.fromBlock : bn > lookback ? bn - lookback : 0n;
+  const windows: [bigint, bigint][] = [];
+  for (let from = start; from <= bn; from += LOG_WINDOW) windows.push([from, from + LOG_WINDOW - 1n > bn ? bn : from + LOG_WINDOW - 1n]);
+  const scan = async (args: { to: Address } | { from: Address }) =>
+    (await Promise.all(windows.map(([fromBlock, toBlock]) => wc.getLogs({ address: cfg.usdtAddress, event: TRANSFER_EVENT, args, fromBlock, toBlock })))).flat();
+  const [inbound, outbound] = await Promise.all([scan({ to: safe }), scan({ from: safe })]);
+  const map = (l: (typeof inbound)[number], direction: "IN" | "OUT"): TokenTransfer => ({
+    from: l.args.from as Address,
+    to: l.args.to as Address,
+    valueRaw: (l.args.value ?? 0n).toString(),
+    txHash: l.transactionHash as Hex,
+    blockNumber: (l.blockNumber ?? 0n).toString(),
+    direction,
+  });
+  return {
+    blockNumber: bn.toString(),
+    balanceRaw: balance.toString(),
+    decimals: Number(decimals),
+    transfers: [...inbound.map((l) => map(l, "IN")), ...outbound.map((l) => map(l, "OUT"))].sort((a, b) => Number(BigInt(b.blockNumber) - BigInt(a.blockNumber))),
+    scanFrom: start.toString(),
+    fromDeployment: cfg.fromBlock !== undefined,
+  };
 }

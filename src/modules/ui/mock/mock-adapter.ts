@@ -186,7 +186,7 @@ export function createMockAdapter(opts: { storage?: MockStorage; latencyMs?: num
       createdAt: v.createdAt,
       seats: v.seats.map(({ simulatedHumanId: _h, attestReadyAt: _a, label: _l, verifiedAt: _v, ...seat }) => seat),
       agreement: ver ? toAgreement(v, ver, viewer) : undefined,
-      listing: { listed: allIn, optedIn: [...v.listingOptIn] },
+      listing: { listed: allIn, consents: v.seats.map((x) => ({ wallet: x.wallet, listed: v.listingOptIn.some((w) => sameAddr(w, x.wallet)) })) },
       source: "DEV_MOCK",
     };
   };

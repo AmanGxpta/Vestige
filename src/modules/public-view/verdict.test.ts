@@ -14,7 +14,7 @@ const SAFE = "0x4444444444444444444444444444444444444444" as const;
 const USDT = "0xcedfB56113143d55b2358b8CFbB0dEB5Ad2f55a7" as const;
 const VID = `0x${"ab".repeat(32)}` as const;
 const H = (c: string) => `0x${c.repeat(64)}` as `0x${string}`;
-const art = (address: `0x${string}`, code: string) => ({ address, deploymentTxHash: H("e"), deploymentBlock: 100, runtimeCodeHash: H(code), abiPath: "abi/x.json", abiSha256: "a".repeat(64) });
+const art = (address: `0x${string}`, code: string) => ({ address, deploymentTxHash: H("e"), deploymentBlock: 100, runtimeCodeHash: H(code), abiPath: "contracts/abi/X.json", abiSha256: "a".repeat(64) });
 
 /** Fixture only — a structurally valid manifest. Not a real deployment. */
 export const MANIFEST: DeploymentManifestV1 = {
@@ -22,7 +22,7 @@ export const MANIFEST: DeploymentManifestV1 = {
   network: "whitechain-sepolia",
   chainId: 1874,
   deploymentBlock: 100,
-  sourceCommit: "ee46097",
+  sourceCommit: "4d44fa8".padEnd(40, "0"),
   explorerBaseUrl: "https://explorer.testnet.whitechain.io",
   ventureId: VID,
   ensName: "northstar.vestige.eth",
@@ -162,6 +162,14 @@ describe("validateManifest (fail closed)", () => {
     const { guard: _g, ...rest } = MANIFEST.contracts;
     expect(validateManifest({ ...MANIFEST, contracts: rest })).toContain("contracts.guard is missing");
     expect(validateManifest({ ...MANIFEST, owners: [O1, O1] })).toContain("owners must be distinct");
+  });
+  it("matches X's stricter rules: anchors, unknown keys, short commit, deploymentBlock binding, abiPath", () => {
+    expect(validateManifest({ ...MANIFEST, sourceCommit: "ee46097" })).toContain("sourceCommit must be a full 40-hex git commit");
+    expect(validateManifest({ ...MANIFEST, extra: 1 })).toContain("manifest has unknown keys: extra");
+    expect(validateManifest({ ...MANIFEST, deploymentBlock: 99 })).toContain("deploymentBlock must equal contracts.safe.deploymentBlock");
+    expect(validateManifest({ ...MANIFEST, contracts: { ...MANIFEST.contracts, factory: { ...MANIFEST.contracts.factory, address: O1 } } }).some((p) => p.includes("approved anchor"))).toBe(true);
+    expect(validateManifest({ ...MANIFEST, contracts: { ...MANIFEST.contracts, guard: { ...MANIFEST.contracts.guard, abiPath: "../x.json" } } }).some((p) => p.includes("abiPath"))).toBe(true);
+    expect(validateManifest({ ...MANIFEST, approvedAt: "2026-11-07T00:00:00+05:30" }).some((p) => p.includes("approvedAt"))).toBe(true);
   });
   it("rejects a token domain that is not the approved Tether USD domain", () => {
     const bad = { ...MANIFEST, contracts: { ...MANIFEST.contracts, token: { ...MANIFEST.contracts.token, eip712Domain: { ...MANIFEST.contracts.token.eip712Domain, name: "Fake USD" } } } };

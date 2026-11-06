@@ -48,52 +48,83 @@ export interface DeploymentManifestV1 {
   };
 }
 
+/*
+ * Rules mirror X's validator exactly (agent/treasury 1d2ff44 src/modules/treasury/manifest.mjs)
+ * so the browser and the treasury service accept and reject the same manifests:
+ * no unknown keys, non-zero addresses/hashes, 40-hex sourceCommit, UTC approvedAt,
+ * the Whitechain explorer, contracts/abi/*.json paths, canonical singleton/factory/token
+ * anchors, and deploymentBlock === contracts.safe.deploymentBlock. Cross-checked against
+ * X's code in docs/agent-reports/product/2026-11-07-cross-owner-*.txt.
+ */
 const ADDR = /^0x[0-9a-fA-F]{40}$/;
 const H32 = /^0x[0-9a-fA-F]{64}$/;
 const VID = /^0x[0-9a-f]{64}$/;
+const ZERO_ADDR = /^0x0{40}$/;
+const ZERO_H32 = /^0x0{64}$/;
+export const MANIFEST_ANCHORS = {
+  singleton: "0x29fcB43b46531BcA003ddC8FCB67FFE91900C762",
+  factory: "0x4e1DCf7AD4e460CfD30791CCC4F9c8a4f820ec67",
+  token: "0xcedfB56113143d55b2358b8CFbB0dEB5Ad2f55a7",
+} as const;
+const EXPLORERS = ["https://explorer.testnet.whitechain.io", "https://explorer.testnet.whitechain.io/"];
+const ART_KEYS = ["address", "deploymentTxHash", "deploymentBlock", "runtimeCodeHash", "abiPath", "abiSha256", "verifiedSourceUrl"];
+const TOKEN_KEYS = [...ART_KEYS, "decimals", "eip712Domain", "domainSeparator", "implementation"];
+const TOP_KEYS = ["schemaVersion", "chainId", "sourceCommit", "approvedAt", "explorerBaseUrl", "contracts", "network", "deploymentBlock", "ventureId", "ensName", "owners", "threshold", "setupInitializerHash"];
+const eqi = (a: unknown, b: unknown) => typeof a === "string" && typeof b === "string" && a.toLowerCase() === b.toLowerCase();
+const extraKeys = (o: object, allowed: string[]) => Object.keys(o).filter((k) => !allowed.includes(k));
 
-function artifactProblems(name: string, a: unknown): string[] {
+function artifactProblems(name: string, a: unknown, token = false): string[] {
   const x = a as Partial<ContractArtifact> | undefined;
-  if (!x || typeof x !== "object") return [`contracts.${name} is missing`];
+  if (!x || typeof x !== "object" || Array.isArray(x)) return [`contracts.${name} is missing`];
   const p: string[] = [];
-  if (!ADDR.test(String(x.address))) p.push(`contracts.${name}.address is not an address`);
-  if (!H32.test(String(x.deploymentTxHash))) p.push(`contracts.${name}.deploymentTxHash is not a tx hash`);
+  const extra = extraKeys(x, token ? TOKEN_KEYS : ART_KEYS);
+  if (extra.length) p.push(`contracts.${name} has unknown keys: ${extra.join(", ")}`);
+  if (!ADDR.test(String(x.address)) || ZERO_ADDR.test(String(x.address))) p.push(`contracts.${name}.address is not a non-zero address`);
+  if (!H32.test(String(x.deploymentTxHash)) || ZERO_H32.test(String(x.deploymentTxHash))) p.push(`contracts.${name}.deploymentTxHash is not a tx hash`);
   if (!Number.isSafeInteger(x.deploymentBlock) || (x.deploymentBlock as number) < 0) p.push(`contracts.${name}.deploymentBlock is not a block number`);
   if (!H32.test(String(x.runtimeCodeHash))) p.push(`contracts.${name}.runtimeCodeHash is not a bytes32`);
-  if (typeof x.abiPath !== "string" || !x.abiPath) p.push(`contracts.${name}.abiPath is missing`);
-  if (typeof x.abiSha256 !== "string" || !/^[0-9a-f]{64}$/i.test(x.abiSha256)) p.push(`contracts.${name}.abiSha256 is not a sha256`);
+  if (typeof x.abiPath !== "string" || !/^contracts\/abi\/[A-Za-z0-9_.-]+\.json$/.test(x.abiPath)) p.push(`contracts.${name}.abiPath must be contracts/abi/<name>.json`);
+  if (typeof x.abiSha256 !== "string" || !/^[0-9a-f]{64}$/.test(x.abiSha256)) p.push(`contracts.${name}.abiSha256 is not a lowercase sha256`);
+  if (x.verifiedSourceUrl !== undefined && !/^https:\/\//.test(String(x.verifiedSourceUrl))) p.push(`contracts.${name}.verifiedSourceUrl must be https`);
   return p;
 }
 
 /** Structural validation of a treasury manifest. Returns problems; empty = structurally valid. */
 export function validateManifest(m: unknown): string[] {
   const x = m as Partial<DeploymentManifestV1> | undefined;
-  if (!x || typeof x !== "object") return ["manifest is not a JSON object"];
+  if (!x || typeof x !== "object" || Array.isArray(x)) return ["manifest is not a JSON object"];
   const p: string[] = [];
-  if (x.schemaVersion !== 1) p.push("schemaVersion must be 1");
   if ((x as { kind?: string }).kind === "infrastructure") p.push("this is an InfrastructureManifestV1; a treasury manifest is required");
+  const extra = extraKeys(x, TOP_KEYS);
+  if (extra.length) p.push(`manifest has unknown keys: ${extra.join(", ")}`);
+  if (x.schemaVersion !== 1) p.push("schemaVersion must be 1");
   if (x.network !== "whitechain-sepolia") p.push('network must be "whitechain-sepolia"');
   if (x.chainId !== WHITECHAIN_CHAIN_ID) p.push("chainId must be 1874");
   if (!Number.isSafeInteger(x.deploymentBlock) || (x.deploymentBlock as number) < 0) p.push("deploymentBlock is not a block number");
-  if (typeof x.sourceCommit !== "string" || !/^[0-9a-f]{7,40}$/.test(x.sourceCommit)) p.push("sourceCommit is not a git commit");
-  if (typeof x.explorerBaseUrl !== "string" || !/^https:\/\//.test(x.explorerBaseUrl)) p.push("explorerBaseUrl must be https");
-  if (!VID.test(String(x.ventureId))) p.push("ventureId must be 0x + 64 lowercase hex");
-  if (typeof x.ensName !== "string" || !x.ensName.endsWith(".eth")) p.push("ensName is missing");
-  if (!Array.isArray(x.owners) || x.owners.length !== 2 || !x.owners.every((o) => ADDR.test(String(o)))) p.push("owners must be two addresses");
-  else if (x.owners[0].toLowerCase() === x.owners[1].toLowerCase()) p.push("owners must be distinct");
+  if (typeof x.sourceCommit !== "string" || !/^[0-9a-f]{40}$/.test(x.sourceCommit)) p.push("sourceCommit must be a full 40-hex git commit");
+  if (!EXPLORERS.includes(String(x.explorerBaseUrl))) p.push("explorerBaseUrl must be https://explorer.testnet.whitechain.io");
+  if (!VID.test(String(x.ventureId)) || ZERO_H32.test(String(x.ventureId))) p.push("ventureId must be 0x + 64 lowercase hex");
+  if (typeof x.ensName !== "string" || !/^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.vestige\.eth$/.test(x.ensName)) p.push("ensName must be <label>.vestige.eth");
+  if (!Array.isArray(x.owners) || x.owners.length !== 2 || !x.owners.every((o) => ADDR.test(String(o)) && !ZERO_ADDR.test(String(o)))) p.push("owners must be two addresses");
+  else if (eqi(x.owners[0], x.owners[1])) p.push("owners must be distinct");
   if (x.threshold !== 2) p.push("threshold must be 2");
   if (!H32.test(String(x.setupInitializerHash))) p.push("setupInitializerHash is not a bytes32");
-  if (typeof x.approvedAt !== "string" || Number.isNaN(Date.parse(x.approvedAt))) p.push("approvedAt is not an ISO-8601 time");
+  if (typeof x.approvedAt !== "string" || Number.isNaN(Date.parse(x.approvedAt)) || !x.approvedAt.endsWith("Z")) p.push("approvedAt must be an ISO-8601 UTC time ending in Z");
   const c = x.contracts as DeploymentManifestV1["contracts"] | undefined;
-  if (!c) return [...p, "contracts is missing"];
-  for (const k of ["safe", "guard", "registry", "singleton", "factory", "setup", "token"] as const) p.push(...artifactProblems(k, c[k]));
+  if (!c || typeof c !== "object") return [...p, "contracts is missing"];
+  const names = ["safe", "guard", "registry", "singleton", "factory", "setup", "token"] as const;
+  const cExtra = extraKeys(c, [...names]);
+  if (cExtra.length) p.push(`contracts has unknown keys: ${cExtra.join(", ")}`);
+  for (const k of names) p.push(...artifactProblems(k, c[k], k === "token"));
+  for (const k of ["singleton", "factory", "token"] as const) if (c[k] && !eqi(c[k].address, MANIFEST_ANCHORS[k])) p.push(`contracts.${k}.address must be the approved anchor ${MANIFEST_ANCHORS[k]}`);
+  if (c.safe && x.deploymentBlock !== c.safe.deploymentBlock) p.push("deploymentBlock must equal contracts.safe.deploymentBlock");
   const t = c.token;
   if (t) {
     if (t.decimals !== 6) p.push("contracts.token.decimals must be 6");
     p.push(...artifactProblems("token.implementation", t.implementation));
     if (!H32.test(String(t.domainSeparator))) p.push("contracts.token.domainSeparator is not a bytes32");
     const d = t.eip712Domain;
-    if (!d || d.name !== "Tether USD" || d.version !== "1" || d.chainId !== WHITECHAIN_CHAIN_ID || String(d.verifyingContract).toLowerCase() !== String(t.address).toLowerCase())
+    if (!d || extraKeys(d, ["name", "version", "chainId", "verifyingContract"]).length || d.name !== "Tether USD" || d.version !== "1" || d.chainId !== WHITECHAIN_CHAIN_ID || !eqi(d.verifyingContract, t.address))
       p.push('contracts.token.eip712Domain must be {"Tether USD","1",1874,token address}');
   }
   return p;

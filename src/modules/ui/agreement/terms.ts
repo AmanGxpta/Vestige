@@ -10,8 +10,9 @@
  * The UI uses this ONLY to preview the hash while founders edit. The hash that is
  * signed always comes from C1's server-built EIP-712 payload, never from here.
  *
- * One intentional difference: CONTRACTS says sparse arrays are invalid. C1@1b502e6
- * emits `[1,,2]` for them (not valid JSON). We reject; reported to C1/H.
+ * Rules match C1 @ a00016b exactly, including the sparse-array fix and container-depth
+ * counting (root container = level 1, more than 16 rejected). `terms.test.ts` runs both the
+ * vectors generated from C1's code and C1's official tests/identity/vectors/canonical-v1.json.
  */
 import { getAddress, isAddress, keccak256, stringToHex } from "viem";
 import type { Address, Hex, VentureId } from "../types";
@@ -25,7 +26,6 @@ export class CanonicalError extends Error {}
 
 /** vestige restricted canonical JSON (CONTRACTS v0). Throws CanonicalError. */
 export function canonicalize(value: unknown, depth = 0): string {
-  if (depth > MAX_DEPTH) throw new CanonicalError("Agreement is nested too deeply.");
   if (value === null) return "null";
   switch (typeof value) {
     case "string":
@@ -36,16 +36,19 @@ export function canonicalize(value: unknown, depth = 0): string {
       if (!Number.isSafeInteger(value)) throw new CanonicalError("Agreement numbers must be whole numbers (use basis points).");
       return Object.is(value, -0) ? "0" : String(value);
     case "object": {
+      if (depth + 1 > MAX_DEPTH) throw new CanonicalError("Agreement is nested too deeply.");
       if (Array.isArray(value)) {
+        if (Object.getPrototypeOf(value) !== Array.prototype) throw new CanonicalError("Agreement must be plain JSON.");
         const parts: string[] = [];
         for (let i = 0; i < value.length; i++) {
-          if (!(i in value)) throw new CanonicalError("Agreement arrays must not be sparse.");
+          if (!(i in value) || value[i] === undefined) throw new CanonicalError("Agreement arrays must not be sparse or contain undefined.");
           parts.push(canonicalize(value[i], depth + 1));
         }
         return `[${parts.join(",")}]`;
       }
       const proto = Object.getPrototypeOf(value);
       if (proto !== Object.prototype && proto !== null) throw new CanonicalError("Agreement must be plain JSON.");
+      if (Object.getOwnPropertySymbols(value).length > 0) throw new CanonicalError("Agreement must be plain JSON.");
       const entries = Object.entries(value as Record<string, unknown>)
         .filter(([, v]) => v !== undefined)
         .map(([k, v]) => [k.normalize("NFC"), v] as const);

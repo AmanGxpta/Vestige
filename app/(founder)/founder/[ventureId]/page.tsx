@@ -28,7 +28,8 @@ export default function TeamPage() {
   const v = venture.data;
   const mySeat = seatFor(v, address);
   const full = v.seats.length >= 2;
-  const myOptIn = !!address && !!v.listing?.optedIn.some((w) => w.toLowerCase() === address.toLowerCase());
+  const myOptIn = !!address && !!v.listing?.consents.some((c) => c.listed && c.wallet.toLowerCase() === address.toLowerCase());
+  const agreed = v.listing?.consents.filter((c) => c.listed).length ?? 0;
   const inviteUrl = invite ? inviteLink(origin, ventureId, invite, v.ensName) : null;
 
   return (
@@ -94,7 +95,7 @@ export default function TeamPage() {
             </p>
             {v.listing ? (
               <span className="small">
-                {v.listing.optedIn.length} of {v.seats.length} founders agreed{v.listing.listed ? "." : v.seats.length < 2 ? " · needs both founders." : " · waiting for the other founder."}
+                {agreed} of {v.seats.length} founders agreed{v.listing.listed ? "." : v.seats.length < 2 ? " · needs both founders." : " · waiting for the other founder."}
               </span>
             ) : (
               <span className="small faint">The API does not report listing consent yet; the toggle still sends your choice.</span>

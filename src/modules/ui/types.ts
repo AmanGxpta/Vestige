@@ -161,10 +161,10 @@ export type VentureDetail = {
   seats: FounderSeat[];
   agreement?: Agreement;
   /**
-   * Public-list consent (CR-C2-001). All current founders must opt in; any founder
-   * can withdraw. `null` = the API does not report it yet.
+   * Public-list consent (CR-C2-001), exactly C1's `venture.listing` shape: listed only
+   * while every current founder consents; any founder can withdraw. `null` = not reported.
    */
-  listing?: { listed: boolean; optedIn: Address[] } | null;
+  listing?: { listed: boolean; consents: { wallet: Address; listed: boolean }[] } | null;
   source: DataSource;
 };
 
@@ -176,8 +176,16 @@ export type TreasuryState = {
   tokenDecimals?: number;
   payments: Payment[];
   deposits: { from: Address; amountRaw: string; txHash: Hex; status: ReadStatus }[];
-  /** Receipt-backed evidence from X's readback (e.g. the mined GS020 REJECTED_ATTEMPT). */
+  /** Receipt-backed evidence from X's readback (e.g. the mined GS020 REJECTED_ATTEMPT). CR-C2-009. */
   evidence?: Evidence[];
+  /** X operation log (RESERVED/UNKNOWN/SUBMITTED/EXECUTED/FAILED), as returned. */
+  operations?: { operationId: string; status: RelayStatus; txHash?: Hex; blockNumber?: string; source?: string; error?: string | null }[];
+  /** Venture-level World provenance computed by X from C1's stored environment. */
+  worldSource?: "WORLD_PRODUCTION" | "TESTED_IN_SIMULATOR" | "UNKNOWN";
+  /** Block the readback was pinned to. */
+  readAtBlock?: string;
+  /** False when the API does not report per-payment approvals (signerWallets). */
+  approvalsReported?: boolean;
   source: DataSource;
 };
 
