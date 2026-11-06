@@ -14,7 +14,7 @@ describe("ENS setup plans (no broadcast)", () => {
     const p = buildParentSetupPlan({ registrar, owner: null, proxyLogic, createdAt: at });
     expect(p.txs.map((t) => t.signer)).toEqual(["REGISTRAR", "VESTIGE_ETH_OWNER"]);
     const d = decodeFunctionData({ abi: verifiableFactoryAbi, data: p.txs[0]!.data });
-    expect(d.args[0].toLowerCase()).toBe(ENSV2_SEPOLIA.UserRegistryImpl);
+    expect(String(d.args?.[0]).toLowerCase()).toBe(ENSV2_SEPOLIA.UserRegistryImpl);
     const s = decodeFunctionData({ abi: permissionedRegistryAbi, data: p.txs[1]!.data });
     expect(s.functionName).toBe("setSubregistry");
     expect(s.args[1]).toBe(p.predicted.parentRegistry);
