@@ -1,5 +1,6 @@
 // Read-only: never signs, sends a transaction, or requests a secret.
 import Safe from '@safe-global/protocol-kit';
+import { getSafeL2SingletonDeployment, getProxyFactoryDeployment } from '@safe-global/safe-deployments';
 import { createPublicClient, http, parseAbi, keccak256, encodeAbiParameters, zeroAddress } from 'viem';
 
 const rpc = process.env.WHITECHAIN_RPC_URL || 'https://rpc.testnet.whitechain.io';
@@ -18,6 +19,14 @@ for (const [name, address] of Object.entries({ ...addresses, token })) {
   if (!code || code === '0x') throw new Error(`No bytecode: ${name}`);
   result.contracts[name] = { address, bytes: (code.length - 2) / 2, codeHash: keccak256(code) };
 }
+const officialSafe = getSafeL2SingletonDeployment({version:'1.4.1'});
+const officialFactory = getProxyFactoryDeployment({version:'1.4.1'});
+for (const [name, deployment] of [['safeSingletonAddress',officialSafe],['safeProxyFactoryAddress',officialFactory]]) {
+  const canonical = deployment.deployments.canonical;
+  if (canonical.address.toLowerCase() !== addresses[name].toLowerCase() || canonical.codeHash !== result.contracts[name].codeHash) throw new Error('NONCANONICAL_SAFE_BYTECODE');
+}
+result.officialDeployments = { packageVersion:'1.37.67', canonicalCodeHashesMatch:true,
+  chain1874Listed:Boolean(officialSafe.networkAddresses['1874'] && officialFactory.networkAddresses['1874']) };
 const read = (address, declaration, functionName) => client.readContract({ address,
   abi: parseAbi([declaration]), functionName, blockNumber: block.number });
 result.safeVersion = await read(addresses.safeSingletonAddress, 'function VERSION() view returns (string)', 'VERSION');

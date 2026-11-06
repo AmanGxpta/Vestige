@@ -8,7 +8,10 @@ contract SeatRegistry {
     mapping(bytes32 => mapping(bytes32 => bool)) private usedNullifiers;
     event SeatAttested(bytes32 indexed ventureId, address indexed wallet, bytes32 nullifierHash);
 
-    constructor(address attester_) { require(attester_ != address(0), "ZERO_ATTESTER"); attester = attester_; }
+    constructor(address attester_) {
+        require(attester_ != address(0), "ZERO_ATTESTER");
+        attester = attester_;
+    }
 
     function attestSeat(bytes32 ventureId, address wallet, bytes32 nullifierHash) external {
         require(ventureId != bytes32(0) && wallet != address(0) && nullifierHash != bytes32(0), "ZERO_INPUT");

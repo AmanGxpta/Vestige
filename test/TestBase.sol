@@ -21,7 +21,16 @@ interface Vm {
 
 abstract contract TestBase {
     Vm internal constant vm = Vm(address(uint160(uint256(keccak256("hevm cheat code")))));
-    function assertTrue(bool value) internal pure { require(value, "assertTrue"); }
-    function assertEq(uint256 a, uint256 b) internal pure { require(a == b, "assertEq uint"); }
-    function assertEq(address a, address b) internal pure { require(a == b, "assertEq address"); }
+
+    function assertTrue(bool value) internal pure {
+        require(value, "assertTrue");
+    }
+
+    function assertEq(uint256 a, uint256 b) internal pure {
+        require(a == b, "assertEq uint");
+    }
+
+    function assertEq(address a, address b) internal pure {
+        require(a == b, "assertEq address");
+    }
 }

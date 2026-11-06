@@ -300,3 +300,36 @@ Ran 6 tests for test/SafeSetup.t.sol:SafeSetupTest
 Suite result: ok. 6 passed; 0 failed; 0 skipped; finished in 1.03ms (2.40ms CPU time)
 
 Ran 1 test suite in 4.56ms (1.03ms CPU time): 6 tests passed, 0 failed, 0 skipped (6 total tests)
+Compiling 1 files with Solc 0.8.24
+Solc 0.8.24 finished in 1.01s
+Compiler run successful!
+
+Ran 7 tests for test/SafeSetup.t.sol:SafeSetupTest
+[PASS] testAtomicSetupAttachesBoundGuard() (gas: 1222083)
+[PASS] testHelperCannotBeCalledDirectly() (gas: 32607)
+[PASS] testHelperRejectsMissingSingletonCode() (gas: 1750916)
+[PASS] testHelperRejectsWrongSingleton() (gas: 3176730)
+[PASS] testSetupRejectsFallbackHandler() (gas: 344702)
+[PASS] testSetupRejectsThresholdOne() (gas: 307623)
+[PASS] testSetupRejectsUnverifiedOwner() (gas: 317319)
+Suite result: ok. 7 passed; 0 failed; 0 skipped; finished in 9.76ms (6.80ms CPU time)
+
+Ran 1 test suite in 12.82ms (9.76ms CPU time): 7 tests passed, 0 failed, 0 skipped (7 total tests)
+Compiling 1 files with Solc 0.8.24
+Solc 0.8.24 finished in 1.01s
+Compiler run successful!
+
+Ran 1 test for test/SafeSetup.t.sol:SafeSetupTest
+[FAIL: next call did not revert as expected] testHelperRejectsMissingSingletonCode() (gas: 1608432)
+Suite result: FAILED. 0 passed; 1 failed; 0 skipped; finished in 9.54ms (1.04ms CPU time)
+
+Ran 1 test suite in 12.42ms (9.54ms CPU time): 0 tests passed, 1 failed, 0 skipped (1 total tests)
+
+Failing tests:
+Encountered 1 failing test in test/SafeSetup.t.sol:SafeSetupTest
+[FAIL: next call did not revert as expected] testHelperRejectsMissingSingletonCode() (gas: 1608432)
+
+Encountered a total of 1 failing tests, 0 tests succeeded
+
+Tip: Run `forge test --rerun` to retry only the 1 failed test
+Tip: Run `forge test --debug --match-test <TEST_NAME>` to inspect one failing test in the debugger

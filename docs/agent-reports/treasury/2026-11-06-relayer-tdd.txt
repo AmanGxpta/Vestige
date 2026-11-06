@@ -1,0 +1,621 @@
+✖ unknown venture cannot choose a relay destination (0.610125ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 0
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 43.437542
+
+✖ failing tests:
+
+test at tests/treasury/relayer.test.mjs:5:1
+✖ unknown venture cannot choose a relay destination (0.610125ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at async TestContext.<anonymous> (file:///Users/amang/Code/NovemberRush/ethglobal/vestige/vestige-treasury/tests/treasury/relayer.test.mjs:8:3)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: undefined,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+✔ unknown venture cannot choose a relay destination (0.480834ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 1
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 210.661542
+
+GREEN registered destination only
+✔ unknown venture cannot choose a relay destination (0.508667ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 1
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 321.202458
+
+RED chain-verified two-seat Safe
+✔ unknown venture cannot choose a relay destination (0.520834ms)
+✖ treasury activation rejects unsafe configuration (5.800958ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 1
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 195.005333
+
+✖ failing tests:
+
+test at tests/treasury/relayer.test.mjs:13:1
+✖ treasury activation rejects unsafe configuration (5.800958ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at async TestContext.<anonymous> (file:///Users/amang/Code/NovemberRush/ethglobal/vestige/vestige-treasury/tests/treasury/relayer.test.mjs:15:2)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: undefined,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+GREEN chain-verified two-seat Safe
+✔ unknown venture cannot choose a relay destination (0.5185ms)
+✔ treasury activation rejects unsafe configuration (2.929542ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 2
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 189.499167
+
+RED funding fields and validity
+✔ unknown venture cannot choose a relay destination (0.554ms)
+✔ treasury activation rejects unsafe configuration (2.905916ms)
+✖ funding recipient and expiry are bound to policy (2.674208ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 2
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 192.733042
+
+✖ failing tests:
+
+test at tests/treasury/relayer.test.mjs:18:1
+✖ funding recipient and expiry are bound to policy (2.674208ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at async TestContext.<anonymous> (file:///Users/amang/Code/NovemberRush/ethglobal/vestige/vestige-treasury/tests/treasury/relayer.test.mjs:20:21)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: undefined,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+GREEN funding fields and validity
+✔ unknown venture cannot choose a relay destination (0.543459ms)
+✔ treasury activation rejects unsafe configuration (3.254209ms)
+✔ funding recipient and expiry are bound to policy (3.132708ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 3
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 192.820417
+
+RED payer signature
+✔ unknown venture cannot choose a relay destination (0.57125ms)
+✔ treasury activation rejects unsafe configuration (2.857959ms)
+✔ funding recipient and expiry are bound to policy (2.7805ms)
+✖ a signed authorization cannot change its amount (2.630125ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 3
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 197.622958
+
+✖ failing tests:
+
+test at tests/treasury/relayer.test.mjs:24:1
+✖ a signed authorization cannot change its amount (2.630125ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at async TestContext.<anonymous> (file:///Users/amang/Code/NovemberRush/ethglobal/vestige/vestige-treasury/tests/treasury/relayer.test.mjs:26:2)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: undefined,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+GREEN payer signature
+✔ unknown venture cannot choose a relay destination (0.572625ms)
+✔ treasury activation rejects unsafe configuration (3.029333ms)
+✔ funding recipient and expiry are bound to policy (2.850583ms)
+✔ a signed authorization cannot change its amount (20.463541ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 214.438875
+
+RED threshold signatures and exact Safe payment
+✔ unknown venture cannot choose a relay destination (0.579584ms)
+✔ treasury activation rejects unsafe configuration (2.878125ms)
+✔ funding recipient and expiry are bound to policy (2.906458ms)
+✔ a signed authorization cannot change its amount (21.178541ms)
+✖ one owner cannot relay a payment (2.155ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 4
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 212.754917
+
+✖ failing tests:
+
+test at tests/treasury/relayer.test.mjs:29:1
+✖ one owner cannot relay a payment (2.155ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at async TestContext.<anonymous> (file:///Users/amang/Code/NovemberRush/ethglobal/vestige/vestige-treasury/tests/treasury/relayer.test.mjs:31:2)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: undefined,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+GREEN threshold signatures and exact Safe payment
+✔ unknown venture cannot choose a relay destination (0.59475ms)
+✔ treasury activation rejects unsafe configuration (2.890416ms)
+✔ funding recipient and expiry are bound to policy (2.921417ms)
+✔ a signed authorization cannot change its amount (21.288625ms)
+✔ one owner cannot relay a payment (1.888584ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 5
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 217.905042
+
+RED durable replay keys
+✔ unknown venture cannot choose a relay destination (0.5555ms)
+✔ treasury activation rejects unsafe configuration (2.856458ms)
+✔ funding recipient and expiry are bound to policy (2.786417ms)
+✔ a signed authorization cannot change its amount (20.374709ms)
+✔ one owner cannot relay a payment (1.800459ms)
+✖ the same authorization cannot be submitted twice (5.113208ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 5
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 230.532833
+
+✖ failing tests:
+
+test at tests/treasury/relayer.test.mjs:34:1
+✖ the same authorization cannot be submitted twice (5.113208ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at async TestContext.<anonymous> (file:///Users/amang/Code/NovemberRush/ethglobal/vestige/vestige-treasury/tests/treasury/relayer.test.mjs:36:2)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: undefined,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+GREEN durable replay keys
+✔ unknown venture cannot choose a relay destination (0.654625ms)
+✔ treasury activation rejects unsafe configuration (3.13ms)
+✔ funding recipient and expiry are bound to policy (3.038917ms)
+✔ a signed authorization cannot change its amount (20.619792ms)
+✔ one owner cannot relay a payment (1.897833ms)
+✔ the same authorization cannot be submitted twice (4.643542ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 6
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 224.280542
+
+RED venture and wallet rates
+✔ unknown venture cannot choose a relay destination (0.600166ms)
+✔ treasury activation rejects unsafe configuration (3.022583ms)
+✔ funding recipient and expiry are bound to policy (3.156833ms)
+✔ a signed authorization cannot change its amount (21.049041ms)
+✔ one owner cannot relay a payment (1.954542ms)
+✔ the same authorization cannot be submitted twice (5.33725ms)
+✖ rate-limited requests never send (3.003041ms)
+ℹ tests 7
+ℹ suites 0
+ℹ pass 6
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 232.933417
+
+✖ failing tests:
+
+test at tests/treasury/relayer.test.mjs:39:1
+✖ rate-limited requests never send (3.003041ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at async TestContext.<anonymous> (file:///Users/amang/Code/NovemberRush/ethglobal/vestige/vestige-treasury/tests/treasury/relayer.test.mjs:41:2)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: undefined,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+GREEN venture and wallet rates
+✔ unknown venture cannot choose a relay destination (0.606458ms)
+✔ treasury activation rejects unsafe configuration (3.085541ms)
+✔ funding recipient and expiry are bound to policy (3.070709ms)
+✔ a signed authorization cannot change its amount (21.023459ms)
+✔ one owner cannot relay a payment (1.749875ms)
+✔ the same authorization cannot be submitted twice (4.811375ms)
+✔ rate-limited requests never send (2.556834ms)
+ℹ tests 7
+ℹ suites 0
+ℹ pass 7
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 233.228709
+
+RED gas reservation budget
+✔ unknown venture cannot choose a relay destination (0.653ms)
+✔ treasury activation rejects unsafe configuration (3.234833ms)
+✔ funding recipient and expiry are bound to policy (2.879834ms)
+✔ a signed authorization cannot change its amount (21.173375ms)
+✔ one owner cannot relay a payment (1.785ms)
+✔ the same authorization cannot be submitted twice (4.975625ms)
+✔ rate-limited requests never send (2.587291ms)
+✖ daily WBT budget cannot be oversubscribed (3.497291ms)
+ℹ tests 8
+ℹ suites 0
+ℹ pass 7
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 234.504417
+
+✖ failing tests:
+
+test at tests/treasury/relayer.test.mjs:44:1
+✖ daily WBT budget cannot be oversubscribed (3.497291ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at async TestContext.<anonymous> (file:///Users/amang/Code/NovemberRush/ethglobal/vestige/vestige-treasury/tests/treasury/relayer.test.mjs:46:2)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: undefined,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+GREEN gas reservation budget
+✔ unknown venture cannot choose a relay destination (0.658042ms)
+✔ treasury activation rejects unsafe configuration (3.148833ms)
+✔ funding recipient and expiry are bound to policy (2.957084ms)
+✔ a signed authorization cannot change its amount (20.274541ms)
+✔ one owner cannot relay a payment (1.859458ms)
+✔ the same authorization cannot be submitted twice (4.855042ms)
+✔ rate-limited requests never send (2.536083ms)
+✔ daily WBT budget cannot be oversubscribed (3.131834ms)
+ℹ tests 8
+ℹ suites 0
+ℹ pass 8
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 228.680166
+
+RED low WBT balance
+✔ unknown venture cannot choose a relay destination (0.676584ms)
+✔ treasury activation rejects unsafe configuration (3.109042ms)
+✔ funding recipient and expiry are bound to policy (2.955ms)
+✔ a signed authorization cannot change its amount (20.477208ms)
+✔ one owner cannot relay a payment (1.885083ms)
+✔ the same authorization cannot be submitted twice (5.095666ms)
+✔ rate-limited requests never send (2.453417ms)
+✔ daily WBT budget cannot be oversubscribed (3.050375ms)
+✖ low gas balance rejects before submission (2.434459ms)
+ℹ tests 9
+ℹ suites 0
+ℹ pass 8
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 232.930541
+
+✖ failing tests:
+
+test at tests/treasury/relayer.test.mjs:49:1
+✖ low gas balance rejects before submission (2.434459ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at async TestContext.<anonymous> (file:///Users/amang/Code/NovemberRush/ethglobal/vestige/vestige-treasury/tests/treasury/relayer.test.mjs:51:2)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: undefined,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+GREEN low WBT balance
+✔ unknown venture cannot choose a relay destination (0.615708ms)
+✔ treasury activation rejects unsafe configuration (2.750416ms)
+✔ funding recipient and expiry are bound to policy (2.83275ms)
+✔ a signed authorization cannot change its amount (20.479667ms)
+✔ one owner cannot relay a payment (1.673167ms)
+✔ the same authorization cannot be submitted twice (4.748375ms)
+✔ rate-limited requests never send (2.336166ms)
+✔ daily WBT budget cannot be oversubscribed (3.019958ms)
+✔ low gas balance rejects before submission (2.305041ms)
+ℹ tests 9
+ℹ suites 0
+ℹ pass 9
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 224.984542
+
+RED sender-correct simulation
+✔ unknown venture cannot choose a relay destination (0.636792ms)
+✔ treasury activation rejects unsafe configuration (2.874166ms)
+✔ funding recipient and expiry are bound to policy (2.812042ms)
+✔ a signed authorization cannot change its amount (21.339167ms)
+✔ one owner cannot relay a payment (1.879875ms)
+✔ the same authorization cannot be submitted twice (4.947834ms)
+✔ rate-limited requests never send (2.392625ms)
+✔ daily WBT budget cannot be oversubscribed (3.019209ms)
+✔ low gas balance rejects before submission (2.160208ms)
+✖ simulation failures cost no submitted gas (2.407417ms)
+ℹ tests 10
+ℹ suites 0
+ℹ pass 9
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 230.6965
+
+✖ failing tests:
+
+test at tests/treasury/relayer.test.mjs:54:1
+✖ simulation failures cost no submitted gas (2.407417ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at async TestContext.<anonymous> (file:///Users/amang/Code/NovemberRush/ethglobal/vestige/vestige-treasury/tests/treasury/relayer.test.mjs:56:2)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: undefined,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+GREEN sender-correct simulation
+✔ unknown venture cannot choose a relay destination (0.637834ms)
+✔ treasury activation rejects unsafe configuration (2.884375ms)
+✔ funding recipient and expiry are bound to policy (2.779458ms)
+✔ a signed authorization cannot change its amount (20.449292ms)
+✔ one owner cannot relay a payment (1.799042ms)
+✔ the same authorization cannot be submitted twice (4.931958ms)
+✔ rate-limited requests never send (2.419375ms)
+✔ daily WBT budget cannot be oversubscribed (3.085333ms)
+✔ low gas balance rejects before submission (2.169875ms)
+✔ simulation failures cost no submitted gas (2.16975ms)
+ℹ tests 10
+ℹ suites 0
+ℹ pass 10
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 229.801167
+✔ unknown venture cannot choose a relay destination (0.698542ms)
+✔ treasury activation rejects unsafe configuration (2.781208ms)
+✔ funding recipient and expiry are bound to policy (2.784833ms)
+✔ a signed authorization cannot change its amount (20.195541ms)
+✔ one owner cannot relay a payment (1.61525ms)
+✔ the same authorization cannot be submitted twice (4.445417ms)
+✔ rate-limited requests never send (2.31525ms)
+✔ daily WBT budget cannot be oversubscribed (2.216958ms)
+✔ low gas balance rejects before submission (2.230334ms)
+✔ simulation failures cost no submitted gas (2.538958ms)
+✔ valid funding simulates with the actual sender then submits exact token call (2.498042ms)
+✔ duplicate owners, outsider signers, altered payments and stale nonces fail (13.343292ms)
+✔ two owners relay sorted signatures and never authorize a delegatecall or refund (6.97475ms)
+✔ unsafe modules, guard, seats, handler, singleton, code or network fail closed (2.533541ms)
+✔ an ambiguous broadcast remains reserved and is never automatically retried (3.909959ms)
+✔ a missing receipt or failed independent check cannot become EXECUTED (2.014125ms)
+✔ concurrent submissions cannot oversubscribe one durable reservation (3.242958ms)
+✔ gas quote spikes and excessive estimates never broadcast (3.946167ms)
+✔ wallet and venture limits each independently reject without submission (3.747209ms)
+✔ wrong-chain token domains and malformed amounts cannot reach the signer (1.459916ms)
+✖ known mined failure is recorded as FAILED instead of EXECUTED (1.917584ms)
+ℹ tests 21
+ℹ suites 0
+ℹ pass 20
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 365.535083
+
+✖ failing tests:
+
+test at tests/treasury/relayer.test.mjs:118:1
+✖ known mined failure is recorded as FAILED instead of EXECUTED (1.917584ms)
+  Error: UNVERIFIED_RECEIPT
+      at requirePolicy (file:///Users/amang/Code/NovemberRush/ethglobal/vestige/vestige-treasury/src/modules/relayer/relayer.mjs:18:56)
+      at file:///Users/amang/Code/NovemberRush/ethglobal/vestige/vestige-treasury/src/modules/relayer/relayer.mjs:125:7
+      at async MemoryJournal.run (file:///Users/amang/Code/NovemberRush/ethglobal/vestige/vestige-treasury/tests/treasury/fixtures.mjs:15:18)
+      at async TestContext.<anonymous> (file:///Users/amang/Code/NovemberRush/ethglobal/vestige/vestige-treasury/tests/treasury/relayer.test.mjs:120:16)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7)
+✔ unknown venture cannot choose a relay destination (0.64275ms)
+✔ treasury activation rejects unsafe configuration (3.26875ms)
+✔ funding recipient and expiry are bound to policy (2.949208ms)
+✔ a signed authorization cannot change its amount (20.74425ms)
+✔ one owner cannot relay a payment (2.289584ms)
+✔ the same authorization cannot be submitted twice (10.684167ms)
+✔ rate-limited requests never send (3.359917ms)
+✔ daily WBT budget cannot be oversubscribed (4.787166ms)
+✔ low gas balance rejects before submission (2.732875ms)
+✔ simulation failures cost no submitted gas (2.319417ms)
+✔ valid funding simulates with the actual sender then submits exact token call (2.415417ms)
+✔ duplicate owners, outsider signers, altered payments and stale nonces fail (13.249958ms)
+✔ two owners relay sorted signatures and never authorize a delegatecall or refund (7.293417ms)
+✔ unsafe modules, guard, seats, handler, singleton, code or network fail closed (2.895084ms)
+✔ an ambiguous broadcast remains reserved and is never automatically retried (3.596833ms)
+✔ a missing receipt or failed independent check cannot become EXECUTED (1.834666ms)
+✔ concurrent submissions cannot oversubscribe one durable reservation (3.386917ms)
+✔ gas quote spikes and excessive estimates never broadcast (3.779958ms)
+✔ wallet and venture limits each independently reject without submission (4.0225ms)
+✔ wrong-chain token domains and malformed amounts cannot reach the signer (1.432666ms)
+✔ known mined failure is recorded as FAILED instead of EXECUTED (1.836417ms)
+✖ the gas sender cannot be a founder or the seat attester (2.119167ms)
+ℹ tests 22
+ℹ suites 0
+ℹ pass 21
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 299.386459
+
+✖ failing tests:
+
+test at tests/treasury/relayer.test.mjs:124:1
+✖ the gas sender cannot be a founder or the seat attester (2.119167ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at async TestContext.<anonymous> (file:///Users/amang/Code/NovemberRush/ethglobal/vestige/vestige-treasury/tests/treasury/relayer.test.mjs:127:3)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /ROLE_SEPARATION/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+✔ unknown venture cannot choose a relay destination (0.666375ms)
+✔ treasury activation rejects unsafe configuration (2.662208ms)
+✔ funding recipient and expiry are bound to policy (2.819542ms)
+✔ a signed authorization cannot change its amount (22.534083ms)
+✔ one owner cannot relay a payment (1.663125ms)
+✔ the same authorization cannot be submitted twice (4.699917ms)
+✔ rate-limited requests never send (2.310208ms)
+✔ daily WBT budget cannot be oversubscribed (2.258125ms)
+✔ low gas balance rejects before submission (2.811541ms)
+✔ simulation failures cost no submitted gas (2.768125ms)
+✔ valid funding simulates with the actual sender then submits exact token call (3.365917ms)
+✔ duplicate owners, outsider signers, altered payments and stale nonces fail (14.598208ms)
+✔ two owners relay sorted signatures and never authorize a delegatecall or refund (7.649958ms)
+✔ unsafe modules, guard, seats, handler, singleton, code or network fail closed (3.006583ms)
+✔ an ambiguous broadcast remains reserved and is never automatically retried (4.159125ms)
+✔ a missing receipt or failed independent check cannot become EXECUTED (2.135416ms)
+✔ concurrent submissions cannot oversubscribe one durable reservation (3.445ms)
+✔ gas quote spikes and excessive estimates never broadcast (4.1205ms)
+✔ wallet and venture limits each independently reject without submission (3.93575ms)
+✔ wrong-chain token domains and malformed amounts cannot reach the signer (1.552791ms)
+✔ known mined failure is recorded as FAILED instead of EXECUTED (1.98225ms)
+✔ the gas sender cannot be a founder or the seat attester (0.868ms)
+✖ an unresolved sender nonce blocks other intents until reconciliation (4.51125ms)
+ℹ tests 23
+ℹ suites 0
+ℹ pass 22
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 416.339125
+
+✖ failing tests:
+
+test at tests/treasury/relayer.test.mjs:131:1
+✖ an unresolved sender nonce blocks other intents until reconciliation (4.51125ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /WALLET_IN_FLIGHT/. Input:
+
+  'Error: SUBMISSION_UNKNOWN_NO_RETRY'
+
+      at async TestContext.<anonymous> (file:///Users/amang/Code/NovemberRush/ethglobal/vestige/vestige-treasury/tests/treasury/relayer.test.mjs:135:2)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: Error: SUBMISSION_UNKNOWN_NO_RETRY
+        at file:///Users/amang/Code/NovemberRush/ethglobal/vestige/vestige-treasury/src/modules/relayer/relayer.mjs:116:15
+        at async MemoryJournal.run (file:///Users/amang/Code/NovemberRush/ethglobal/vestige/vestige-treasury/tests/treasury/fixtures.mjs:15:18)
+        at async waitForActual (node:assert:615:5)
+        at async strict.rejects (node:assert:738:25)
+        at async TestContext.<anonymous> (file:///Users/amang/Code/NovemberRush/ethglobal/vestige/vestige-treasury/tests/treasury/relayer.test.mjs:135:2)
+        at async Test.run (node:internal/test_runner/test:1409:7)
+        at async Test.processPendingSubtests (node:internal/test_runner/test:974:7),
+    expected: /WALLET_IN_FLIGHT/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
