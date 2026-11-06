@@ -12,6 +12,8 @@ import { RpcIO } from '../../src/modules/relayer/rpc-io.mjs';
 import { buildGuardedSafe } from '../../src/modules/treasury/spike/guarded-safe.mjs';
 import { SeatAttester } from '../../src/modules/treasury/seat-attestation.mjs';
 import { TreasuryService } from '../../src/modules/treasury/service.mjs';
+import { TreasuryChainReadPort } from '../../src/modules/treasury/readback-port.mjs';
+import { treasuryReadV1 } from '../../src/modules/treasury/readback-payload.mjs';
 import { createTreasuryHandlers } from '../../src/modules/treasury/http.mjs';
 import { sqlFixture } from './service-fixtures.mjs';
 import { RelaySafety,AlertHooks,limitsDigest } from '../../src/modules/relayer/safety.mjs';
@@ -105,7 +107,16 @@ try {
  assert.ok(metrics.some(m=>m.event==='receipt_fee'));assert.ok(metrics.some(m=>m.event==='confirmation_latency'));
  const balance=await client.readContract({address:tokenAddress,abi:parseAbi(['function balanceOf(address) view returns(uint256)']),functionName:'balanceOf',args:[recipient]});
  assert.equal(balance,500000n);
+ stage='draft-readback';
+ // LOCAL fixture descriptor only; never published as an approved live manifest.
+ service.manifests=[{ventureId,deploymentBlock:Number(creation.blockNumber),contracts:{safe:{address:safe,deploymentTxHash:creation.transactionHash},guard:{address:guard},registry:{address:registry},token:{address:tokenAddress}}}];
+ service.readPort=new TreasuryChainReadPort({client,store:app.store});
+ const readback=await treasuryReadV1(service,ventureId,a.address);
+ assert.equal(readback.balanceRaw,'500000');assert.equal(readback.tokenDecimals,6);
+ assert.equal(readback.depositsStatus,'VERIFIED');assert.equal(readback.deposits.length,1);assert.equal(readback.deposits[0].amountRaw,'1000000');
+ assert.equal(readback.payments[0].status,'EXECUTED');assert.equal(readback.payments[0].safeTypedData,null);assert.ok(readback.payments[0].executedTxHash);
+ assert.deepEqual(readback.evidence,[]);assert.equal(readback.provenance.source,'TESTED_IN_SIMULATOR');
  console.log(JSON.stringify({claim:'LOCAL_ANVIL_FORK_ONLY',chainId:1874,pinnedBlock:12353825,
   protocolKit:'8.0.11',guardedSdkDeployment:'PASSED',funding:'EXECUTED',payment:'EXECUTED',replay:'REJECTED',oneSigner:'REJECTED_BEFORE_SUBMISSION',recipientBalanceRaw:String(balance),
-  seatPort:'CONFIRMED',authenticatedRoutes:'PASSED',sqliteAndJournal:'DURABLE',feeMetrics:'LOCAL_ONLY',evidenceSource:'TESTED_IN_SIMULATOR',confirmations:2,liveTransactionsBroadcast:0}));
+  seatPort:'CONFIRMED',authenticatedRoutes:'PASSED',sqliteAndJournal:'DURABLE',draftReadback:'BALANCE_DEPOSIT_PAYMENT_PASSED',rejectedEvidence:'EMPTY_NO_MINED_GS020',feeMetrics:'LOCAL_ONLY',evidenceSource:'TESTED_IN_SIMULATOR',confirmations:2,liveTransactionsBroadcast:0}));
 } catch(error) {console.error(JSON.stringify({claim:'LOCAL_FORK_TEST_FAILED',stage,error:error.name,code:/^[a-z]+:[A-Z0-9_]+$/.test(error.message)?error.message:error.code||'FAILED'}));process.exitCode=1;} finally {app?.close();node.kill('SIGTERM');await rm(dir,{recursive:true,force:true});}

@@ -28,4 +28,3 @@ SIMULATION COMPLETE. To broadcast these transactions, add --broadcast and wallet
 Transactions saved to: /Users/amang/Code/NovemberRush/ethglobal/vestige/vestige-treasury/broadcast/DeployInfrastructure.s.sol/1874/dry-run/run-latest.json
 
 Sensitive values saved to: /Users/amang/Code/NovemberRush/ethglobal/vestige/vestige-treasury/contracts/.cache/DeployInfrastructure.s.sol/1874/dry-run/run-latest.json
-
