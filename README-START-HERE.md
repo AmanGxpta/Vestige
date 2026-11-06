@@ -1,10 +1,10 @@
-# DayZero multi-agent team starter pack
+# vestige multi-agent team starter pack
 
-This is an **overlay** for an existing DayZero Git repo, not an implemented application. It contains operational docs, four role runbooks, the user's PRD copy, and a safe worktree bootstrap script. It has NOT deployed any contract or verified any live human proof.
+This is an **overlay** for an existing vestige Git repo, not an implemented application. It contains operational docs, four role runbooks, the user's PRD copy, and a safe worktree bootstrap script. It has NOT deployed any contract or verified any live human proof.
 
 ## Setup
 
-1. Extract the pack into your DayZero Git repository root. Preserve paths; if existing files have the same names, review differences before overwriting them.
+1. Extract the pack into your vestige Git repository root. Preserve paths; if existing files have the same names, review differences before overwriting them.
 2. Read `MASTER_TEAM_INSTRUCTIONS.md` and `docs/INSTRUCTION_FOR_HUMAN.md`.
 3. Make architecture decisions in `docs/DECISIONS.md`; freeze `docs/CONTRACTS.md` after all agent ACKs.
 4. Commit the pack as a baseline (see `docs/INSTRUCTION_FOR_HUMAN.md`).

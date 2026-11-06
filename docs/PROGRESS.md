@@ -2,15 +2,17 @@
 
 > H updates after every merged slice. **Not yet implemented or tested by this starter pack.** A status is VERIFIED only when H sees the evidence. Do not invent completion percentages.
 
-**Integrated revision:** TBD  
-**Interface version:** `v0 PROPOSED`  
-**Current bottleneck:** Unknown pending M0 handshake  
+**Integrated revision:** `50efcf2` baseline; v0 approval/review commit recorded in Git history
+
+**Interface version:** `v0 H-APPROVED; C1/C2/X compatibility ACKs pending`
+
+**Current bottleneck:** Owner adaptation/ACKs, root scaffold, live World/ENS configuration and separately approved testnet deployment
 **Current quality gate:** not run  
 **Submission:** exact event deadline requires H portal confirmation; PRD states Nov 7, 09:00 IST with 08:00 target.
 
 | Milestone | Owner | Status | Evidence required | Remaining blocker |
 |---|---|---|---|---|
-| M0 Architecture, tools, configs and 3 ACKs | H / all | NOT_STARTED | contracts locked, branches/worktrees | Repo scaffold, account access |
+| M0 Architecture, tools, configs and 3 ACKs | H / all | IN_PROGRESS | H-approved v0; `.env.example`; repaired worktrees | C1/C2/X compatibility ACKs and root scaffold |
 | M1-A ENSv2 proof + Sepolia reads | C1 | NOT_STARTED | real subname + resolution tx | ENS deployments/parent |
 | M1-B World unique-person spike | C1 | NOT_STARTED | one real/staging proof, 2 seats negative path | Portal/simulator/action semantics |
 | M1-C Foundry security + Safe/USDT spike | X | NOT_STARTED | green tests + real Safe/token call | RPC/faucet/SDK |
@@ -27,10 +29,12 @@
 
 ### Immediate next actions
 
-- H: commit scaffold; decide package manager and codebase structure; install worktrees; confirm live event rules; unblock browser, RPC, ENS and World.
-- C1: investigate World action scoping and ENSv2 deployment with minimal reproducible tests.
-- C2: build product shell from stable mock adapter, public evidence state machine, and browser test plan.
-- X: Foundry Guard threat model/tests; Safe 1874 and test USDT signature spike.
+- H: integrate root scaffold separately; collect ACKs to this approved revision, then mark team freeze complete. Provision World/ENS configuration and approve exact live transactions when ready.
+- C1: adapt approved endpoints, consent/list, nullifier digest and ENS ventureId; ACK with tests and remaining live gates.
+- C2: replace preview document with C1's exact shape; integrate injected wallet, manifest, ENS ventureId, and live clients; ACK with byte/hash and wallet tests.
+- X: implement authenticated API/attestation adapters and manifest/ABIs using the accepted journal; ACK with policy/concurrency/confirmation tests. Configure measured fee limits and alerts before live relay.
+
+Branch reports already contain local identity/treasury/product test claims. Those slices have not been merged or independently accepted here; the unchanged M1/M2 rows describe integrated acceptance, not whether branch prototypes exist.
 
 ### Status legend
 

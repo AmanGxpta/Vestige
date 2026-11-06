@@ -16,7 +16,7 @@ if ! git rev-parse HEAD >/dev/null 2>&1; then
   exit 1
 fi
 if [[ ! -f MASTER_TEAM_INSTRUCTIONS.md || ! -f docs/CONTRACTS.md || ! -f docs/PRD.md ]]; then
-  echo 'ERROR: Copy the full DayZero team starter pack into the repo root first.' >&2
+  echo 'ERROR: Copy the full vestige team starter pack into the repo root first.' >&2
   exit 1
 fi
 
@@ -38,17 +38,17 @@ create_worktree() {
   echo "READY: $path ($branch)"
 }
 
-create_worktree "../dayzero-identity" "agent/identity"
-create_worktree "../dayzero-product" "agent/product"
-create_worktree "../dayzero-treasury" "agent/treasury"
+create_worktree "../vestige-identity" "agent/identity"
+create_worktree "../vestige-product" "agent/product"
+create_worktree "../vestige-treasury" "agent/treasury"
 
 git worktree list
 cat <<'MESSAGE'
 
 NEXT:
-  cd ../dayzero-identity && claude --chrome
-  cd ../dayzero-product && claude --chrome
-  cd ../dayzero-treasury && codex
+  cd ../vestige-identity && claude --chrome
+  cd ../vestige-product && claude --chrome
+  cd ../vestige-treasury && codex
 Paste the matching agents/*.md prompt. Inspect `docs/INSTRUCTION_FOR_HUMAN.md`.
 Only Human merges into the original integration checkout.
 MESSAGE

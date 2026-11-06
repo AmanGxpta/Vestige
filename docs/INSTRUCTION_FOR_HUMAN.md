@@ -2,27 +2,31 @@
 
 > H owns state. Agents REQUEST actions through role reports. Use testnet-only keys. Never paste seed phrases, private keys, API tokens or signed authorizations into agent chat or screenshots. Exact commands below are examples **only where prerequisites exist**; confirm installed script names before running any deploy step.
 
-| ID | Priority | Status | Requester | Human action | Expected proof |
-|---|---|---|---|---|---|
-| H-001 | BLOCKER | OPEN | all | Put starter pack in Git repository root, commit baseline, run worktree setup | `git worktree list`, base commit |
-| H-002 | BLOCKER | OPEN | C1 | Confirm owned `dayzero.eth` Sepolia name / parent controls, ENSv2 registry and resolver at official booth | Address + non-secret links, notes |
-| H-003 | BLOCKER | OPEN | C1 | Setup World developer app, action / RP signing and simulator in matching env; don't share keys in chat | App/action public ID; redacted test outcome |
-| H-004 | BLOCKER | OPEN | X | Provide Whitechain faucet WBT to relayer/test deployer and test USDT to funder; four demo wallets A/B/funder/payee | Public addresses + balances, explorer links |
-| H-005 | HIGH | OPEN | X | Confirm whitechain RPC + explorer and actual Safe contracts and test token bytecode | RPC `eth_getCode` outputs, no private secrets |
-| H-006 | HIGH | OPEN | H | Verify sponsor track selections, eligibility, live submission cutoff | Official URLs/notes |
-| H-007 | HIGH | OPEN | H | Clarify project IP ownership and disclose Hercules connection in writing | Confirmation, public disclosure text |
-| H-008 | HIGH | OPEN | H | Recruit 2 distinct consenting founders for live proof; find an independent program manager | Consent and anonymized meeting notes |
-| H-009 | HIGH | OPEN | X | Approve execution of deliberately failing one-signature transaction from **test-only funded account** | Mined failed tx hash, proper error |
-| H-010 | HIGH | OPEN | H | Integrate/rehearse video, collect verified feedback and submit | Demo URL, repo ref and submission confirmation |
+| ID    | Priority | Status | Requester | Human action                                                                                                       | Expected proof                                 |
+| ----- | -------- | ------ | --------- | ------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------- |
+| H-001 | BLOCKER  | DONE   | all       | Put starter pack in Git repository root, commit baseline, run worktree setup                                       | `git worktree list`, base commit `50efcf2`; renamed identity/treasury worktrees repaired |
+| H-002 | BLOCKER  | OPEN   | C1        | Confirm owned `vestige.eth` Sepolia name / parent controls, ENSv2 registry and resolver at official booth          | Address + non-secret links, notes              |
+| H-003 | BLOCKER  | OPEN   | C1        | Setup World developer app, action / RP signing and simulator in matching env; don't share keys in chat             | App/action public ID; redacted test outcome    |
+| H-004 | BLOCKER  | OPEN   | X         | Provide Whitechain faucet WBT to relayer/test deployer and test USDT to funder; four demo wallets A/B/funder/payee | Public addresses + balances, explorer links    |
+| H-005 | HIGH     | OPEN   | X         | Confirm whitechain RPC + explorer and actual Safe contracts and test token bytecode                                | RPC `eth_getCode` outputs, no private secrets  |
+| H-006 | HIGH     | OPEN   | H         | Verify sponsor track selections, eligibility, live submission cutoff                                               | Official URLs/notes                            |
+| H-007 | HIGH     | OPEN   | H         | Clarify project IP ownership and disclose Hercules connection in writing                                           | Confirmation, public disclosure text           |
+| H-008 | HIGH     | OPEN   | H         | Recruit 2 distinct consenting founders for live proof; find an independent program manager                         | Consent and anonymized meeting notes           |
+| H-009 | HIGH     | OPEN   | X         | Approve execution of deliberately failing one-signature transaction from **test-only funded account**              | Mined failed tx hash, proper error             |
+| H-010 | HIGH     | OPEN   | H         | Integrate/rehearse video, collect verified feedback and submit                                                     | Demo URL, repo ref and submission confirmation |
+| H-011 | HIGH | OPEN | all | Have C1/C2/X read the committed H-approved v0 and ACK compatibility in their own reports; implement the assigned follow-through | Three exact-revision ACKs + tests; only then team freeze complete |
+| H-012 | BLOCKER | OPEN | X | Configure all explicit relay fee/rate/balance limits, secure signer and working alerts; measure OP L1 fee allowance | Reviewed config and fee evidence; relay remains disabled until ready |
 
 ## H-001 — Initialize worktrees
+
+Completed: the starter baseline is `50efcf2`; identity/treasury Git status and worktree links were checked. The commands below are retained as bootstrap reference and should not be rerun to recreate existing worktrees.
 
 Run from **your existing Git project root** (the repo must already have at least one commit, the starter pack files added, no uncommitted changes):
 
 ```bash
 git status --short
 git add MASTER_TEAM_INSTRUCTIONS.md AGENTS.md CLAUDE.md README-START-HERE.md agents docs scripts
-git commit -m "chore: add DayZero multi-agent execution system"
+git commit -m "chore: add vestige multi-agent execution system"
 bash scripts/setup-worktrees.sh
 git worktree list
 ```
@@ -30,10 +34,10 @@ git worktree list
 Start each dedicated agent in its worktree:
 
 ```bash
-(cd ../dayzero-identity && claude --chrome)
-(cd ../dayzero-product && claude --chrome)
+(cd ../vestige-identity && claude --chrome)
+(cd ../vestige-product && claude --chrome)
 # Codex's exact CLI invocation depends on your installation:
-(cd ../dayzero-treasury && codex)
+(cd ../vestige-treasury && codex)
 ```
 
 Paste `agents/CLAUDE_IDENTITY.md`, `agents/CLAUDE_PRODUCT.md`, or `agents/CODEX_TREASURY.md` respectively as their first instruction. If `claude --chrome` is unavailable, use `claude` and ask H to arrange research/browser access. Before enabling browser use, verify `/chrome` is connected; use a dedicated profile with only needed tabs.
@@ -54,6 +58,14 @@ Non-`0x` bytecode confirms a contract is present, **not** that its code/ABI/func
 ## H-003 — World setup
 
 In the World developer portal, create/confirm the relevant World ID app, its staging/production action and the supported proof-of-human credential. Configure IDKit/World simulator exactly as C1 documents. Keep API and RP signing keys in local secret env; only reveal public app/action IDs to agents. Confirm with C1 whether the platform supports truly per-venture scoped actions. Never enter a raw RP signing key into browser-visible pages other than the official portal's designated secure process.
+
+Approved action format is dynamic `vestige-founder-seat:<ventureId>`; no portal action preregistration is assumed. Start with protocol 4.0. Any protocol/environment/RP fallback needs approval before enrollment and a fresh namespace; existing attested ventures cannot be reused across that switch. Label simulator proofs `TESTED_IN_SIMULATOR`.
+
+## H-011 — Owner handoff for approved v0
+
+Send each owner the integration commit SHA and `docs/CONTRACTS.md`. C1 implements consent/list, ENS ventureId, nullifier hashing, session hardening and attestation registration. X implements the authenticated treasury API and SeatAttestationPort, publishes ABI/manifest artifacts, and keeps the accepted durable journal on one host. C2 adapts the exact C1 document/hash, injected EOA wallets, visible switches, public summaries, manifest and ENS reads. Each owner records `ACK <revision>` or a specific CR plus tests in its own report. This settles the H decisions that were blocking API work; account setup and live approval remain separate gates.
+
+Shared starter edits still exist in sibling worktrees. Owners must preserve their uncommitted code and reconcile those identical baseline copies with H before syncing main; a blind merge/reset is not part of this handoff. No sibling branch was rewritten during this review.
 
 ## H-004 — Role separation and demo wallets
 
