@@ -1,0 +1,238 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "DeploymentManifestV1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "chainId",
+    "sourceCommit",
+    "approvedAt",
+    "explorerBaseUrl",
+    "contracts",
+    "network",
+    "deploymentBlock",
+    "ventureId",
+    "ensName",
+    "owners",
+    "threshold",
+    "setupInitializerHash"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": 1
+    },
+    "chainId": {
+      "const": 1874
+    },
+    "sourceCommit": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "approvedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "explorerBaseUrl": {
+      "enum": [
+        "https://explorer.testnet.whitechain.io",
+        "https://explorer.testnet.whitechain.io/"
+      ]
+    },
+    "contracts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "safe",
+        "guard",
+        "registry",
+        "singleton",
+        "factory",
+        "setup",
+        "token"
+      ],
+      "properties": {
+        "safe": {
+          "$ref": "#/$defs/ContractArtifact"
+        },
+        "guard": {
+          "$ref": "#/$defs/ContractArtifact"
+        },
+        "registry": {
+          "$ref": "#/$defs/ContractArtifact"
+        },
+        "singleton": {
+          "$ref": "#/$defs/ContractArtifact"
+        },
+        "factory": {
+          "$ref": "#/$defs/ContractArtifact"
+        },
+        "setup": {
+          "$ref": "#/$defs/ContractArtifact"
+        },
+        "token": {
+          "$ref": "#/$defs/TokenArtifact"
+        }
+      }
+    },
+    "network": {
+      "const": "whitechain-sepolia"
+    },
+    "deploymentBlock": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "ventureId": {
+      "type": "string",
+      "pattern": "^0x[0-9a-f]{64}$"
+    },
+    "ensName": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9-]*\\.vestige\\.eth$"
+    },
+    "owners": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^0x[0-9a-fA-F]{40}$"
+      }
+    },
+    "threshold": {
+      "const": 2
+    },
+    "setupInitializerHash": {
+      "type": "string",
+      "pattern": "^0x[0-9a-fA-F]{64}$"
+    }
+  },
+  "$defs": {
+    "ContractArtifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "address",
+        "deploymentTxHash",
+        "deploymentBlock",
+        "runtimeCodeHash",
+        "abiPath",
+        "abiSha256"
+      ],
+      "properties": {
+        "address": {
+          "type": "string",
+          "pattern": "^0x[0-9a-fA-F]{40}$"
+        },
+        "deploymentTxHash": {
+          "type": "string",
+          "pattern": "^0x[0-9a-fA-F]{64}$"
+        },
+        "deploymentBlock": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "runtimeCodeHash": {
+          "type": "string",
+          "pattern": "^0x[0-9a-fA-F]{64}$"
+        },
+        "abiPath": {
+          "type": "string",
+          "pattern": "^contracts/abi/[A-Za-z0-9_.-]+\\.json$"
+        },
+        "abiSha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "verifiedSourceUrl": {
+          "type": "string",
+          "format": "uri",
+          "pattern": "^https://"
+        }
+      }
+    },
+    "TokenArtifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "address",
+        "deploymentTxHash",
+        "deploymentBlock",
+        "runtimeCodeHash",
+        "abiPath",
+        "abiSha256",
+        "decimals",
+        "eip712Domain",
+        "domainSeparator",
+        "implementation"
+      ],
+      "properties": {
+        "address": {
+          "type": "string",
+          "pattern": "^0x[0-9a-fA-F]{40}$"
+        },
+        "deploymentTxHash": {
+          "type": "string",
+          "pattern": "^0x[0-9a-fA-F]{64}$"
+        },
+        "deploymentBlock": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "runtimeCodeHash": {
+          "type": "string",
+          "pattern": "^0x[0-9a-fA-F]{64}$"
+        },
+        "abiPath": {
+          "type": "string",
+          "pattern": "^contracts/abi/[A-Za-z0-9_.-]+\\.json$"
+        },
+        "abiSha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "verifiedSourceUrl": {
+          "type": "string",
+          "format": "uri",
+          "pattern": "^https://"
+        },
+        "decimals": {
+          "const": 6
+        },
+        "eip712Domain": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "name",
+            "version",
+            "chainId",
+            "verifyingContract"
+          ],
+          "properties": {
+            "name": {
+              "const": "Tether USD"
+            },
+            "version": {
+              "const": "1"
+            },
+            "chainId": {
+              "const": 1874
+            },
+            "verifyingContract": {
+              "type": "string",
+              "pattern": "^0x[0-9a-fA-F]{40}$"
+            }
+          }
+        },
+        "domainSeparator": {
+          "type": "string",
+          "pattern": "^0x[0-9a-fA-F]{64}$"
+        },
+        "implementation": {
+          "$ref": "#/$defs/ContractArtifact"
+        }
+      }
+    }
+  }
+}
