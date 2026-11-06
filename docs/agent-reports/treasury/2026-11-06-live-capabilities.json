@@ -1,0 +1,38 @@
+{
+  "chainId": 1874,
+  "blockNumber": "12353825",
+  "blockHash": "0x9d601bd4684d369ba21bbebcd9f0e3113e1cd2ce441e4001d80d97b70a7ea662",
+  "contracts": {
+    "safeSingletonAddress": {
+      "address": "0x29fcB43b46531BcA003ddC8FCB67FFE91900C762",
+      "bytes": 24421,
+      "codeHash": "0xb1f926978a0f44a2c0ec8fe822418ae969bd8c3f18d61e5103100339894f81ff"
+    },
+    "safeProxyFactoryAddress": {
+      "address": "0x4e1DCf7AD4e460CfD30791CCC4F9c8a4f820ec67",
+      "bytes": 3054,
+      "codeHash": "0x50c3cdc4074750a7a974204a716c999edd37482f907608d960b2b025ee0b3317"
+    },
+    "token": {
+      "address": "0xcedfB56113143d55b2358b8CFbB0dEB5Ad2f55a7",
+      "bytes": 2227,
+      "codeHash": "0x4d9be648c5bf39973670d9f8b481d5d0b971e6a2db2deccc6b98cde21c5dd83e"
+    }
+  },
+  "safeVersion": "1.4.1",
+  "token": {
+    "name": "Tether USD",
+    "symbol": "USDT",
+    "decimals": 6,
+    "DOMAIN_SEPARATOR": "0xcdcfacb6b15c8238b4e5fbb47bdb83b7f83f50a531d264bf9763d2bd1d3d2a25",
+    "domainVersion": "1"
+  },
+  "sdk": {
+    "protocolKit": "8.0.11",
+    "predictedSafe": "0x6a003E88C37c835216D1363141b551F9f1764938",
+    "deploymentTarget": "0x4e1DCf7AD4e460CfD30791CCC4F9c8a4f820ec67",
+    "selector": "0x1688f0b9",
+    "factoryEthCallResult": "0x0000000000000000000000006a003e88c37c835216d1363141b551f9f1764938"
+  },
+  "claim": "READ_ONLY_SIMULATION; no deployment or funding transaction broadcast"
+}

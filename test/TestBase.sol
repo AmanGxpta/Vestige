@@ -10,6 +10,8 @@ interface Vm {
     function deal(address, uint256) external;
     function warp(uint256) external;
     function createSelectFork(string calldata) external returns (uint256);
+    function createSelectFork(string calldata, uint256) external returns (uint256);
+    function skip(bool) external;
     function envOr(string calldata, string calldata) external returns (string memory);
     function envAddress(string calldata) external returns (address);
     function envBytes32(string calldata) external returns (bytes32);
