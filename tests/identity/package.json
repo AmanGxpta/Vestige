@@ -1,0 +1,20 @@
+{
+  "name": "vestige-identity-tests",
+  "private": true,
+  "type": "module",
+  "description": "TEMPORARY C1-owned test harness until H scaffolds the root package. Pinned deps; see docs/agent-reports/identity.",
+  "scripts": {
+    "test": "vitest run --config vitest.config.ts",
+    "test:live": "VESTIGE_LIVE=1 vitest run --config vitest.config.ts live",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@worldcoin/idkit-core": "4.6.0",
+    "viem": "2.57.7"
+  },
+  "devDependencies": {
+    "@types/node": "24.9.1",
+    "typescript": "5.9.3",
+    "vitest": "4.1.12"
+  }
+}
