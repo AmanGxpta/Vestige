@@ -1,13 +1,13 @@
 # Interface Contracts — v0 LOCKED
 
-**Status:** H-APPROVED v0 baseline; owner compatibility ACKs pending. **Owner:** Human Lead. **Decision date:** 2026-11-06 UTC.
+**Status:** H-APPROVED v0 baseline; C1 compatibility ACK integrated, other owner integration pending. **Owner:** Human Lead. **Decision date:** 2026-11-06 UTC.
 Changes require a numbered CR, affected-owner review, migration notes, and H approval. A locked interface does not make an unverified live deployment or World proof verified; runtime state remains `UNKNOWN`/`UNVERIFIED` until independently read back.
 
 This document settles H's decisions and authorizes owner-scoped implementation and local integration work. Under MASTER §3, the team freeze is complete only after C1, C2, and X ACK this exact revision in their own report, identifying deviations and tests. None of those ACKs has yet been supplied; approval of a proposal is not an implementation ACK. Live signing/deployment still requires H's separate approval of exact network and parameters.
 
 | Owner | Compatibility ACK | Required follow-through |
 |---|---|---|
-| C1 | PENDING | Hash nullifiers, publish ENS ventureId, add consent/list API, match signing and session rules |
+| C1 | ACK `30d1ef6`, integrated at `b67de31` | Implemented and tested; World 4.0 staging ID-02 limitation and live ENS writes remain open |
 | X | PENDING | Implement attestation/auth adapters, publish ABIs/manifest, configure relay limits and monitoring |
 | C2 | PENDING | Consume manifest and ENS ventureId, byte-match C1 agreement document, test real wallet switching |
 
