@@ -1,0 +1,508 @@
+✖ missing approved manifest never fabricates a registered treasury (0.687ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 0
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 47.374375
+
+✖ failing tests:
+
+test at tests/treasury/manifest.test.mjs:4:1
+✖ missing approved manifest never fabricates a registered treasury (0.687ms)
+  AssertionError [ERR_ASSERTION]: Missing expected exception.
+      at TestContext.<anonymous> (file:///Users/amang/Code/NovemberRush/ethglobal/vestige/vestige-treasury/tests/treasury/manifest.test.mjs:5:9)
+      at Test.runInAsyncScope (node:async_hooks:226:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.start (node:internal/test_runner/test:1262:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:387:17) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: undefined,
+    operator: 'throws',
+    diff: 'simple'
+  }
+✔ missing approved manifest never fabricates a registered treasury (0.505708ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 1
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 45.149667
+✖ unconfigured or unrelated receipt never confirms a seat (3.725166ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 0
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 345.902542
+
+✖ failing tests:
+
+test at tests/treasury/seat-attestation.test.mjs:5:1
+✖ unconfigured or unrelated receipt never confirms a seat (3.725166ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+
+  + 'CONFIRMED'
+  - 'FAILED'
+
+      at TestContext.<anonymous> (file:///Users/amang/Code/NovemberRush/ethglobal/vestige/vestige-treasury/tests/treasury/seat-attestation.test.mjs:8:10)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'CONFIRMED',
+    expected: 'FAILED',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+✔ unconfigured or unrelated receipt never confirms a seat (1.934958ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 1
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 513.481458
+✖ treasury mutations require the server-resolved bearer session (11.753458ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 0
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 484.626208
+
+✖ failing tests:
+
+test at tests/treasury/routes.test.mjs:5:1
+✖ treasury mutations require the server-resolved bearer session (11.753458ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+  200 !== 401
+
+      at TestContext.<anonymous> (file:///Users/amang/Code/NovemberRush/ethglobal/vestige/vestige-treasury/tests/treasury/routes.test.mjs:9:10)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 200,
+    expected: 401,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+✔ treasury mutations require the server-resolved bearer session (11.930708ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 1
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 487.899375
+✔ treasury mutations require the server-resolved bearer session (11.793208ms)
+✖ stored server proposal, owner signatures and idempotency preserve payment authority (4.994333ms)
+✖ origin, payer/session mismatch, stale tokens, invalid body and oversized body fail closed (0.687ms)
+✔ staging seats prepare only; no transport or real-human claim is exposed (0.855292ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 2
+ℹ fail 2
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 636.093916
+
+✖ failing tests:
+
+test at tests/treasury/routes.test.mjs:19:1
+✖ stored server proposal, owner signatures and idempotency preserve payment authority (4.994333ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+  503 !== 200
+
+      at TestContext.<anonymous> (file:///Users/amang/Code/NovemberRush/ethglobal/vestige/vestige-treasury/tests/treasury/routes.test.mjs:22:94)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 503,
+    expected: 200,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/treasury/routes.test.mjs:30:1
+✖ origin, payer/session mismatch, stale tokens, invalid body and oversized body fail closed (0.687ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+  401 !== 403
+
+      at TestContext.<anonymous> (file:///Users/amang/Code/NovemberRush/ethglobal/vestige/vestige-treasury/tests/treasury/routes.test.mjs:32:10)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 401,
+    expected: 403,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+✖ relay sends are disabled unless configuration and fee policy are explicitly reviewed (23.382292ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 0
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 365.418292
+
+✖ failing tests:
+
+test at tests/treasury/safety.test.mjs:5:1
+✖ relay sends are disabled unless configuration and fee policy are explicitly reviewed (23.382292ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at async TestContext.<anonymous> (file:///Users/amang/Code/NovemberRush/ethglobal/vestige/vestige-treasury/tests/treasury/safety.test.mjs:7:2)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /RELAYER_DISABLED/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+✔ relay sends are disabled unless configuration and fee policy are explicitly reviewed (3.474ms)
+✔ blank or malformed fee/rate settings cannot enable the runtime (0.277791ms)
+✔ local measurements can never authorize a live RPC or survive limit changes (0.469958ms)
+✔ alert transport failure durably opens the circuit before sending (19.91625ms)
+✔ L1 quote, balance and manifest drift trigger alerts and persist a circuit (5.953042ms)
+✔ observed fees exceeding reserve retain replay protection and stop the next send (4.937167ms)
+✔ operator nonce reconciliation attaches matching evidence but never resends (2.454416ms)
+✔ monitor transport receives only allowed event metrics, never user payloads (0.477459ms)
+✖ an invalid review expiry cannot enable fee policy (0.454875ms)
+ℹ tests 9
+ℹ suites 0
+ℹ pass 8
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 497.495083
+
+✖ failing tests:
+
+test at tests/treasury/safety.test.mjs:63:1
+✖ an invalid review expiry cannot enable fee policy (0.454875ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at async TestContext.<anonymous> (file:///Users/amang/Code/NovemberRush/ethglobal/vestige/vestige-treasury/tests/treasury/safety.test.mjs:65:2)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /UNREVIEWED/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+✔ relay sends are disabled unless configuration and fee policy are explicitly reviewed (3.529292ms)
+✔ blank or malformed fee/rate settings cannot enable the runtime (0.275625ms)
+✔ local measurements can never authorize a live RPC or survive limit changes (0.483542ms)
+✔ alert transport failure durably opens the circuit before sending (20.615541ms)
+✔ L1 quote, balance and manifest drift trigger alerts and persist a circuit (6.056166ms)
+✔ observed fees exceeding reserve retain replay protection and stop the next send (4.918625ms)
+✔ operator nonce reconciliation attaches matching evidence but never resends (2.554ms)
+✔ monitor transport receives only allowed event metrics, never user payloads (0.505292ms)
+✔ an invalid review expiry cannot enable fee policy (0.15175ms)
+✖ a malformed transport result remains UNKNOWN rather than a claimed submission (2.845625ms)
+ℹ tests 10
+ℹ suites 0
+ℹ pass 9
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 537.764208
+
+✖ failing tests:
+
+test at tests/treasury/safety.test.mjs:68:1
+✖ a malformed transport result remains UNKNOWN rather than a claimed submission (2.845625ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at async TestContext.<anonymous> (file:///Users/amang/Code/NovemberRush/ethglobal/vestige/vestige-treasury/tests/treasury/safety.test.mjs:70:2)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /UNKNOWN/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+✔ relay sends are disabled unless configuration and fee policy are explicitly reviewed (3.541625ms)
+✔ blank or malformed fee/rate settings cannot enable the runtime (0.276625ms)
+✔ local measurements can never authorize a live RPC or survive limit changes (0.479875ms)
+✔ alert transport failure durably opens the circuit before sending (21.410542ms)
+✔ L1 quote, balance and manifest drift trigger alerts and persist a circuit (6.326166ms)
+✔ observed fees exceeding reserve retain replay protection and stop the next send (5.038084ms)
+✔ operator nonce reconciliation attaches matching evidence but never resends (2.651166ms)
+✔ monitor transport receives only allowed event metrics, never user payloads (0.612375ms)
+✔ an invalid review expiry cannot enable fee policy (0.188916ms)
+✔ a malformed transport result remains UNKNOWN rather than a claimed submission (2.545208ms)
+✔ an unattempted reservation can be abandoned only by explicit review and unchanged nonce (2.36075ms)
+✖ failed simulations still consume the configured per-wallet and venture attempt limit (4.983333ms)
+ℹ tests 12
+ℹ suites 0
+ℹ pass 11
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 559.066125
+
+✖ failing tests:
+
+test at tests/treasury/safety.test.mjs:80:1
+✖ failed simulations still consume the configured per-wallet and venture attempt limit (4.983333ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /RATE_LIMITED/. Input:
+
+  'Error: SIMULATION_FAILED'
+
+      at async TestContext.<anonymous> (file:///Users/amang/Code/NovemberRush/ethglobal/vestige/vestige-treasury/tests/treasury/safety.test.mjs:83:2)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: Error: SIMULATION_FAILED
+        at file:///Users/amang/Code/NovemberRush/ethglobal/vestige/vestige-treasury/src/modules/relayer/relayer.mjs:129:197
+        at async MemoryJournal.run (file:///Users/amang/Code/NovemberRush/ethglobal/vestige/vestige-treasury/tests/treasury/fixtures.mjs:15:18)
+        at async waitForActual (node:assert:615:5)
+        at async strict.rejects (node:assert:738:25)
+        at async TestContext.<anonymous> (file:///Users/amang/Code/NovemberRush/ethglobal/vestige/vestige-treasury/tests/treasury/safety.test.mjs:83:2)
+        at async Test.run (node:internal/test_runner/test:1409:7)
+        at async Test.processPendingSubtests (node:internal/test_runner/test:974:7),
+    expected: /RATE_LIMITED/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+✔ unconfigured or unrelated receipt never confirms a seat (1.904292ms)
+✔ successful attestation requires exact receipt, two confirmations and independent seat readback (3.458792ms)
+✔ pending, reorged, failed, wrong sender and missing readback cannot confirm (3.576084ms)
+✔ ambiguous attestation and disabled port never automatically retry or send (1.138208ms)
+✖ a later reorg removes the durable current confirmation rather than trusting a cached status (1.507625ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 4
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 563.264666
+
+✖ failing tests:
+
+test at tests/treasury/seat-attestation.test.mjs:43:1
+✖ a later reorg removes the durable current confirmation rather than trusting a cached status (1.507625ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+
+  + 'CONFIRMED'
+  - 'SUBMITTED'
+
+      at TestContext.<anonymous> (file:///Users/amang/Code/NovemberRush/ethglobal/vestige/vestige-treasury/tests/treasury/seat-attestation.test.mjs:48:10)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'CONFIRMED',
+    expected: 'SUBMITTED',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+✔ relay sends are disabled unless configuration and fee policy are explicitly reviewed (3.578292ms)
+✔ blank or malformed fee/rate settings cannot enable the runtime (0.267208ms)
+✔ local measurements can never authorize a live RPC or survive limit changes (0.489959ms)
+✔ alert transport failure durably opens the circuit before sending (22.280459ms)
+✔ L1 quote, balance and manifest drift trigger alerts and persist a circuit (5.818875ms)
+✔ observed fees exceeding reserve retain replay protection and stop the next send (4.822666ms)
+✔ operator nonce reconciliation attaches matching evidence but never resends (2.469542ms)
+✔ monitor transport receives only allowed event metrics, never user payloads (0.466833ms)
+✔ an invalid review expiry cannot enable fee policy (0.143208ms)
+✔ a malformed transport result remains UNKNOWN rather than a claimed submission (2.265ms)
+✔ an unattempted reservation can be abandoned only by explicit review and unchanged nonce (2.256ms)
+✔ failed simulations still consume the configured per-wallet and venture attempt limit (4.071458ms)
+✖ a confirmed receipt can replay to SQLite after a crash without charging the journal twice (2.12825ms)
+ℹ tests 13
+ℹ suites 0
+ℹ pass 12
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 524.656416
+
+✖ failing tests:
+
+test at tests/treasury/safety.test.mjs:86:1
+✖ a confirmed receipt can replay to SQLite after a crash without charging the journal twice (2.12825ms)
+  Error: NOT_SUBMITTED
+      at requirePolicy (file:///Users/amang/Code/NovemberRush/ethglobal/vestige/vestige-treasury/src/modules/relayer/relayer.mjs:18:56)
+      at file:///Users/amang/Code/NovemberRush/ethglobal/vestige/vestige-treasury/src/modules/relayer/relayer.mjs:159:7
+      at MemoryJournal.run (file:///Users/amang/Code/NovemberRush/ethglobal/vestige/vestige-treasury/tests/treasury/fixtures.mjs:15:24)
+      at RestrictedRelayer.confirm (file:///Users/amang/Code/NovemberRush/ethglobal/vestige/vestige-treasury/src/modules/relayer/relayer.mjs:157:25)
+      at TestContext.<anonymous> (file:///Users/amang/Code/NovemberRush/ethglobal/vestige/vestige-treasury/tests/treasury/safety.test.mjs:88:72)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7)
+✔ treasury mutations require the server-resolved bearer session (11.03425ms)
+✔ stored server proposal, owner signatures and idempotency preserve payment authority (27.990042ms)
+✔ origin, payer/session mismatch, stale tokens, invalid body and oversized body fail closed (2.098834ms)
+✔ staging seats prepare only; no transport or real-human claim is exposed (0.753042ms)
+✔ two authenticated owners sign the stored proposal and a stale nonce clears approvals (6.865875ms)
+✔ Next route wrapper forwards authentication and never bypasses the service (60.831458ms)
+✔ a pending off-chain seat cannot propose even if the chain has its wallet (0.807542ms)
+✔ UNKNOWN HTTP operations reconcile from an operator-reviewed journal hash without resending (26.89275ms)
+✖ a different retry key cannot detach a payment from its pending execution (11.477291ms)
+ℹ tests 9
+ℹ suites 0
+ℹ pass 8
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 747.163709
+
+✖ failing tests:
+
+test at tests/treasury/routes.test.mjs:93:1
+✖ a different retry key cannot detach a payment from its pending execution (11.477291ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+  503 !== 409
+
+      at TestContext.<anonymous> (file:///Users/amang/Code/NovemberRush/ethglobal/vestige/vestige-treasury/tests/treasury/routes.test.mjs:99:119)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 503,
+    expected: 409,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+✔ treasury mutations require the server-resolved bearer session (12.910583ms)
+✔ stored server proposal, owner signatures and idempotency preserve payment authority (28.599833ms)
+✔ origin, payer/session mismatch, stale tokens, invalid body and oversized body fail closed (2.463083ms)
+✔ staging seats prepare only; no transport or real-human claim is exposed (0.786042ms)
+✔ two authenticated owners sign the stored proposal and a stale nonce clears approvals (6.715417ms)
+✔ Next route wrapper forwards authentication and never bypasses the service (60.841542ms)
+✔ a pending off-chain seat cannot propose even if the chain has its wallet (0.905166ms)
+✔ UNKNOWN HTTP operations reconcile from an operator-reviewed journal hash without resending (25.879209ms)
+✔ a different retry key cannot detach a payment from its pending execution (7.7845ms)
+✖ revisiting an executed payment never rewrites its history to FAILED (1.579625ms)
+✔ relay sends are disabled unless configuration and fee policy are explicitly reviewed (3.879875ms)
+✔ blank or malformed fee/rate settings cannot enable the runtime (0.316542ms)
+✔ local measurements can never authorize a live RPC or survive limit changes (0.538541ms)
+✔ alert transport failure durably opens the circuit before sending (23.467667ms)
+✔ L1 quote, balance and manifest drift trigger alerts and persist a circuit (7.02025ms)
+✔ observed fees exceeding reserve retain replay protection and stop the next send (5.218625ms)
+✔ operator nonce reconciliation attaches matching evidence but never resends (3.044ms)
+✔ monitor transport receives only allowed event metrics, never user payloads (0.52275ms)
+✔ an invalid review expiry cannot enable fee policy (0.162625ms)
+✔ a malformed transport result remains UNKNOWN rather than a claimed submission (2.481833ms)
+✔ an unattempted reservation can be abandoned only by explicit review and unchanged nonce (2.557458ms)
+✔ failed simulations still consume the configured per-wallet and venture attempt limit (4.87075ms)
+✔ a confirmed receipt can replay to SQLite after a crash without charging the journal twice (2.449625ms)
+✖ a kill switch activated during simulation blocks the final send (2.787333ms)
+ℹ tests 24
+ℹ suites 0
+ℹ pass 22
+ℹ fail 2
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 797.12375
+
+✖ failing tests:
+
+test at tests/treasury/routes.test.mjs:105:1
+✖ revisiting an executed payment never rewrites its history to FAILED (1.579625ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+
+  + 'FAILED'
+  - 'EXECUTED'
+
+      at TestContext.<anonymous> (file:///Users/amang/Code/NovemberRush/ethglobal/vestige/vestige-treasury/tests/treasury/routes.test.mjs:110:10)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'FAILED',
+    expected: 'EXECUTED',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/treasury/safety.test.mjs:91:1
+✖ a kill switch activated during simulation blocks the final send (2.787333ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at async TestContext.<anonymous> (file:///Users/amang/Code/NovemberRush/ethglobal/vestige/vestige-treasury/tests/treasury/safety.test.mjs:94:52)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /KILL_SWITCH/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+✔ treasury mutations require the server-resolved bearer session (12.380292ms)
+✔ stored server proposal, owner signatures and idempotency preserve payment authority (28.75825ms)
+✔ origin, payer/session mismatch, stale tokens, invalid body and oversized body fail closed (2.096875ms)
+✔ staging seats prepare only; no transport or real-human claim is exposed (0.938875ms)
+✔ two authenticated owners sign the stored proposal and a stale nonce clears approvals (6.95475ms)
+✔ Next route wrapper forwards authentication and never bypasses the service (64.417084ms)
+✔ a pending off-chain seat cannot propose even if the chain has its wallet (0.813709ms)
+✔ UNKNOWN HTTP operations reconcile from an operator-reviewed journal hash without resending (27.002292ms)
+✔ a different retry key cannot detach a payment from its pending execution (7.0805ms)
+✔ revisiting an executed payment never rewrites its history to FAILED (1.183541ms)
+✖ bearer routes reject an insecure non-local authentication origin (0.393458ms)
+ℹ tests 11
+ℹ suites 0
+ℹ pass 10
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 774.897125
+
+✖ failing tests:
+
+test at tests/treasury/routes.test.mjs:114:1
+✖ bearer routes reject an insecure non-local authentication origin (0.393458ms)
+  AssertionError [ERR_ASSERTION]: Missing expected exception.
+      at TestContext.<anonymous> (file:///Users/amang/Code/NovemberRush/ethglobal/vestige/vestige-treasury/tests/treasury/routes.test.mjs:115:9)
+      at Test.runInAsyncScope (node:async_hooks:226:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /HTTPS_AUTH_ORIGIN_REQUIRED/,
+    operator: 'throws',
+    diff: 'simple'
+  }

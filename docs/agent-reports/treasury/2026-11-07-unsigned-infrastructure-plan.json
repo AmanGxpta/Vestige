@@ -1,0 +1,27 @@
+{
+  "kind": "UNSIGNED_DEPLOYMENT_PLAN",
+  "network": "whitechain-sepolia",
+  "chainId": 1874,
+  "status": "NOT_SUBMITTED",
+  "broadcastAuthorized": false,
+  "fundingStatus": "UNCONFIRMED",
+  "sourceCommit": "cd600ab644f07117d51bfc0103f5548fbec8de1c",
+  "sender": "0x10d8C1d6359F0694203924182d3da83843a4e052",
+  "deployments": [
+    {
+      "contract": "contracts/SeatRegistry.sol:SeatRegistry",
+      "constructorArgs": [
+        "0x84068C51A9236A869E5F05FBA96323E97597DDEd"
+      ]
+    },
+    {
+      "contract": "contracts/SafeSetup.sol:SafeSetup",
+      "constructorArgs": [
+        "0x29fcB43b46531BcA003ddC8FCB67FFE91900C762"
+      ]
+    }
+  ],
+  "factory": "0x4e1DCf7AD4e460CfD30791CCC4F9c8a4f820ec67",
+  "founderSeats": [],
+  "requiredApproval": "H review of exact infrastructure constructors; no signing approved"
+}

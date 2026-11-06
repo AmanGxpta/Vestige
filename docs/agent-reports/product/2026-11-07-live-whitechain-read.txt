@@ -1,0 +1,12 @@
+
+stdout | src/modules/public-view/chain-reader.live.test.ts > live Whitechain reads > reads a real Safe on chain 1874 and does not mark it ACTIVE
+{"block":"12404908","code":"VERIFIED","version":"1.4.1","threshold":1,"guard":"FAILED","binding":"UNKNOWN","safeCodeHash":"0xb1f926978a0f44a2c0ec8fe822418ae969bd8c3f18d61e5103100339894f81ff","modules":"UNKNOWN","token":{"address":"0xcedfB56113143d55b2358b8CFbB0dEB5Ad2f55a7","symbol":"USDT","decimals":6,"balanceRaw":"0"},"seats":"UNKNOWN","transfers":"VERIFIED","scanFrom":{"block":"12354908","fromManifest":false},"ensVentureId":"FAILED","manifest":"NOT_CONFIGURED"}
+{"verdict":"NOT_ACTIVE","checks":["ens:VERIFIED","link:VERIFIED","ventureId:FAILED","manifest:UNKNOWN","safe:VERIFIED","owners:UNKNOWN","threshold:FAILED","guard:FAILED","binding:UNKNOWN","codehash:UNKNOWN","modules:UNKNOWN","seats:UNKNOWN","status:UNKNOWN"]}
+
+ ✓ src/modules/public-view/chain-reader.live.test.ts > live Whitechain reads > reads a real Safe on chain 1874 and does not mark it ACTIVE 1587ms
+
+ Test Files  1 passed (1)
+      Tests  1 passed (1)
+   Start at  03:11:15
+   Duration  2.08s (transform 27ms, setup 0ms, import 406ms, tests 1.59s, environment 0ms)
+

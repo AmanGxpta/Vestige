@@ -1,0 +1,31 @@
+Compiling 1 files with Solc 0.8.24
+Solc 0.8.24 finished in 656.13ms
+Compiler run successful!
+Script ran successfully.
+
+== Return ==
+registry: contract SeatRegistry 0xe91BF256Afa7c5453e715c39Ab2431EAd492bcBA
+helper: contract SafeSetup 0x153406cd0509E71d302eD49E787051Bb98231558
+
+## Setting up 1 EVM.
+
+==========================
+
+Chain 1874
+
+Estimated max fee per gas: 10.000000001 gwei
+Estimated base fee per gas: 5 gwei
+Estimated max priority fee per gas: 0.000000001 gwei
+
+Estimated total gas used for script: 2564488
+
+Estimated amount required: 0.025644880002564488 WBT
+
+==========================
+
+SIMULATION COMPLETE. To broadcast these transactions, add --broadcast and wallet configuration(s) to the previous command. See forge script --help for more.
+
+Transactions saved to: /Users/amang/Code/NovemberRush/ethglobal/vestige/vestige-treasury/broadcast/DeployInfrastructure.s.sol/1874/dry-run/run-latest.json
+
+Sensitive values saved to: /Users/amang/Code/NovemberRush/ethglobal/vestige/vestige-treasury/contracts/.cache/DeployInfrastructure.s.sol/1874/dry-run/run-latest.json
+

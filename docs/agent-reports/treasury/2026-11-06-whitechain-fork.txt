@@ -1,0 +1,25 @@
+Compiling 2 files with Solc 0.8.24
+Solc 0.8.24 finished in 962.66ms
+Compiler run successful with warnings:
+Warning (2018): Function state mutability can be restricted to view
+  --> contracts/VestigeGuard.sol:19:5:
+   |
+19 |     function checkTransaction(address to, uint256, bytes memory data, Enum.Operation operation, uint256,
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2018): Function state mutability can be restricted to view
+  --> contracts/VestigeGuard.sol:40:5:
+   |
+40 |     function checkAfterExecution(bytes32, bool) external override { require(msg.sender == address(safe), "SAFE_ONLY"); }
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+Ran 5 tests for test/WhitechainFork.t.sol:WhitechainForkTest
+[PASS] testCannotRedirectSignedFunding() (gas: 80907)
+[PASS] testDeployedSafeAndTokenDomain() (gas: 60653)
+[PASS] testExpiredAuthorization() (gas: 70079)
+[PASS] testExternalRelayerCannotReceiveForSafe() (gas: 69562)
+[PASS] testGaslessFundingAndReplay() (gas: 210539)
+Suite result: ok. 5 passed; 0 failed; 0 skipped; finished in 5.04s (3.33s CPU time)
+
+Ran 1 test suite in 5.04s (5.04s CPU time): 5 tests passed, 0 failed, 0 skipped (5 total tests)

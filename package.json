@@ -19,6 +19,7 @@
     "viem": "2.57.16"
   },
   "devDependencies": {
+    "@playwright/test": "1.65.0",
     "@types/node": "24.9.1",
     "@types/qrcode": "1.5.5",
     "@types/react": "^19",

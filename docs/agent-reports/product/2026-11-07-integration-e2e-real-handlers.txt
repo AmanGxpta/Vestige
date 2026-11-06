@@ -1,0 +1,7 @@
+[integration] World outcome: BLOCKED: !
+Not connected yet
+World ID is not configured on this server. (server code CONFIG_MISSING)
+[integration] treasury page: Treasury | Set up the treasury | vestige deploys a Safe on Whitechain owned by both founders, with a 2-of-2 rule: every payment needs both of you. The vestige Guard is attached so the owners can only ever be verified-human seats. | You don't sign a transaction or pay gas — vestige's operator deploys it after H approves the exact parameters.
+[integration] public page: 0 of 2 founders · ens-unresolved=1
+  ✓  1 [integration] › tests/e2e/integration-real.spec.ts:86:1 › integrated: real C1 auth/ventures/invite/listing/World gate + X treasury readback + public page (3.1s)
+  1 passed (3.7s)
