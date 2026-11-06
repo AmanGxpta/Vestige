@@ -17,7 +17,7 @@ export class TreasuryStore {
  FROM identity_seats s LEFT JOIN identity_world_nullifiers w ON w.venture_id=s.venture_id AND w.wallet=s.wallet
  WHERE s.venture_id=?`,ventureId);}
  member(ventureId,wallet){if(!this.seats(ventureId).some(s=>s.wallet===wallet))fail('FORBIDDEN',403);}
- source(ventureId){const seats=this.seats(ventureId);return seats.length===2&&seats.every(s=>s.environment==='production'&&s.world_status==='VERIFIED')?'WORLD_PRODUCTION':'TESTED_IN_SIMULATOR';}
+ source(ventureId){const seats=this.seats(ventureId);return seats.length===2&&seats.every(s=>s.environment==='production'&&s.world_status==='VERIFIED')?'WORLD_PRODUCTION':seats.some(s=>s.environment==='staging')?'TESTED_IN_SIMULATOR':'UNKNOWN';}
  reserve({wallet,route,key,digest,ventureId,kind,source}){
   return this.db.tx(()=>{
    const existing=this.db.get('SELECT * FROM treasury_idempotency WHERE wallet=? AND route=? AND idempotency_key=?',wallet,route,key);
@@ -29,7 +29,7 @@ export class TreasuryStore {
   });
  }
  settle(id,response,status=200){this.db.run('UPDATE treasury_idempotency SET response_json=?,http_status=? WHERE operation_id=?',JSON.stringify(response),status,id);}
- operations(ventureId){return this.db.all('SELECT operation_id AS operationId,status,tx_hash AS txHash,block_number AS blockNumber,block_hash AS blockHash,source,error_code AS error FROM treasury_operations WHERE venture_id=? ORDER BY created_at',ventureId);}
+ operations(ventureId,actor){return this.db.all('SELECT operation_id AS operationId,status,tx_hash AS txHash,block_number AS blockNumber,block_hash AS blockHash,source,error_code AS error FROM treasury_operations WHERE venture_id=?'+(actor?' AND actor=?':'')+' ORDER BY created_at',...([ventureId,...(actor?[actor]:[])]));}
 }
 /** Same synchronous SqlDb surface C1 exposes; no identity tables are created or modified here. */
 export function openTreasuryStore(path){

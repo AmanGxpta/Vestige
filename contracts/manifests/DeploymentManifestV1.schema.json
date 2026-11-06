@@ -88,7 +88,7 @@
     },
     "ensName": {
       "type": "string",
-      "pattern": "^[a-z0-9][a-z0-9-]*\\.vestige\\.eth$"
+      "pattern": "^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.vestige\\.eth$"
     },
     "owners": {
       "type": "array",

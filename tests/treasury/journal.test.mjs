@@ -20,3 +20,16 @@ test('retained crash lock and corrupt state fail closed',async()=>{
   await rm(path+'.lock');await writeFile(path,'corrupt');await assert.rejects(new FileJournal(path).run(()=>{}));
  } finally {await rm(dir,{recursive:true,force:true});}
 });
+import {recoverDeadJournalLock} from '../../src/modules/relayer/journal.mjs';
+import {createHash} from 'node:crypto';
+test('crash-lock recovery requires dead PID, exact review and retains nonce/replay reservations',async()=>{
+ const dir=await mkdtemp(join(tmpdir(),'vestige-recover-')),path=join(dir,'journal.json');
+ try{
+  const state=JSON.stringify({requests:{test:{status:'UNKNOWN',senderNonce:'2'}},counts:{},spent:'100'});await writeFile(path,state);
+  const review={approved:true,reference:'LOCAL_TEST',expectedJournalSha256:createHash('sha256').update(state).digest('hex')};
+  await writeFile(path+'.lock',JSON.stringify({pid:process.pid}));await assert.rejects(recoverDeadJournalLock(path,review),/MAY_BE_ALIVE/);
+  await writeFile(path+'.lock',JSON.stringify({pid:2147483647}));await assert.rejects(recoverDeadJournalLock(path,{...review,expectedJournalSha256:'invalid'}),/REVIEW_MISMATCH/);
+  assert.equal((await recoverDeadJournalLock(path,review)).inflight,1);
+  await new FileJournal(path).run(async session=>assert.equal(session.state.requests.test.status,'UNKNOWN'));
+ }finally{await rm(dir,{recursive:true,force:true});}
+});

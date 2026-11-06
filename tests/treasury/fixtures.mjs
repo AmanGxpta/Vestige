@@ -25,11 +25,12 @@ export function fixture(overrides = {}) {
     estimate:async()=>100000n,balance:async()=>10n**18n,
     simulate:async call=>{simulated.push(call);return true;},
     send:async call=>{sends.push(call);return `0x${'cd'.repeat(32)}`;},
-    confirm:async()=>({verified:true,blockNumber:10n})};
+    senderNonce:async()=>0,quoteL1:async()=>({l1Fee:1n,blockNumber:10n,blockHash:'0x'+'66'.repeat(32),at:1000000}),
+    confirm:async()=>({verified:true,blockNumber:10n,blockHash:'0x'+'66'.repeat(32),fee:{evm:100n,l1:1n}})};
   const limits = {dailyBudgetWei:10n**18n,maxGas:500000n,maxGasPrice:10n**9n,
     l1FeeReserveWei:10000n,minBalanceWei:1000n,maxPerMinute:10};
   const journal = new MemoryJournal();
-  const relay = new RestrictedRelayer({manifests:[manifest],token,io,journal,limits,now:()=>1000,...overrides});
+  const relay = new RestrictedRelayer({manifests:[manifest],token,io,journal,limits,now:()=>1000,enabled:true,safety:{ready:async()=>{},notify:async()=>{}},...overrides});
   const request = {ventureId,from:a.address,to:manifest.safe,value:1000000n,validAfter:1n,
     validBefore:2000n,nonce:`0x${'ef'.repeat(32)}`};
   return {token,manifest,chain,io,limits,journal,relay,request,sends,simulated,

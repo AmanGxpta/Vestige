@@ -32,3 +32,8 @@ CREATE TABLE IF NOT EXISTS treasury_attestations (
  sender TEXT, sender_nonce TEXT, call_hash TEXT, tx_hash TEXT UNIQUE, block_number TEXT, block_hash TEXT, confirmed_at INTEGER,
  PRIMARY KEY(venture_id,wallet), UNIQUE(venture_id,nullifier_hash)
 );
+
+CREATE TABLE IF NOT EXISTS treasury_deployment_requests (
+ operation_id TEXT PRIMARY KEY REFERENCES treasury_operations(operation_id), venture_id TEXT NOT NULL,
+ owner_a TEXT NOT NULL, owner_b TEXT NOT NULL, threshold INTEGER NOT NULL CHECK(threshold=2), source TEXT NOT NULL, created_at INTEGER NOT NULL
+);

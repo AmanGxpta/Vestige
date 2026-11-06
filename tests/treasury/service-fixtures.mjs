@@ -3,8 +3,8 @@ import {openTreasuryStore} from '../../src/modules/treasury/store.mjs';
 import {a,b,addr,ventureId} from './fixtures.mjs';
 export {a,b,addr,ventureId};
 export const txHash=`0x${'55'.repeat(32)}`,blockHash=`0x${'66'.repeat(32)}`;
-export function sqlFixture(){
- const store=openTreasuryStore(':memory:');const db=store.db;
+export function sqlFixture(path=':memory:'){
+ const store=openTreasuryStore(path);const db=store.db;
  db.raw.exec(`CREATE TABLE identity_ventures(venture_id TEXT PRIMARY KEY,ens_name TEXT);
  CREATE TABLE identity_sessions(token_hash TEXT PRIMARY KEY,wallet TEXT,expires_at INTEGER);
  CREATE TABLE identity_seats(venture_id TEXT,wallet TEXT,world_status TEXT,onchain_status TEXT);

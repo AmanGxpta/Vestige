@@ -17,12 +17,12 @@ test('approved nested schema maps losslessly to flat relayer fingerprints',()=>{
  }
 });
 test('infrastructure schema cannot masquerade as a treasury',()=>{
- const m=manifestFixture();delete m.contracts.safe;delete m.contracts.guard;m.kind='infrastructure';
+ const source=manifestFixture();const m=Object.fromEntries(['schemaVersion','chainId','sourceCommit','approvedAt','explorerBaseUrl','contracts'].map(k=>[k,source[k]]));delete m.contracts.safe;delete m.contracts.guard;m.kind='infrastructure';
  assert.ok(validateManifest(m,{infrastructure:true}));assert.throws(()=>adaptDeploymentManifest(m));
 });
 test('published ABI index matches exact file bytes and Solidity function/event exports',async()=>{
- const index=JSON.parse(await readFile('contracts/abi/index.json','utf8'));
- for(const a of Object.values(index.artifacts))assert.equal(createHash('sha256').update(await readFile(a.abiPath)).digest('hex'),a.abiSha256);
- const registry=JSON.parse(await readFile(index.artifacts.SeatRegistry.abiPath,'utf8'));
+ const index=JSON.parse(await readFile(new URL('../../contracts/abi/index.json',import.meta.url),'utf8'));
+ for(const a of Object.values(index.artifacts))assert.equal(createHash('sha256').update(await readFile(new URL('../../'+a.abiPath,import.meta.url))).digest('hex'),a.abiSha256);
+ const registry=JSON.parse(await readFile(new URL('../../'+index.artifacts.SeatRegistry.abiPath,import.meta.url),'utf8'));
  assert.ok(registry.some(a=>a.type==='event'&&a.name==='SeatAttested'));assert.ok(registry.some(a=>a.name==='isSeat'));
 });

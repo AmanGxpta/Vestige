@@ -39,3 +39,12 @@ test('ambiguous attestation and disabled port never automatically retry or send'
   f.port.authorizeSend=async()=>false;await assert.rejects(f.port.attestSeat(f.input),/DISABLED/);assert.equal(calls,1);
  }finally{f.close();}
 });
+
+test('a later reorg removes the durable current confirmation rather than trusting a cached status',async()=>{
+ const f=configured();try{
+  await f.port.attestSeat(f.input);await f.port.confirm({...f.input,txHash});
+  f.client.getBlock=async()=>({hash:txHash});
+  assert.equal((await f.port.confirm({...f.input,txHash})).state,'PENDING');
+  assert.equal(f.db.get('SELECT status FROM treasury_attestations').status,'SUBMITTED');
+ }finally{f.close();}
+});

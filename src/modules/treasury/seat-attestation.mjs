@@ -42,12 +42,13 @@ export class SeatAttester {
   if(!this.store||!this.client||!this.registry)return {state:'FAILED',reason:'ATTESTATION_UNCONFIGURED'};
   const row=this.store.db.get('SELECT * FROM treasury_attestations WHERE venture_id=? AND wallet=? AND tx_hash=?',input.ventureId,input.wallet.toLowerCase(),input.txHash);
   if(!row)return {state:'FAILED',reason:'UNRELATED_ATTESTATION'};
+  const pending=()=>{this.store.db.run('UPDATE treasury_attestations SET status=?,block_number=NULL,block_hash=NULL,confirmed_at=NULL WHERE tx_hash=?','SUBMITTED',input.txHash);return {state:'PENDING'};};
   try{
    if(await this.client.getChainId()!==1874)return {state:'FAILED',reason:'WRONG_CHAIN'};
    const receipt=await this.client.getTransactionReceipt({hash:input.txHash});
-   if(await this.client.getBlockNumber({cacheTime:0})<receipt.blockNumber+1n)return {state:'PENDING'};
+   if(await this.client.getBlockNumber({cacheTime:0})<receipt.blockNumber+1n)return pending();
    const block=await this.client.getBlock({blockNumber:receipt.blockNumber});
-   if(!eq(block.hash,receipt.blockHash))return {state:'PENDING'};
+   if(!eq(block.hash,receipt.blockHash))return pending();
    const tx=await this.client.getTransaction({hash:input.txHash});
    if(!eq(tx.from,row.sender)||!eq(tx.to,this.registry.address)||keccak256(tx.input)!==row.call_hash||String(tx.nonce)!==row.sender_nonce)return {state:'FAILED',reason:'ATTESTATION_TX_MISMATCH'};
    if(receipt.status!=='success'){this.store.db.run('UPDATE treasury_attestations SET status=? WHERE tx_hash=?','FAILED',input.txHash);return {state:'FAILED',reason:'ATTESTATION_REVERTED'};}
@@ -57,6 +58,6 @@ export class SeatAttester {
    if(seat!==true)return {state:'FAILED',reason:'SEAT_READBACK_MISMATCH'};
    const confirmedAt=this.now();this.store.db.run('UPDATE treasury_attestations SET status=?,block_number=?,block_hash=?,confirmed_at=? WHERE tx_hash=?','CONFIRMED',String(receipt.blockNumber),receipt.blockHash,confirmedAt,input.txHash);
    return {state:'CONFIRMED',chainId:1874,blockNumber:receipt.blockNumber,confirmedAt};
-  }catch{return {state:'PENDING'};}
+  }catch{return pending();}
  }
 }
