@@ -1,0 +1,23 @@
+
+ RUN  v4.1.12 /private/tmp/claude-501/-Users-amang-Code-NovemberRush-ethglobal-vestige-vestige-product/47a66e9a-a782-414c-a406-488350f476e6/scratchpad/c1vec
+
+stdout | c2-live-vs-c1.test.ts > C2 live adapter against C1 handlers > full founder journey + duplicate refusal + versioned signatures + public summary
+signIn A ok
+createVenture 0x4be45c6c northstar.vestige.eth
+join B ok; reused invite → NOT_READY
+duplicate → This human already holds a seat in Northstar Labs.
+seats VERIFIED/VERIFIED,VERIFIED/VERIFIED
+docHash match 0xdbe8d224700c97c780bb18548c8f47a6703daa6b4c420ca8aa975451ca9d238d
+both signed v1 → complete
+v2 reset; stale v1 → VERSION_SUPERSEDED
+public: humans=2, events=19, kinds=VENTURE_CREATED|ENS_REGISTERED|FOUNDER_JOINED|FOUNDER_VERIFIED|SEAT_ATTESTED|ENS_RECORD|DUPLICATE_REFUSED|AGREEMENT_VERSION|AGREEMENT_SIGNED
+not deployed → list:BLOCKED listing:BLOCKED treasury:BLOCKED
+signOut cleared session (DELETE route absent → BLOCKED, token dropped locally)
+
+ ✓ c2-live-vs-c1.test.ts > C2 live adapter against C1 handlers > full founder journey + duplicate refusal + versioned signatures + public summary 181ms
+
+ Test Files  1 passed (1)
+      Tests  1 passed (1)
+   Start at  03:10:18
+   Duration  585ms (transform 64ms, setup 0ms, import 321ms, tests 182ms, environment 0ms)
+
