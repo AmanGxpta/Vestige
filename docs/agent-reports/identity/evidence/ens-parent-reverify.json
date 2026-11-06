@@ -1,0 +1,79 @@
+{
+  "label": "READ_ONLY_REVERIFICATION — no transaction signed or sent",
+  "block": "12079559",
+  "reviewedDigest": "1471c7880a7d7b89931c2320e6ce4cce252234c9164df8b01d4fec9b1e49576a",
+  "rebuiltDigest": "1471c7880a7d7b89931c2320e6ce4cce252234c9164df8b01d4fec9b1e49576a",
+  "identicalCalldata": [
+    true,
+    true
+  ],
+  "state": {
+    "vestigeEthStatus": "REGISTERED",
+    "currentSubregistry": "0x0000000000000000000000000000000000000000",
+    "ownerRolesOnVestigeEth": "97409655027181761882228017414928043058140282880",
+    "registrarBalanceWei": "300000000000000000",
+    "predictedParentHasCode": false
+  },
+  "dryRun": [
+    {
+      "id": "P1-deploy-parent-registry",
+      "ok": true,
+      "detail": "eth_call ok, returned 0x00000000000000000000000061dc50fe2099012bd1d0a684192071ef51d7aa73"
+    },
+    {
+      "id": "P2-point-parent-subregistry",
+      "ok": true,
+      "detail": "eth_call ok, returned 0x"
+    }
+  ],
+  "plan": {
+    "schema": "vestige.ens-plan/1",
+    "kind": "parent-setup",
+    "chainId": 11155111,
+    "createdAt": "2026-11-06T22:15:01.675Z",
+    "inputs": {
+      "parentName": "vestige.eth",
+      "registrar": "0xc63F0594309F21E35b41298C71d370c0d0A9313C",
+      "owner": "0x1ed73ee055b7B5379CcD398748281C5A82e9A41E",
+      "implementation": "0x9bd8a88719068d09ecee662f36c0e3856708366a",
+      "factory": "0xda70306c98e97ece36f997a21368e53298572991",
+      "salt": "78478053163388616809496875726529571806444773133386622037766451187820755523075",
+      "registrarRootRoles": "65537"
+    },
+    "predicted": {
+      "parentRegistry": "0x61Dc50fE2099012bD1d0A684192071Ef51d7Aa73"
+    },
+    "txs": [
+      {
+        "id": "P1-deploy-parent-registry",
+        "signer": "REGISTRAR",
+        "signerAddress": "0xc63F0594309F21E35b41298C71d370c0d0A9313C",
+        "to": "0xda70306c98e97ece36f997a21368e53298572991",
+        "data": "0x5d84121a0000000000000000000000009bd8a88719068d09ecee662f36c0e3856708366aad810106e04bb26ab27eabb6a364bad4b9ec74db6f9c421c184ae3eeff7596030000000000000000000000000000000000000000000000000000000000000060000000000000000000000000000000000000000000000000000000000000008437cb53a800000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000001000000000000000000000000c63f0594309f21e35b41298c71d370c0d0a9313c000000000000000000000000000000000000000000000000000000000001000100000000000000000000000000000000000000000000000000000000",
+        "value": "0",
+        "purpose": "Deploy the vestige.eth UserRegistry; registrar gets REGISTRAR|RENEW root roles only",
+        "dependsOn": [],
+        "expectedResult": "ProxyDeployed(proxyAddress=0x61Dc50fE2099012bD1d0A684192071Ef51d7Aa73)"
+      },
+      {
+        "id": "P2-point-parent-subregistry",
+        "signer": "VESTIGE_ETH_OWNER",
+        "signerAddress": "0x1ed73ee055b7B5379CcD398748281C5A82e9A41E",
+        "to": "0xd4ebcbbdf463c9c45784603db0ddd499bc44a8b4",
+        "data": "0x341ec55921952812fa04808958af603a28aa8649e7195d3c1132e4c434170bdc25da1fd800000000000000000000000061dc50fe2099012bd1d0a684192071ef51d7aa73",
+        "value": "0",
+        "purpose": "ETHRegistry: vestige.eth subregistry → 0x61Dc50fE2099012bD1d0A684192071Ef51d7Aa73. Sent by the vestige.eth owner from their own wallet (calldata to paste).",
+        "dependsOn": [
+          "P1-deploy-parent-registry",
+          "H-C1-04 vestige.eth registered to owner"
+        ],
+        "expectedResult": "ETHRegistry.getSubregistry(\"vestige\") == 0x61Dc50fE2099012bD1d0A684192071Ef51d7Aa73"
+      }
+    ],
+    "disclosures": [
+      "Residual power: the registrar can register/renew venture names in the parent registry; the vestige.eth owner can re-point the parent subregistry until handover.",
+      "No dangerous root roles (UNREGISTER, SET_SUBREGISTRY, SET_RESOLVER, UPGRADE, transfer admin) are granted on the parent registry by this plan.",
+      "Set VESTIGE_PARENT_REGISTRY to predicted.parentRegistry only after P1's receipt and a read-back of getSubregistry."
+    ]
+  }
+}
