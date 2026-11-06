@@ -59,7 +59,7 @@ The workflow it rehearsed:
 - Seven steps executed: V1–V3 plus a resolver and registration for each of two founders. A wrong digest was refused.
 - Reconciliation, read-only, promoted 3 steps to VERIFIED: the venture and both founders.
 
-**All 31 post-deployment checks passed:**
+**All 25 post-deployment checks passed:**
 - `vestige.ventureId` equals the server id, `status=workspace`, `humans=2`.
 - The venture registry is emancipated, and the registrar holds none of the 6 dangerous roles on it.
 - For each founder:
@@ -78,7 +78,7 @@ On Sepolia, the same checks run read-only after the approved first venture lands
 tests/identity harness: tsc PASS; vitest → Tests 76 passed | 11 skipped (87)
 root (integrated): tsc --noEmit PASS; vitest → Tests 100 passed | 1 skipped (101); next build PASS (19 API routes + pages)
 VESTIGE_LIVE=1 … live/ens-plans -t "parent read-back" → 1 passed (read-only, block 12079721)
-VESTIGE_FORK=1 … live/ens-fork-rehearsal → 1 passed (LOCAL_FORK_REHEARSAL, 31/31 checks)
+VESTIGE_FORK=1 … live/ens-fork-rehearsal → 1 passed (LOCAL_FORK_REHEARSAL, 25/25 checks)
 lint → NOT RUN (no lint config)
 ```
 
