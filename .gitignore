@@ -10,6 +10,7 @@ coverage/
 *.db
 *.db-shm
 *.db-wal
+private/
 .DS_Store
 broadcast/
 cache/

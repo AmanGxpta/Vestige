@@ -26,6 +26,9 @@ This document settles H's decisions and authorizes owner-scoped implementation a
 | CR-C2-003 | **APPROVED** | X publishes reviewed SeatRegistry/VestigeGuard ABIs and the deployment manifest schema below. |
 | CR-C2-004 | **APPROVED** | Treasury readback includes `deploymentBlock`; the public reader scans logs from that block in RPC-sized windows. |
 | CR-C2-005 | **APPROVED** | Canonical JSON and `docHash` algorithm below is authoritative for C1, C2 preview, and agreement verification. |
+| CR-C2-006 | **APPROVED** | Add optional `worldEnvironment: "staging"|"production"` to verified founder seat and public founder projections, and `source` to evidence events. Staging results must display `TESTED_IN_SIMULATOR`; absent provenance remains unknown. |
+| CR-C2-007 | **RESOLVED** | Keep C1's existing founder-only listing shape `{ listed, consents: [{ wallet, listed }] }`; C2's current adapter already consumes it. No `optedIn` alias is added. |
+| CR-ID-05 | **APPROVED for implementation; X ACK pending** | Read-only `TreasurySummaryPort.summary(ventureId)` returns `{ treasuryActive: boolean|null, funded: boolean|null, observedAt: string, source: string, verificationStatus: "UNKNOWN"|"PENDING"|"ACTIVE"|"UNVERIFIED"|"FAILED" }`. C1 keeps treasury booleans null until X registers the port and supplies independently checked data. |
 
 ## Network and approved runtime anchors
 
