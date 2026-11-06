@@ -5,7 +5,7 @@ export class TreasuryError extends Error {constructor(code,status=400){super(cod
 export const fail=(code,status=400)=>{throw new TreasuryError(code,status);};
 export class TreasuryStore {
  constructor(db){this.db=db;}
- migrate(){const sql=readFileSync(new URL('../../../db/migrations/020_treasury.sql',import.meta.url),'utf8');if(this.db.raw)this.db.raw.exec(sql);else throw new Error('MIGRATION_CONNECTION_REQUIRED');}
+ migrate(){if(!this.db.raw)throw new Error('MIGRATION_CONNECTION_REQUIRED');for(const name of ['020_treasury.sql','020_treasury_readback.sql'])this.db.raw.exec(readFileSync(new URL('../../../db/migrations/'+name,import.meta.url),'utf8'));}
  authenticate(request,now=Date.now()){
   const token=/^Bearer ([A-Za-z0-9_-]{20,128})$/.exec(request.headers.get('authorization')||'');
   if(!token)fail('UNAUTHENTICATED',401);
