@@ -12,7 +12,7 @@
 
 | Milestone | Owner | Status | Evidence required | Remaining blocker |
 |---|---|---|---|---|
-| M0 Architecture, tools, configs and 3 ACKs | H / all | IN_PROGRESS | H-approved v0; `.env.example`; C1 branch merged as `b67de31`; private DB ignored | C2/X integration, root scaffold and cross-owner build |
+| M0 Architecture, tools, configs and 3 ACKs | H / all | IN_PROGRESS | H-approved v0; C1 merged `b67de31`; root Next app `d233332` builds and typechecks; private DB ignored | C2/X integration and full cross-owner build |
 | M1-A ENSv2 proof + Sepolia reads | C1 | NOT_STARTED | real subname + resolution tx | ENS deployments/parent |
 | M1-B World unique-person spike | C1 | NOT_STARTED | one real/staging proof, 2 seats negative path | Portal/simulator/action semantics |
 | M1-C Foundry security + Safe/USDT spike | X | NOT_STARTED | green tests + real Safe/token call | RPC/faucet/SDK |
