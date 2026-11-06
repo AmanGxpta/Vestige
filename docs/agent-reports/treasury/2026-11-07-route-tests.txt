@@ -1,0 +1,12 @@
+✔ treasury mutations require the server-resolved bearer session (10.999458ms)
+✔ stored server proposal, owner signatures and idempotency preserve payment authority (26.887417ms)
+✔ origin, payer/session mismatch, stale tokens, invalid body and oversized body fail closed (2.755125ms)
+✔ staging seats prepare only; no transport or real-human claim is exposed (1.181333ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 584.980042

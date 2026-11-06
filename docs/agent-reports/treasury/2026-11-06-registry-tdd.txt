@@ -1,0 +1,138 @@
+
+RED attester-only
+No files changed, compilation skipped
+
+Ran 1 test for test/SeatRegistry.t.sol:SeatRegistryTest
+[FAIL: next call did not revert as expected] testOnlyAttester() (gas: 54667)
+Suite result: FAILED. 0 passed; 1 failed; 0 skipped; finished in 1.62ms (376.71µs CPU time)
+
+Ran 1 test suite in 6.76ms (1.62ms CPU time): 0 tests passed, 1 failed, 0 skipped (1 total tests)
+
+Failing tests:
+Encountered 1 failing test in test/SeatRegistry.t.sol:SeatRegistryTest
+[FAIL: next call did not revert as expected] testOnlyAttester() (gas: 54667)
+
+Encountered a total of 1 failing tests, 0 tests succeeded
+
+Tip: Run `forge test --rerun` to retry only the 1 failed test
+Tip: Run `forge test --debug --match-test <TEST_NAME>` to inspect one failing test in the debugger
+
+GREEN attester-only
+Compiling 1 files with Solc 0.8.24
+Solc 0.8.24 finished in 36.09ms
+Compiler run successful!
+
+Ran 1 test for test/SeatRegistry.t.sol:SeatRegistryTest
+[PASS] testOnlyAttester() (gas: 33849)
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 337.00µs (65.29µs CPU time)
+
+Ran 1 test suite in 4.93ms (337.00µs CPU time): 1 tests passed, 0 failed, 0 skipped (1 total tests)
+
+RED nullifier reuse
+Compiling 1 files with Solc 0.8.24
+Solc 0.8.24 finished in 54.37ms
+Compiler run successful!
+
+Ran 2 tests for test/SeatRegistry.t.sol:SeatRegistryTest
+[FAIL: next call did not revert as expected] testNullifierCannotTakeSecondSeat() (gas: 101289)
+[PASS] testOnlyAttester() (gas: 33915)
+Suite result: FAILED. 1 passed; 1 failed; 0 skipped; finished in 389.33µs (181.21µs CPU time)
+
+Ran 1 test suite in 4.50ms (389.33µs CPU time): 1 tests passed, 1 failed, 0 skipped (2 total tests)
+
+Failing tests:
+Encountered 1 failing test in test/SeatRegistry.t.sol:SeatRegistryTest
+[FAIL: next call did not revert as expected] testNullifierCannotTakeSecondSeat() (gas: 101289)
+
+Encountered a total of 1 failing tests, 1 tests succeeded
+
+Tip: Run `forge test --rerun` to retry only the 1 failed test
+Tip: Run `forge test --debug --match-test <TEST_NAME>` to inspect one failing test in the debugger
+
+GREEN nullifier reuse
+Compiling 2 files with Solc 0.8.24
+Solc 0.8.24 finished in 59.21ms
+Compiler run successful!
+
+Ran 2 tests for test/SeatRegistry.t.sol:SeatRegistryTest
+[PASS] testNullifierCannotTakeSecondSeat() (gas: 102089)
+[PASS] testOnlyAttester() (gas: 33916)
+Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 377.08µs (188.12µs CPU time)
+
+Ran 1 test suite in 4.61ms (377.08µs CPU time): 2 tests passed, 0 failed, 0 skipped (2 total tests)
+
+RED wallet reuse; cross-venture positive
+Compiling 1 files with Solc 0.8.24
+Solc 0.8.24 finished in 61.12ms
+Compiler run successful!
+
+Ran 4 tests for test/SeatRegistry.t.sol:SeatRegistryTest
+[PASS] testNullifierCannotTakeSecondSeat() (gas: 102249)
+[PASS] testOnlyAttester() (gas: 34004)
+[PASS] testSameHumanDifferentVenture() (gas: 154463)
+[FAIL: next call did not revert as expected] testWalletCannotAcquireAnotherNullifier() (gas: 126575)
+Suite result: FAILED. 3 passed; 1 failed; 0 skipped; finished in 612.46µs (951.46µs CPU time)
+
+Ran 1 test suite in 5.19ms (612.46µs CPU time): 3 tests passed, 1 failed, 0 skipped (4 total tests)
+
+Failing tests:
+Encountered 1 failing test in test/SeatRegistry.t.sol:SeatRegistryTest
+[FAIL: next call did not revert as expected] testWalletCannotAcquireAnotherNullifier() (gas: 126575)
+
+Encountered a total of 1 failing tests, 3 tests succeeded
+
+Tip: Run `forge test --rerun` to retry only the 1 failed test
+Tip: Run `forge test --debug --match-test <TEST_NAME>` to inspect one failing test in the debugger
+
+GREEN wallet reuse
+Compiling 1 files with Solc 0.8.24
+Solc 0.8.24 finished in 30.87ms
+Compiler run successful!
+
+Ran 4 tests for test/SeatRegistry.t.sol:SeatRegistryTest
+[PASS] testNullifierCannotTakeSecondSeat() (gas: 104807)
+[PASS] testOnlyAttester() (gas: 34004)
+[PASS] testSameHumanDifferentVenture() (gas: 155021)
+[PASS] testWalletCannotAcquireAnotherNullifier() (gas: 102499)
+Suite result: ok. 4 passed; 0 failed; 0 skipped; finished in 503.96µs (634.54µs CPU time)
+
+Ran 1 test suite in 4.81ms (503.96µs CPU time): 4 tests passed, 0 failed, 0 skipped (4 total tests)
+
+RED zero inputs
+Compiling 1 files with Solc 0.8.24
+Solc 0.8.24 finished in 76.44ms
+Compiler run successful!
+
+Ran 5 tests for test/SeatRegistry.t.sol:SeatRegistryTest
+[PASS] testNullifierCannotTakeSecondSeat() (gas: 104862)
+[PASS] testOnlyAttester() (gas: 34037)
+[FAIL: next call did not revert as expected] testRejectZeroInputs() (gas: 76938)
+[PASS] testSameHumanDifferentVenture() (gas: 155031)
+[PASS] testWalletCannotAcquireAnotherNullifier() (gas: 102532)
+Suite result: FAILED. 4 passed; 1 failed; 0 skipped; finished in 2.13ms (1.27ms CPU time)
+
+Ran 1 test suite in 4.89ms (2.13ms CPU time): 4 tests passed, 1 failed, 0 skipped (5 total tests)
+
+Failing tests:
+Encountered 1 failing test in test/SeatRegistry.t.sol:SeatRegistryTest
+[FAIL: next call did not revert as expected] testRejectZeroInputs() (gas: 76938)
+
+Encountered a total of 1 failing tests, 4 tests succeeded
+
+Tip: Run `forge test --rerun` to retry only the 1 failed test
+Tip: Run `forge test --debug --match-test <TEST_NAME>` to inspect one failing test in the debugger
+
+GREEN zero inputs
+Compiling 1 files with Solc 0.8.24
+Solc 0.8.24 finished in 43.67ms
+Compiler run successful!
+
+Ran 5 tests for test/SeatRegistry.t.sol:SeatRegistryTest
+[PASS] testNullifierCannotTakeSecondSeat() (gas: 105068)
+[PASS] testOnlyAttester() (gas: 34151)
+[PASS] testRejectZeroInputs() (gas: 180241)
+[PASS] testSameHumanDifferentVenture() (gas: 155237)
+[PASS] testWalletCannotAcquireAnotherNullifier() (gas: 102738)
+Suite result: ok. 5 passed; 0 failed; 0 skipped; finished in 816.83µs (1.24ms CPU time)
+
+Ran 1 test suite in 6.20ms (816.83µs CPU time): 5 tests passed, 0 failed, 0 skipped (5 total tests)

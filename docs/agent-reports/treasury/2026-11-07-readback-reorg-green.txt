@@ -1,0 +1,13 @@
+✔ deposit history paginates from creation, uses receipt-bound logs, and resumes after reload (4.309375ms)
+✔ unknown balance and bad receipts never become zero or a verified deposit (0.921708ms)
+✔ simulation/no mined trace cannot create a GS020 evidence record (0.771ms)
+✔ only a canonical failed receipt with an actual transaction trace can publish rejected evidence (2.40325ms)
+✔ a reorg during a read invalidates the entire balance and deposit projection (0.648125ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 5
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 357.538667

@@ -1,0 +1,41 @@
+{
+  "claim": "READ_ONLY_PUBLIC_BALANCES",
+  "chainId": 1874,
+  "at": "2026-11-06T22:52:11.664Z",
+  "blockNumber": "12409159",
+  "blockHash": "0xff57b7d568d0703a88be0dead254bbd532d9ec5b781417f2fc2437fd9797d4bf",
+  "wallets": {
+    "deployer": {
+      "address": "0x10d8C1d6359F0694203924182d3da83843a4e052",
+      "wbtWei": "800000000000000000",
+      "nonce": 0
+    },
+    "attester": {
+      "address": "0x84068C51A9236A869E5F05FBA96323E97597DDEd",
+      "wbtWei": "200000000000000000",
+      "nonce": 0
+    },
+    "relayer": {
+      "address": "0xc57f2f78997e35fc2C1E0BA06249B499cD293116",
+      "wbtWei": "800000000000000000",
+      "nonce": 0
+    },
+    "funder": {
+      "address": "0xD613312b630C9359EcE15dBF3969c47261d8d43A",
+      "wbtWei": "0",
+      "nonce": 0,
+      "usdtRaw": "100000000"
+    },
+    "payee": {
+      "address": "0xabDC5035CEa855Ec7Cf8A7259eA26E131f0BA8D8",
+      "wbtWei": "0",
+      "nonce": 0
+    },
+    "failedTx": {
+      "address": "0xd03ce7DAE6c4B75fE26213Cb08CEB9286D1FC852",
+      "wbtWei": "50000000000000000",
+      "nonce": 0
+    }
+  },
+  "broadcastAuthorized": false
+}

@@ -1,0 +1,776 @@
+Compiling 3 files with Solc 0.8.24
+Solc 0.8.24 finished in 979.62ms
+Compiler run successful!
+
+Ran 3 tests for test/VestigeGuard.t.sol:VestigeGuardTest
+[FAIL: next call did not revert as expected] testGuardCannotBeRemoved() (gas: 116430)
+[PASS] testOneSignatureFailsGS020() (gas: 91038)
+[PASS] testTwoOwnersCanPay() (gas: 142467)
+Suite result: FAILED. 2 passed; 1 failed; 0 skipped; finished in 1.73ms (1.02ms CPU time)
+
+Ran 1 test suite in 5.83ms (1.73ms CPU time): 2 tests passed, 1 failed, 0 skipped (3 total tests)
+
+Failing tests:
+Encountered 1 failing test in test/VestigeGuard.t.sol:VestigeGuardTest
+[FAIL: next call did not revert as expected] testGuardCannotBeRemoved() (gas: 116430)
+
+Encountered a total of 1 failing tests, 2 tests succeeded
+
+Tip: Run `forge test --rerun` to retry only the 1 failed test
+Tip: Run `forge test --debug --match-test <TEST_NAME>` to inspect one failing test in the debugger
+
+GREEN guard removal
+Error: Compiler run failed:
+Error (9582): Member "setGuard" not found or not visible after argument-dependent lookup in type(contract Safe).
+  --> contracts/VestigeGuard.sol:19:33:
+   |
+19 |             require(selector != Safe.setGuard.selector, "GUARD_LOCKED");
+   |                                 ^^^^^^^^^^^^^
+
+GREEN guard removal
+Compiling 2 files with Solc 0.8.24
+Solc 0.8.24 finished in 886.48ms
+Compiler run successful with warnings:
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> contracts/VestigeGuard.sol:15:71:
+   |
+15 |     function checkTransaction(address to, uint256, bytes memory data, Enum.Operation operation, uint256,
+   |                                                                       ^^^^^^^^^^^^^^^^^^^^^^^^
+
+Warning (2018): Function state mutability can be restricted to view
+  --> contracts/VestigeGuard.sol:15:5:
+   |
+15 |     function checkTransaction(address to, uint256, bytes memory data, Enum.Operation operation, uint256,
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+
+Ran 3 tests for test/VestigeGuard.t.sol:VestigeGuardTest
+[PASS] testGuardCannotBeRemoved() (gas: 108446)
+[PASS] testOneSignatureFailsGS020() (gas: 91038)
+[PASS] testTwoOwnersCanPay() (gas: 142561)
+Suite result: ok. 3 passed; 0 failed; 0 skipped; finished in 19.63ms (4.54ms CPU time)
+
+Ran 1 test suite in 24.43ms (19.63ms CPU time): 3 tests passed, 0 failed, 0 skipped (3 total tests)
+
+RED threshold reduction
+Compiling 1 files with Solc 0.8.24
+Solc 0.8.24 finished in 862.33ms
+Compiler run successful with warnings:
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> contracts/VestigeGuard.sol:15:71:
+   |
+15 |     function checkTransaction(address to, uint256, bytes memory data, Enum.Operation operation, uint256,
+   |                                                                       ^^^^^^^^^^^^^^^^^^^^^^^^
+
+Warning (2018): Function state mutability can be restricted to view
+  --> contracts/VestigeGuard.sol:15:5:
+   |
+15 |     function checkTransaction(address to, uint256, bytes memory data, Enum.Operation operation, uint256,
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+
+Ran 4 tests for test/VestigeGuard.t.sol:VestigeGuardTest
+[PASS] testGuardCannotBeRemoved() (gas: 108587)
+[PASS] testOneSignatureFailsGS020() (gas: 91038)
+[FAIL: next call did not revert as expected] testThresholdCannotDrop() (gas: 118792)
+[PASS] testTwoOwnersCanPay() (gas: 142561)
+Suite result: FAILED. 3 passed; 1 failed; 0 skipped; finished in 1.49ms (1.43ms CPU time)
+
+Ran 1 test suite in 4.50ms (1.49ms CPU time): 3 tests passed, 1 failed, 0 skipped (4 total tests)
+
+Failing tests:
+Encountered 1 failing test in test/VestigeGuard.t.sol:VestigeGuardTest
+[FAIL: next call did not revert as expected] testThresholdCannotDrop() (gas: 118792)
+
+Encountered a total of 1 failing tests, 3 tests succeeded
+
+Tip: Run `forge test --rerun` to retry only the 1 failed test
+Tip: Run `forge test --debug --match-test <TEST_NAME>` to inspect one failing test in the debugger
+
+GREEN threshold reduction
+Compiling 1 files with Solc 0.8.24
+Solc 0.8.24 finished in 397.79ms
+Compiler run successful with warnings:
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> contracts/VestigeGuard.sol:15:71:
+   |
+15 |     function checkTransaction(address to, uint256, bytes memory data, Enum.Operation operation, uint256,
+   |                                                                       ^^^^^^^^^^^^^^^^^^^^^^^^
+
+Warning (2018): Function state mutability can be restricted to view
+  --> contracts/VestigeGuard.sol:15:5:
+   |
+15 |     function checkTransaction(address to, uint256, bytes memory data, Enum.Operation operation, uint256,
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+
+Ran 4 tests for test/VestigeGuard.t.sol:VestigeGuardTest
+[PASS] testGuardCannotBeRemoved() (gas: 108588)
+[PASS] testOneSignatureFailsGS020() (gas: 91038)
+[PASS] testThresholdCannotDrop() (gas: 108701)
+[PASS] testTwoOwnersCanPay() (gas: 142561)
+Suite result: ok. 4 passed; 0 failed; 0 skipped; finished in 1.49ms (1.35ms CPU time)
+
+Ran 1 test suite in 5.04ms (1.49ms CPU time): 4 tests passed, 0 failed, 0 skipped (4 total tests)
+
+RED owner removal
+Compiling 1 files with Solc 0.8.24
+Solc 0.8.24 finished in 893.80ms
+Compiler run successful with warnings:
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> contracts/VestigeGuard.sol:15:71:
+   |
+15 |     function checkTransaction(address to, uint256, bytes memory data, Enum.Operation operation, uint256,
+   |                                                                       ^^^^^^^^^^^^^^^^^^^^^^^^
+
+Warning (2018): Function state mutability can be restricted to view
+  --> contracts/VestigeGuard.sol:15:5:
+   |
+15 |     function checkTransaction(address to, uint256, bytes memory data, Enum.Operation operation, uint256,
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+
+Ran 5 tests for test/VestigeGuard.t.sol:VestigeGuardTest
+[PASS] testGuardCannotBeRemoved() (gas: 108621)
+[PASS] testOneSignatureFailsGS020() (gas: 91060)
+[FAIL: next call did not revert as expected] testRemoveOwnerCannotReduceThreshold() (gas: 154168)
+[PASS] testThresholdCannotDrop() (gas: 108723)
+[PASS] testTwoOwnersCanPay() (gas: 142583)
+Suite result: FAILED. 4 passed; 1 failed; 0 skipped; finished in 1.64ms (1.90ms CPU time)
+
+Ran 1 test suite in 4.89ms (1.64ms CPU time): 4 tests passed, 1 failed, 0 skipped (5 total tests)
+
+Failing tests:
+Encountered 1 failing test in test/VestigeGuard.t.sol:VestigeGuardTest
+[FAIL: next call did not revert as expected] testRemoveOwnerCannotReduceThreshold() (gas: 154168)
+
+Encountered a total of 1 failing tests, 4 tests succeeded
+
+Tip: Run `forge test --rerun` to retry only the 1 failed test
+Tip: Run `forge test --debug --match-test <TEST_NAME>` to inspect one failing test in the debugger
+
+GREEN owner removal
+Compiling 1 files with Solc 0.8.24
+Solc 0.8.24 finished in 399.54ms
+Compiler run successful with warnings:
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> contracts/VestigeGuard.sol:15:71:
+   |
+15 |     function checkTransaction(address to, uint256, bytes memory data, Enum.Operation operation, uint256,
+   |                                                                       ^^^^^^^^^^^^^^^^^^^^^^^^
+
+Warning (2018): Function state mutability can be restricted to view
+  --> contracts/VestigeGuard.sol:15:5:
+   |
+15 |     function checkTransaction(address to, uint256, bytes memory data, Enum.Operation operation, uint256,
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+
+Ran 5 tests for test/VestigeGuard.t.sol:VestigeGuardTest
+[PASS] testGuardCannotBeRemoved() (gas: 108621)
+[PASS] testOneSignatureFailsGS020() (gas: 91060)
+[PASS] testRemoveOwnerCannotReduceThreshold() (gas: 130582)
+[PASS] testThresholdCannotDrop() (gas: 108723)
+[PASS] testTwoOwnersCanPay() (gas: 142583)
+Suite result: ok. 5 passed; 0 failed; 0 skipped; finished in 1.52ms (2.03ms CPU time)
+
+Ran 1 test suite in 4.86ms (1.52ms CPU time): 5 tests passed, 0 failed, 0 skipped (5 total tests)
+
+RED owner addition
+Compiling 1 files with Solc 0.8.24
+Solc 0.8.24 finished in 908.81ms
+Compiler run successful with warnings:
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> contracts/VestigeGuard.sol:15:71:
+   |
+15 |     function checkTransaction(address to, uint256, bytes memory data, Enum.Operation operation, uint256,
+   |                                                                       ^^^^^^^^^^^^^^^^^^^^^^^^
+
+Warning (2018): Function state mutability can be restricted to view
+  --> contracts/VestigeGuard.sol:15:5:
+   |
+15 |     function checkTransaction(address to, uint256, bytes memory data, Enum.Operation operation, uint256,
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+
+Ran 6 tests for test/VestigeGuard.t.sol:VestigeGuardTest
+[FAIL: next call did not revert as expected] testCannotAddUnverifiedOwner() (gas: 147499)
+[PASS] testGuardCannotBeRemoved() (gas: 108599)
+[PASS] testOneSignatureFailsGS020() (gas: 91038)
+[PASS] testRemoveOwnerCannotReduceThreshold() (gas: 130605)
+[PASS] testThresholdCannotDrop() (gas: 108701)
+[PASS] testTwoOwnersCanPay() (gas: 142561)
+Suite result: FAILED. 5 passed; 1 failed; 0 skipped; finished in 1.60ms (2.29ms CPU time)
+
+Ran 1 test suite in 4.68ms (1.60ms CPU time): 5 tests passed, 1 failed, 0 skipped (6 total tests)
+
+Failing tests:
+Encountered 1 failing test in test/VestigeGuard.t.sol:VestigeGuardTest
+[FAIL: next call did not revert as expected] testCannotAddUnverifiedOwner() (gas: 147499)
+
+Encountered a total of 1 failing tests, 5 tests succeeded
+
+Tip: Run `forge test --rerun` to retry only the 1 failed test
+Tip: Run `forge test --debug --match-test <TEST_NAME>` to inspect one failing test in the debugger
+
+GREEN owner addition
+Compiling 1 files with Solc 0.8.24
+Solc 0.8.24 finished in 412.03ms
+Compiler run successful with warnings:
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> contracts/VestigeGuard.sol:15:71:
+   |
+15 |     function checkTransaction(address to, uint256, bytes memory data, Enum.Operation operation, uint256,
+   |                                                                       ^^^^^^^^^^^^^^^^^^^^^^^^
+
+Warning (2018): Function state mutability can be restricted to view
+  --> contracts/VestigeGuard.sol:15:5:
+   |
+15 |     function checkTransaction(address to, uint256, bytes memory data, Enum.Operation operation, uint256,
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+
+Ran 6 tests for test/VestigeGuard.t.sol:VestigeGuardTest
+[PASS] testCannotAddUnverifiedOwner() (gas: 109377)
+[PASS] testGuardCannotBeRemoved() (gas: 108599)
+[PASS] testOneSignatureFailsGS020() (gas: 91038)
+[PASS] testRemoveOwnerCannotReduceThreshold() (gas: 130605)
+[PASS] testThresholdCannotDrop() (gas: 108701)
+[PASS] testTwoOwnersCanPay() (gas: 142561)
+Suite result: ok. 6 passed; 0 failed; 0 skipped; finished in 1.53ms (2.38ms CPU time)
+
+Ran 1 test suite in 5.19ms (1.53ms CPU time): 6 tests passed, 0 failed, 0 skipped (6 total tests)
+
+RED unverified swap
+Compiling 1 files with Solc 0.8.24
+Solc 0.8.24 finished in 912.84ms
+Compiler run successful with warnings:
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> contracts/VestigeGuard.sol:15:71:
+   |
+15 |     function checkTransaction(address to, uint256, bytes memory data, Enum.Operation operation, uint256,
+   |                                                                       ^^^^^^^^^^^^^^^^^^^^^^^^
+
+Warning (2018): Function state mutability can be restricted to view
+  --> contracts/VestigeGuard.sol:15:5:
+   |
+15 |     function checkTransaction(address to, uint256, bytes memory data, Enum.Operation operation, uint256,
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+
+Ran 7 tests for test/VestigeGuard.t.sol:VestigeGuardTest
+[PASS] testCannotAddUnverifiedOwner() (gas: 109377)
+[FAIL: next call did not revert as expected] testCannotSwapToUnverifiedOwner() (gas: 168494)
+[PASS] testGuardCannotBeRemoved() (gas: 108599)
+[PASS] testOneSignatureFailsGS020() (gas: 91038)
+[PASS] testRemoveOwnerCannotReduceThreshold() (gas: 130605)
+[PASS] testThresholdCannotDrop() (gas: 108701)
+[PASS] testTwoOwnersCanPay() (gas: 142561)
+Suite result: FAILED. 6 passed; 1 failed; 0 skipped; finished in 1.54ms (2.65ms CPU time)
+
+Ran 1 test suite in 4.78ms (1.54ms CPU time): 6 tests passed, 1 failed, 0 skipped (7 total tests)
+
+Failing tests:
+Encountered 1 failing test in test/VestigeGuard.t.sol:VestigeGuardTest
+[FAIL: next call did not revert as expected] testCannotSwapToUnverifiedOwner() (gas: 168494)
+
+Encountered a total of 1 failing tests, 6 tests succeeded
+
+Tip: Run `forge test --rerun` to retry only the 1 failed test
+Tip: Run `forge test --debug --match-test <TEST_NAME>` to inspect one failing test in the debugger
+
+GREEN unverified swap
+Compiling 1 files with Solc 0.8.24
+Solc 0.8.24 finished in 416.87ms
+Compiler run successful with warnings:
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> contracts/VestigeGuard.sol:15:71:
+   |
+15 |     function checkTransaction(address to, uint256, bytes memory data, Enum.Operation operation, uint256,
+   |                                                                       ^^^^^^^^^^^^^^^^^^^^^^^^
+
+Warning (2018): Function state mutability can be restricted to view
+  --> contracts/VestigeGuard.sol:15:5:
+   |
+15 |     function checkTransaction(address to, uint256, bytes memory data, Enum.Operation operation, uint256,
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+
+Ran 7 tests for test/VestigeGuard.t.sol:VestigeGuardTest
+[PASS] testCannotAddUnverifiedOwner() (gas: 109377)
+[PASS] testCannotSwapToUnverifiedOwner() (gas: 136359)
+[PASS] testGuardCannotBeRemoved() (gas: 108599)
+[PASS] testOneSignatureFailsGS020() (gas: 91038)
+[PASS] testRemoveOwnerCannotReduceThreshold() (gas: 130605)
+[PASS] testThresholdCannotDrop() (gas: 108701)
+[PASS] testTwoOwnersCanPay() (gas: 142590)
+Suite result: ok. 7 passed; 0 failed; 0 skipped; finished in 1.59ms (3.40ms CPU time)
+
+Ran 1 test suite in 5.60ms (1.59ms CPU time): 7 tests passed, 0 failed, 0 skipped (7 total tests)
+
+RED module enabling
+Compiling 1 files with Solc 0.8.24
+Solc 0.8.24 finished in 923.03ms
+Compiler run successful with warnings:
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> contracts/VestigeGuard.sol:15:71:
+   |
+15 |     function checkTransaction(address to, uint256, bytes memory data, Enum.Operation operation, uint256,
+   |                                                                       ^^^^^^^^^^^^^^^^^^^^^^^^
+
+Warning (2018): Function state mutability can be restricted to view
+  --> contracts/VestigeGuard.sol:15:5:
+   |
+15 |     function checkTransaction(address to, uint256, bytes memory data, Enum.Operation operation, uint256,
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+
+Ran 8 tests for test/VestigeGuard.t.sol:VestigeGuardTest
+[PASS] testCannotAddUnverifiedOwner() (gas: 109377)
+[FAIL: next call did not revert as expected] testCannotEnableModule() (gas: 141987)
+[PASS] testCannotSwapToUnverifiedOwner() (gas: 136359)
+[PASS] testGuardCannotBeRemoved() (gas: 108599)
+[PASS] testOneSignatureFailsGS020() (gas: 91038)
+[PASS] testRemoveOwnerCannotReduceThreshold() (gas: 130605)
+[PASS] testThresholdCannotDrop() (gas: 108723)
+[PASS] testTwoOwnersCanPay() (gas: 142612)
+Suite result: FAILED. 7 passed; 1 failed; 0 skipped; finished in 1.63ms (3.35ms CPU time)
+
+Ran 1 test suite in 5.16ms (1.63ms CPU time): 7 tests passed, 1 failed, 0 skipped (8 total tests)
+
+Failing tests:
+Encountered 1 failing test in test/VestigeGuard.t.sol:VestigeGuardTest
+[FAIL: next call did not revert as expected] testCannotEnableModule() (gas: 141987)
+
+Encountered a total of 1 failing tests, 7 tests succeeded
+
+Tip: Run `forge test --rerun` to retry only the 1 failed test
+Tip: Run `forge test --debug --match-test <TEST_NAME>` to inspect one failing test in the debugger
+
+GREEN module enabling
+Compiling 1 files with Solc 0.8.24
+Solc 0.8.24 finished in 418.53ms
+Compiler run successful with warnings:
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> contracts/VestigeGuard.sol:15:71:
+   |
+15 |     function checkTransaction(address to, uint256, bytes memory data, Enum.Operation operation, uint256,
+   |                                                                       ^^^^^^^^^^^^^^^^^^^^^^^^
+
+Warning (2018): Function state mutability can be restricted to view
+  --> contracts/VestigeGuard.sol:15:5:
+   |
+15 |     function checkTransaction(address to, uint256, bytes memory data, Enum.Operation operation, uint256,
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+
+Ran 8 tests for test/VestigeGuard.t.sol:VestigeGuardTest
+[PASS] testCannotAddUnverifiedOwner() (gas: 109377)
+[PASS] testCannotEnableModule() (gas: 109044)
+[PASS] testCannotSwapToUnverifiedOwner() (gas: 136409)
+[PASS] testGuardCannotBeRemoved() (gas: 108599)
+[PASS] testOneSignatureFailsGS020() (gas: 91038)
+[PASS] testRemoveOwnerCannotReduceThreshold() (gas: 130605)
+[PASS] testThresholdCannotDrop() (gas: 108723)
+[PASS] testTwoOwnersCanPay() (gas: 142612)
+Suite result: ok. 8 passed; 0 failed; 0 skipped; finished in 1.73ms (3.28ms CPU time)
+
+Ran 1 test suite in 4.94ms (1.73ms CPU time): 8 tests passed, 0 failed, 0 skipped (8 total tests)
+
+RED handler change
+Compiling 1 files with Solc 0.8.24
+Solc 0.8.24 finished in 992.95ms
+Compiler run successful with warnings:
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> contracts/VestigeGuard.sol:15:71:
+   |
+15 |     function checkTransaction(address to, uint256, bytes memory data, Enum.Operation operation, uint256,
+   |                                                                       ^^^^^^^^^^^^^^^^^^^^^^^^
+
+Warning (2018): Function state mutability can be restricted to view
+  --> contracts/VestigeGuard.sol:15:5:
+   |
+15 |     function checkTransaction(address to, uint256, bytes memory data, Enum.Operation operation, uint256,
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+
+Ran 9 tests for test/VestigeGuard.t.sol:VestigeGuardTest
+[PASS] testCannotAddUnverifiedOwner() (gas: 109377)
+[FAIL: next call did not revert as expected] testCannotChangeFallbackHandler() (gas: 138577)
+[PASS] testCannotEnableModule() (gas: 109044)
+[PASS] testCannotSwapToUnverifiedOwner() (gas: 136409)
+[PASS] testGuardCannotBeRemoved() (gas: 108599)
+[PASS] testOneSignatureFailsGS020() (gas: 91127)
+[PASS] testRemoveOwnerCannotReduceThreshold() (gas: 130605)
+[PASS] testThresholdCannotDrop() (gas: 108723)
+[PASS] testTwoOwnersCanPay() (gas: 142612)
+Suite result: FAILED. 8 passed; 1 failed; 0 skipped; finished in 2.38ms (5.26ms CPU time)
+
+Ran 1 test suite in 5.92ms (2.38ms CPU time): 8 tests passed, 1 failed, 0 skipped (9 total tests)
+
+Failing tests:
+Encountered 1 failing test in test/VestigeGuard.t.sol:VestigeGuardTest
+[FAIL: next call did not revert as expected] testCannotChangeFallbackHandler() (gas: 138577)
+
+Encountered a total of 1 failing tests, 8 tests succeeded
+
+Tip: Run `forge test --rerun` to retry only the 1 failed test
+Tip: Run `forge test --debug --match-test <TEST_NAME>` to inspect one failing test in the debugger
+
+GREEN handler change
+Compiling 1 files with Solc 0.8.24
+Solc 0.8.24 finished in 435.78ms
+Compiler run successful with warnings:
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> contracts/VestigeGuard.sol:15:71:
+   |
+15 |     function checkTransaction(address to, uint256, bytes memory data, Enum.Operation operation, uint256,
+   |                                                                       ^^^^^^^^^^^^^^^^^^^^^^^^
+
+Warning (2018): Function state mutability can be restricted to view
+  --> contracts/VestigeGuard.sol:15:5:
+   |
+15 |     function checkTransaction(address to, uint256, bytes memory data, Enum.Operation operation, uint256,
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+
+Ran 9 tests for test/VestigeGuard.t.sol:VestigeGuardTest
+[PASS] testCannotAddUnverifiedOwner() (gas: 109377)
+[PASS] testCannotChangeFallbackHandler() (gas: 111181)
+[PASS] testCannotEnableModule() (gas: 109044)
+[PASS] testCannotSwapToUnverifiedOwner() (gas: 136459)
+[PASS] testGuardCannotBeRemoved() (gas: 108599)
+[PASS] testOneSignatureFailsGS020() (gas: 91127)
+[PASS] testRemoveOwnerCannotReduceThreshold() (gas: 130605)
+[PASS] testThresholdCannotDrop() (gas: 108723)
+[PASS] testTwoOwnersCanPay() (gas: 142612)
+Suite result: ok. 9 passed; 0 failed; 0 skipped; finished in 1.82ms (4.67ms CPU time)
+
+Ran 1 test suite in 5.23ms (1.82ms CPU time): 9 tests passed, 0 failed, 0 skipped (9 total tests)
+
+RED arbitrary delegatecall
+Compiling 1 files with Solc 0.8.24
+Solc 0.8.24 finished in 922.18ms
+Compiler run successful with warnings:
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> contracts/VestigeGuard.sol:15:71:
+   |
+15 |     function checkTransaction(address to, uint256, bytes memory data, Enum.Operation operation, uint256,
+   |                                                                       ^^^^^^^^^^^^^^^^^^^^^^^^
+
+Warning (2018): Function state mutability can be restricted to view
+  --> contracts/VestigeGuard.sol:15:5:
+   |
+15 |     function checkTransaction(address to, uint256, bytes memory data, Enum.Operation operation, uint256,
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+
+Ran 10 tests for test/VestigeGuard.t.sol:VestigeGuardTest
+[PASS] testCannotAddUnverifiedOwner() (gas: 109377)
+[PASS] testCannotChangeFallbackHandler() (gas: 111181)
+[PASS] testCannotEnableModule() (gas: 109066)
+[PASS] testCannotSwapToUnverifiedOwner() (gas: 136459)
+[FAIL: next call did not revert as expected] testDelegatecallCannotWriteSafeStorage() (gas: 225580)
+[PASS] testGuardCannotBeRemoved() (gas: 108599)
+[PASS] testOneSignatureFailsGS020() (gas: 91127)
+[PASS] testRemoveOwnerCannotReduceThreshold() (gas: 130605)
+[PASS] testThresholdCannotDrop() (gas: 108745)
+[PASS] testTwoOwnersCanPay() (gas: 142634)
+Suite result: FAILED. 9 passed; 1 failed; 0 skipped; finished in 1.86ms (6.52ms CPU time)
+
+Ran 1 test suite in 5.34ms (1.86ms CPU time): 9 tests passed, 1 failed, 0 skipped (10 total tests)
+
+Failing tests:
+Encountered 1 failing test in test/VestigeGuard.t.sol:VestigeGuardTest
+[FAIL: next call did not revert as expected] testDelegatecallCannotWriteSafeStorage() (gas: 225580)
+
+Encountered a total of 1 failing tests, 9 tests succeeded
+
+Tip: Run `forge test --rerun` to retry only the 1 failed test
+Tip: Run `forge test --debug --match-test <TEST_NAME>` to inspect one failing test in the debugger
+
+GREEN arbitrary delegatecall
+Compiling 1 files with Solc 0.8.24
+Solc 0.8.24 finished in 417.66ms
+Compiler run successful with warnings:
+Warning (2018): Function state mutability can be restricted to view
+  --> contracts/VestigeGuard.sol:15:5:
+   |
+15 |     function checkTransaction(address to, uint256, bytes memory data, Enum.Operation operation, uint256,
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+
+Ran 10 tests for test/VestigeGuard.t.sol:VestigeGuardTest
+[PASS] testCannotAddUnverifiedOwner() (gas: 109426)
+[PASS] testCannotChangeFallbackHandler() (gas: 111230)
+[PASS] testCannotEnableModule() (gas: 109115)
+[PASS] testCannotSwapToUnverifiedOwner() (gas: 136508)
+[PASS] testDelegatecallCannotWriteSafeStorage() (gas: 216683)
+[PASS] testGuardCannotBeRemoved() (gas: 108659)
+[PASS] testOneSignatureFailsGS020() (gas: 91127)
+[PASS] testRemoveOwnerCannotReduceThreshold() (gas: 130654)
+[PASS] testThresholdCannotDrop() (gas: 108794)
+[PASS] testTwoOwnersCanPay() (gas: 142683)
+Suite result: ok. 10 passed; 0 failed; 0 skipped; finished in 1.88ms (6.41ms CPU time)
+
+Ran 1 test suite in 4.91ms (1.88ms CPU time): 10 tests passed, 0 failed, 0 skipped (10 total tests)
+
+RED remaining self-call policy
+Compiling 1 files with Solc 0.8.24
+Solc 0.8.24 finished in 947.26ms
+Compiler run successful with warnings:
+Warning (2018): Function state mutability can be restricted to view
+  --> contracts/VestigeGuard.sol:15:5:
+   |
+15 |     function checkTransaction(address to, uint256, bytes memory data, Enum.Operation operation, uint256,
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+
+Ran 11 tests for test/VestigeGuard.t.sol:VestigeGuardTest
+[PASS] testCannotAddUnverifiedOwner() (gas: 109426)
+[PASS] testCannotChangeFallbackHandler() (gas: 111341)
+[PASS] testCannotEnableModule() (gas: 109115)
+[PASS] testCannotSwapToUnverifiedOwner() (gas: 136508)
+[PASS] testDelegatecallCannotWriteSafeStorage() (gas: 216683)
+[PASS] testGuardCannotBeRemoved() (gas: 108659)
+[PASS] testOneSignatureFailsGS020() (gas: 91127)
+[PASS] testRemoveOwnerCannotReduceThreshold() (gas: 130654)
+[PASS] testSelfApproveHashForbidden() (gas: 113064)
+[PASS] testThresholdCannotDrop() (gas: 108794)
+[PASS] testTwoOwnersCanPay() (gas: 142683)
+Suite result: ok. 11 passed; 0 failed; 0 skipped; finished in 1.96ms (7.11ms CPU time)
+
+Ran 1 test suite in 4.98ms (1.96ms CPU time): 11 tests passed, 0 failed, 0 skipped (11 total tests)
+
+RED remaining self-call policy
+Compiling 1 files with Solc 0.8.24
+Solc 0.8.24 finished in 944.95ms
+Compiler run successful with warnings:
+Warning (2018): Function state mutability can be restricted to view
+  --> contracts/VestigeGuard.sol:15:5:
+   |
+15 |     function checkTransaction(address to, uint256, bytes memory data, Enum.Operation operation, uint256,
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+
+Ran 12 tests for test/VestigeGuard.t.sol:VestigeGuardTest
+[PASS] testCannotAddUnverifiedOwner() (gas: 109426)
+[PASS] testCannotChangeFallbackHandler() (gas: 111341)
+[PASS] testCannotEnableModule() (gas: 109071)
+[PASS] testCannotSwapToUnverifiedOwner() (gas: 136508)
+[PASS] testDelegatecallCannotWriteSafeStorage() (gas: 216706)
+[FAIL: next call did not revert as expected] testEmptySelfCallForbidden() (gas: 112314)
+[PASS] testGuardCannotBeRemoved() (gas: 108682)
+[PASS] testOneSignatureFailsGS020() (gas: 91127)
+[PASS] testRemoveOwnerCannotReduceThreshold() (gas: 130654)
+[PASS] testSelfApproveHashForbidden() (gas: 113087)
+[PASS] testThresholdCannotDrop() (gas: 108772)
+[PASS] testTwoOwnersCanPay() (gas: 142661)
+Suite result: FAILED. 11 passed; 1 failed; 0 skipped; finished in 2.19ms (9.25ms CPU time)
+
+Ran 1 test suite in 5.06ms (2.19ms CPU time): 11 tests passed, 1 failed, 0 skipped (12 total tests)
+
+Failing tests:
+Encountered 1 failing test in test/VestigeGuard.t.sol:VestigeGuardTest
+[FAIL: next call did not revert as expected] testEmptySelfCallForbidden() (gas: 112314)
+
+Encountered a total of 1 failing tests, 11 tests succeeded
+
+Tip: Run `forge test --rerun` to retry only the 1 failed test
+Tip: Run `forge test --debug --match-test <TEST_NAME>` to inspect one failing test in the debugger
+
+GREEN remaining self-call policy
+Compiling 1 files with Solc 0.8.24
+Solc 0.8.24 finished in 432.57ms
+Compiler run successful with warnings:
+Warning (2018): Function state mutability can be restricted to view
+  --> contracts/VestigeGuard.sol:15:5:
+   |
+15 |     function checkTransaction(address to, uint256, bytes memory data, Enum.Operation operation, uint256,
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+
+Ran 12 tests for test/VestigeGuard.t.sol:VestigeGuardTest
+[PASS] testCannotAddUnverifiedOwner() (gas: 109415)
+[PASS] testCannotChangeFallbackHandler() (gas: 111330)
+[PASS] testCannotEnableModule() (gas: 109060)
+[PASS] testCannotSwapToUnverifiedOwner() (gas: 136547)
+[PASS] testDelegatecallCannotWriteSafeStorage() (gas: 216706)
+[PASS] testEmptySelfCallForbidden() (gas: 107154)
+[PASS] testGuardCannotBeRemoved() (gas: 108671)
+[PASS] testOneSignatureFailsGS020() (gas: 91127)
+[PASS] testRemoveOwnerCannotReduceThreshold() (gas: 130643)
+[PASS] testSelfApproveHashForbidden() (gas: 108934)
+[PASS] testThresholdCannotDrop() (gas: 108761)
+[PASS] testTwoOwnersCanPay() (gas: 142638)
+Suite result: ok. 12 passed; 0 failed; 0 skipped; finished in 2.38ms (10.65ms CPU time)
+
+Ran 1 test suite in 5.75ms (2.38ms CPU time): 12 tests passed, 0 failed, 0 skipped (12 total tests)
+
+RED bound hooks
+Compiling 1 files with Solc 0.8.24
+Solc 0.8.24 finished in 1.11s
+Compiler run successful with warnings:
+Warning (2018): Function state mutability can be restricted to view
+  --> contracts/VestigeGuard.sol:15:5:
+   |
+15 |     function checkTransaction(address to, uint256, bytes memory data, Enum.Operation operation, uint256,
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+
+Ran 13 tests for test/VestigeGuard.t.sol:VestigeGuardTest
+[PASS] testCannotAddUnverifiedOwner() (gas: 109471)
+[PASS] testCannotChangeFallbackHandler() (gas: 111341)
+[PASS] testCannotEnableModule() (gas: 109093)
+[PASS] testCannotSwapToUnverifiedOwner() (gas: 136536)
+[PASS] testDelegatecallCannotWriteSafeStorage() (gas: 216739)
+[PASS] testEmptySelfCallForbidden() (gas: 107187)
+[PASS] testGuardCannotBeRemoved() (gas: 108704)
+[PASS] testOneSignatureFailsGS020() (gas: 91083)
+[FAIL: next call did not revert as expected] testOnlyBoundSafeMayInvokeHooks() (gas: 29828)
+[PASS] testRemoveOwnerCannotReduceThreshold() (gas: 130699)
+[PASS] testSelfApproveHashForbidden() (gas: 108967)
+[PASS] testThresholdCannotDrop() (gas: 108794)
+[PASS] testTwoOwnersCanPay() (gas: 142638)
+Suite result: FAILED. 12 passed; 1 failed; 0 skipped; finished in 4.14ms (7.44ms CPU time)
+
+Ran 1 test suite in 5.89ms (4.14ms CPU time): 12 tests passed, 1 failed, 0 skipped (13 total tests)
+
+Failing tests:
+Encountered 1 failing test in test/VestigeGuard.t.sol:VestigeGuardTest
+[FAIL: next call did not revert as expected] testOnlyBoundSafeMayInvokeHooks() (gas: 29828)
+
+Encountered a total of 1 failing tests, 12 tests succeeded
+
+Tip: Run `forge test --rerun` to retry only the 1 failed test
+Tip: Run `forge test --debug --match-test <TEST_NAME>` to inspect one failing test in the debugger
+
+GREEN bound hooks
+Compiling 1 files with Solc 0.8.24
+Solc 0.8.24 finished in 440.45ms
+Compiler run successful with warnings:
+Warning (2018): Function state mutability can be restricted to view
+  --> contracts/VestigeGuard.sol:15:5:
+   |
+15 |     function checkTransaction(address to, uint256, bytes memory data, Enum.Operation operation, uint256,
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2018): Function state mutability can be restricted to view
+  --> contracts/VestigeGuard.sol:36:5:
+   |
+36 |     function checkAfterExecution(bytes32, bool) external override { require(msg.sender == address(safe), "SAFE_ONLY"); }
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+Ran 13 tests for test/VestigeGuard.t.sol:VestigeGuardTest
+[PASS] testCannotAddUnverifiedOwner() (gas: 109511)
+[PASS] testCannotChangeFallbackHandler() (gas: 111381)
+[PASS] testCannotEnableModule() (gas: 109133)
+[PASS] testCannotSwapToUnverifiedOwner() (gas: 136576)
+[PASS] testDelegatecallCannotWriteSafeStorage() (gas: 216790)
+[PASS] testEmptySelfCallForbidden() (gas: 107227)
+[PASS] testGuardCannotBeRemoved() (gas: 108744)
+[PASS] testOneSignatureFailsGS020() (gas: 91083)
+[PASS] testOnlyBoundSafeMayInvokeHooks() (gas: 58327)
+[PASS] testRemoveOwnerCannotReduceThreshold() (gas: 130739)
+[PASS] testSelfApproveHashForbidden() (gas: 109007)
+[PASS] testThresholdCannotDrop() (gas: 108834)
+[PASS] testTwoOwnersCanPay() (gas: 142730)
+Suite result: ok. 13 passed; 0 failed; 0 skipped; finished in 2.26ms (10.69ms CPU time)
+
+Ran 1 test suite in 5.70ms (2.26ms CPU time): 13 tests passed, 0 failed, 0 skipped (13 total tests)
+
+RED contaminated bootstrap
+Compiling 3 files with Solc 0.8.24
+Solc 0.8.24 finished in 1.12s
+Compiler run successful with warnings:
+Warning (2018): Function state mutability can be restricted to view
+  --> contracts/VestigeGuard.sol:19:5:
+   |
+19 |     function checkTransaction(address to, uint256, bytes memory data, Enum.Operation operation, uint256,
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2018): Function state mutability can be restricted to view
+  --> contracts/VestigeGuard.sol:40:5:
+   |
+40 |     function checkAfterExecution(bytes32, bool) external override { require(msg.sender == address(safe), "SAFE_ONLY"); }
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+Ran 21 tests for test/VestigeGuard.t.sol:VestigeGuardTest
+[PASS] testBaselineEnabledModuleBypassesTransactionGuard() (gas: 4135459)
+[PASS] testCannotAddUnverifiedOwner() (gas: 109501)
+[PASS] testCannotChangeFallbackHandler() (gas: 111350)
+[PASS] testCannotEnableModule() (gas: 109257)
+[PASS] testCannotSwapToUnverifiedOwner() (gas: 136623)
+[PASS] testDelegatecallCannotWriteSafeStorage() (gas: 216847)
+[PASS] testEmptySelfCallForbidden() (gas: 107262)
+[PASS] testEvenVerifiedThirdOwnerCannotBeAdded() (gas: 183917)
+[PASS] testFuzzSelfCallForbidden(bytes4) (runs: 256, μ: 108426, ~: 108434)
+[PASS] testGuardCannotBeRemoved() (gas: 108801)
+[PASS] testGuardReplacementBlocked() (gas: 377074)
+[PASS] testMultiSendCannotHideGuardRemoval() (gas: 326756)
+[PASS] testOneSignatureFailsGS020() (gas: 91140)
+[PASS] testOnlyBoundSafeMayInvokeHooks() (gas: 58349)
+[FAIL: next call did not revert as expected] testRejectGuardForSafeWithPreexistingModule() (gas: 4429489)
+[PASS] testRemoveOwnerCannotReduceThreshold() (gas: 130819)
+[PASS] testSelfApproveHashForbidden() (gas: 109064)
+[PASS] testThresholdCannotDrop() (gas: 108869)
+[PASS] testTwoOwnersCanPay() (gas: 142765)
+[PASS] testUnregisteredModuleCannotExecuteEitherEntryPoint() (gas: 82993)
+[PASS] testVerifiedSeatSwapAllowed() (gas: 264112)
+Suite result: FAILED. 20 passed; 1 failed; 0 skipped; finished in 33.26ms (45.81ms CPU time)
+
+Ran 1 test suite in 37.22ms (33.26ms CPU time): 20 tests passed, 1 failed, 0 skipped (21 total tests)
+
+Failing tests:
+Encountered 1 failing test in test/VestigeGuard.t.sol:VestigeGuardTest
+[FAIL: next call did not revert as expected] testRejectGuardForSafeWithPreexistingModule() (gas: 4429489)
+
+Encountered a total of 1 failing tests, 20 tests succeeded
+
+Tip: Run `forge test --rerun` to retry only the 1 failed test
+Tip: Run `forge test --debug --match-test <TEST_NAME>` to inspect one failing test in the debugger
+
+GREEN contaminated bootstrap; full bypass regression suite
+Compiling 3 files with Solc 0.8.24
+Solc 0.8.24 finished in 1.14s
+Compiler run successful with warnings:
+Warning (2018): Function state mutability can be restricted to view
+  --> contracts/VestigeGuard.sol:21:5:
+   |
+21 |     function checkTransaction(address to, uint256, bytes memory data, Enum.Operation operation, uint256,
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2018): Function state mutability can be restricted to view
+  --> contracts/VestigeGuard.sol:42:5:
+   |
+42 |     function checkAfterExecution(bytes32, bool) external override { require(msg.sender == address(safe), "SAFE_ONLY"); }
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+Ran 21 tests for test/VestigeGuard.t.sol:VestigeGuardTest
+[PASS] testBaselineEnabledModuleBypassesTransactionGuard() (gas: 4135459)
+[PASS] testCannotAddUnverifiedOwner() (gas: 109501)
+[PASS] testCannotChangeFallbackHandler() (gas: 111350)
+[PASS] testCannotEnableModule() (gas: 109257)
+[PASS] testCannotSwapToUnverifiedOwner() (gas: 136623)
+[PASS] testDelegatecallCannotWriteSafeStorage() (gas: 216847)
+[PASS] testEmptySelfCallForbidden() (gas: 107262)
+[PASS] testEvenVerifiedThirdOwnerCannotBeAdded() (gas: 183917)
+[PASS] testFuzzSelfCallForbidden(bytes4) (runs: 256, μ: 108430, ~: 108446)
+[PASS] testGuardCannotBeRemoved() (gas: 108801)
+[PASS] testGuardReplacementBlocked() (gas: 377074)
+[PASS] testMultiSendCannotHideGuardRemoval() (gas: 326756)
+[PASS] testOneSignatureFailsGS020() (gas: 91140)
+[PASS] testOnlyBoundSafeMayInvokeHooks() (gas: 58349)
+[PASS] testRejectGuardForSafeWithPreexistingModule() (gas: 3939097)
+[PASS] testRemoveOwnerCannotReduceThreshold() (gas: 130819)
+[PASS] testSelfApproveHashForbidden() (gas: 109064)
+[PASS] testThresholdCannotDrop() (gas: 108869)
+[PASS] testTwoOwnersCanPay() (gas: 142765)
+[PASS] testUnregisteredModuleCannotExecuteEitherEntryPoint() (gas: 82993)
+[PASS] testVerifiedSeatSwapAllowed() (gas: 264112)
+Suite result: ok. 21 passed; 0 failed; 0 skipped; finished in 16.50ms (28.64ms CPU time)
+
+Ran 1 test suite in 16.74ms (16.50ms CPU time): 21 tests passed, 0 failed, 0 skipped (21 total tests)

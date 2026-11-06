@@ -1,0 +1,29 @@
+{
+  "compiler": "0.8.24",
+  "artifacts": {
+    "SeatRegistry": {
+      "abiPath": "contracts/abi/SeatRegistry.json",
+      "abiSha256": "a9e5b83b4e2192784dd1c6104f85759027754b8f62f8e42d65be0ac9bbb9cfb2"
+    },
+    "VestigeGuard": {
+      "abiPath": "contracts/abi/VestigeGuard.json",
+      "abiSha256": "bd2ade62b43c0fe0d84c14bfe9ae7eb4bb3893cfcd2e111af7a5603abae8cf4a"
+    },
+    "SafeSetup": {
+      "abiPath": "contracts/abi/SafeSetup.json",
+      "abiSha256": "613611a8a03d4af00324ffebdfc655563d569d94c86b40c7ca80f97fc624ce67"
+    },
+    "SafeL2": {
+      "abiPath": "contracts/abi/SafeL2.json",
+      "abiSha256": "7cefae6c6eb086457998fc603cf7d93faf8af7c8d659d93548a4bffa642e34dc"
+    },
+    "SafeProxyFactory": {
+      "abiPath": "contracts/abi/SafeProxyFactory.json",
+      "abiSha256": "433ac586e353818573487746829e29b0531fd06e851fa2f7fb708ca9af3e003b"
+    },
+    "TestUSDT": {
+      "abiPath": "contracts/abi/TestUSDT.json",
+      "abiSha256": "1c34195c66cd83e69a6f63136b0b599d211157e5610baee4cd32eeabc08700a3"
+    }
+  }
+}
