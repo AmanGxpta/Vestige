@@ -1,0 +1,41 @@
+{
+  "at": "2026-11-06T22:12:07.680Z",
+  "ens": {
+    "owner": "0x1ed73ee055b7B5379CcD398748281C5A82e9A41E",
+    "status": "2",
+    "parentRegistry": "0x0000000000000000000000000000000000000000",
+    "registrarBalanceWei": "300000000000000000"
+  },
+  "wallets": {
+    "attester": {
+      "address": "0x84068C51A9236A869E5F05FBA96323E97597DDEd",
+      "wbtWei": "0"
+    },
+    "relayer": {
+      "address": "0xc57f2f78997e35fc2C1E0BA06249B499cD293116",
+      "wbtWei": "0"
+    },
+    "payee": {
+      "address": "0xabDC5035CEa855Ec7Cf8A7259eA26E131f0BA8D8",
+      "wbtWei": "0"
+    },
+    "funder": {
+      "address": "0xD613312b630C9359EcE15dBF3969c47261d8d43A",
+      "wbtWei": "0",
+      "usdtRaw": "0"
+    },
+    "failedTx": {
+      "address": "0xd03ce7DAE6c4B75fE26213Cb08CEB9286D1FC852",
+      "wbtWei": "0"
+    },
+    "deployer": {
+      "address": "0x10d8C1d6359F0694203924182d3da83843a4e052",
+      "wbtWei": "0"
+    }
+  },
+  "world": {
+    "envMode": "600",
+    "keyFormatValid": true,
+    "signerMatchesScreenshot": true
+  }
+}
