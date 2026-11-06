@@ -1,0 +1,7 @@
+  ✓  1 [mock] › tests/e2e/mock-journey.spec.ts:25:1 › founder A + founder B + funder + public verifier (DEV MOCK) (55.2s)
+  ✓  2 [mock] › tests/e2e/mock-journey.spec.ts:175:1 › public page with real chains: unregistered name is shown unresolved, no fallback (2.3s)
+  ✓  3 [live] › tests/e2e/live-wallet.spec.ts:72:1 › live build: connect injected wallet, explicit switch both ways, honest BLOCKED sign-in when C1 is not deployed (693ms)
+  ✓  4 [live] › tests/e2e/live-wallet.spec.ts:98:1 › live build: rejected network switch stays actionable (543ms)
+  ✓  5 [live] › tests/e2e/live-wallet.spec.ts:108:1 › live build: signing founding terms requires an explicit switch to Sepolia; payload checked; C1-shaped fixtures (751ms)
+  ✓  6 [live] › tests/e2e/live-wallet.spec.ts:183:1 › live build: public page and funder page read real Sepolia; unregistered name stays unresolved; no manifest → never ACTIVE (2.5s)
+  6 passed (1.1m)
