@@ -2,18 +2,18 @@
 
 > H owns state. Agents REQUEST actions through role reports. Use testnet-only keys. Never paste seed phrases, private keys, API tokens or signed authorizations into agent chat or screenshots. Exact commands below are examples **only where prerequisites exist**; confirm installed script names before running any deploy step.
 
-| ID | Priority | Status | Requester | Human action | Expected proof |
-|---|---|---|---|---|---|
-| H-001 | BLOCKER | OPEN | all | Put starter pack in Git repository root, commit baseline, run worktree setup | `git worktree list`, base commit |
-| H-002 | BLOCKER | OPEN | C1 | Confirm owned `dayzero.eth` Sepolia name / parent controls, ENSv2 registry and resolver at official booth | Address + non-secret links, notes |
-| H-003 | BLOCKER | OPEN | C1 | Setup World developer app, action / RP signing and simulator in matching env; don't share keys in chat | App/action public ID; redacted test outcome |
-| H-004 | BLOCKER | OPEN | X | Provide Whitechain faucet WBT to relayer/test deployer and test USDT to funder; four demo wallets A/B/funder/payee | Public addresses + balances, explorer links |
-| H-005 | HIGH | OPEN | X | Confirm whitechain RPC + explorer and actual Safe contracts and test token bytecode | RPC `eth_getCode` outputs, no private secrets |
-| H-006 | HIGH | OPEN | H | Verify sponsor track selections, eligibility, live submission cutoff | Official URLs/notes |
-| H-007 | HIGH | OPEN | H | Clarify project IP ownership and disclose Hercules connection in writing | Confirmation, public disclosure text |
-| H-008 | HIGH | OPEN | H | Recruit 2 distinct consenting founders for live proof; find an independent program manager | Consent and anonymized meeting notes |
-| H-009 | HIGH | OPEN | X | Approve execution of deliberately failing one-signature transaction from **test-only funded account** | Mined failed tx hash, proper error |
-| H-010 | HIGH | OPEN | H | Integrate/rehearse video, collect verified feedback and submit | Demo URL, repo ref and submission confirmation |
+| ID    | Priority | Status | Requester | Human action                                                                                                       | Expected proof                                 |
+| ----- | -------- | ------ | --------- | ------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------- |
+| H-001 | BLOCKER  | OPEN   | all       | Put starter pack in Git repository root, commit baseline, run worktree setup                                       | `git worktree list`, base commit               |
+| H-002 | BLOCKER  | OPEN   | C1        | Confirm owned `vestige.eth` Sepolia name / parent controls, ENSv2 registry and resolver at official booth          | Address + non-secret links, notes              |
+| H-003 | BLOCKER  | OPEN   | C1        | Setup World developer app, action / RP signing and simulator in matching env; don't share keys in chat             | App/action public ID; redacted test outcome    |
+| H-004 | BLOCKER  | OPEN   | X         | Provide Whitechain faucet WBT to relayer/test deployer and test USDT to funder; four demo wallets A/B/funder/payee | Public addresses + balances, explorer links    |
+| H-005 | HIGH     | OPEN   | X         | Confirm whitechain RPC + explorer and actual Safe contracts and test token bytecode                                | RPC `eth_getCode` outputs, no private secrets  |
+| H-006 | HIGH     | OPEN   | H         | Verify sponsor track selections, eligibility, live submission cutoff                                               | Official URLs/notes                            |
+| H-007 | HIGH     | OPEN   | H         | Clarify project IP ownership and disclose Hercules connection in writing                                           | Confirmation, public disclosure text           |
+| H-008 | HIGH     | OPEN   | H         | Recruit 2 distinct consenting founders for live proof; find an independent program manager                         | Consent and anonymized meeting notes           |
+| H-009 | HIGH     | OPEN   | X         | Approve execution of deliberately failing one-signature transaction from **test-only funded account**              | Mined failed tx hash, proper error             |
+| H-010 | HIGH     | OPEN   | H         | Integrate/rehearse video, collect verified feedback and submit                                                     | Demo URL, repo ref and submission confirmation |
 
 ## H-001 — Initialize worktrees
 
@@ -22,7 +22,7 @@ Run from **your existing Git project root** (the repo must already have at least
 ```bash
 git status --short
 git add MASTER_TEAM_INSTRUCTIONS.md AGENTS.md CLAUDE.md README-START-HERE.md agents docs scripts
-git commit -m "chore: add DayZero multi-agent execution system"
+git commit -m "chore: add vestige multi-agent execution system"
 bash scripts/setup-worktrees.sh
 git worktree list
 ```
@@ -30,10 +30,10 @@ git worktree list
 Start each dedicated agent in its worktree:
 
 ```bash
-(cd ../dayzero-identity && claude --chrome)
-(cd ../dayzero-product && claude --chrome)
+(cd ../vestige-identity && claude --chrome)
+(cd ../vestige-product && claude --chrome)
 # Codex's exact CLI invocation depends on your installation:
-(cd ../dayzero-treasury && codex)
+(cd ../vestige-treasury && codex)
 ```
 
 Paste `agents/CLAUDE_IDENTITY.md`, `agents/CLAUDE_PRODUCT.md`, or `agents/CODEX_TREASURY.md` respectively as their first instruction. If `claude --chrome` is unavailable, use `claude` and ask H to arrange research/browser access. Before enabling browser use, verify `/chrome` is connected; use a dedicated profile with only needed tabs.
