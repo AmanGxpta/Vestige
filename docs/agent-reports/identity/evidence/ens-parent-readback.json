@@ -1,0 +1,69 @@
+{
+  "label": "READ_ONLY_LIVE_READBACK",
+  "block": "12079721",
+  "parentName": "vestige.eth",
+  "parentExpiry": "1825560312",
+  "ok": false,
+  "checks": [
+    {
+      "id": "parent-name-registered",
+      "ok": true,
+      "detail": "vestige.eth status=REGISTERED"
+    },
+    {
+      "id": "P2-subregistry-points-to-parent",
+      "ok": false,
+      "detail": "getSubregistry(\"vestige\")=0x0000000000000000000000000000000000000000"
+    },
+    {
+      "id": "P1-parent-has-code",
+      "ok": true,
+      "detail": "code bytes=77"
+    },
+    {
+      "id": "registrar-has-REGISTRAR|RENEW",
+      "ok": true,
+      "detail": "roles=65537"
+    },
+    {
+      "id": "registrar-lacks-UNREGISTER",
+      "ok": true,
+      "detail": "not held"
+    },
+    {
+      "id": "registrar-lacks-SET_SUBREGISTRY",
+      "ok": true,
+      "detail": "not held"
+    },
+    {
+      "id": "registrar-lacks-SET_RESOLVER",
+      "ok": true,
+      "detail": "not held"
+    },
+    {
+      "id": "registrar-lacks-SET_PARENT",
+      "ok": true,
+      "detail": "not held"
+    },
+    {
+      "id": "registrar-lacks-UPGRADE",
+      "ok": true,
+      "detail": "not held"
+    },
+    {
+      "id": "registrar-lacks-CAN_TRANSFER_ADMIN",
+      "ok": true,
+      "detail": "not held"
+    },
+    {
+      "id": "owner-root-roles-on-parent",
+      "ok": true,
+      "detail": "owner holds no root roles on the parent (as planned)"
+    },
+    {
+      "id": "registrar-funded",
+      "ok": true,
+      "detail": "balance wei=299999097023552608"
+    }
+  ]
+}

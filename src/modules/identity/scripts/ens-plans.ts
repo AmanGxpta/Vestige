@@ -127,11 +127,15 @@ export function buildFirstVenturePlan(a: {
   slug: string;
   ventureId: Bytes32;
   expiry: bigint;
-  founders?: { label: string; wallet: Address }[];
+  founders?: { label: string; wallet: Address; worldEnvironment?: string }[];
+  /** Initial records derived from server state (never from a request). */
+  initial?: { humans?: number; agreementHash?: Hex };
+  /** Provenance of ventureId/founders, recorded in the plan for the approver. */
+  source?: Record<string, unknown>;
   createdAt?: string;
 }): EnsPlan {
   const cfg = { parentRegistry: a.parentRegistry, expiry: a.expiry };
-  const plan = buildVenturePlan(cfg, a.slug, a.registrar, a.ventureId);
+  const plan = buildVenturePlan(cfg, a.slug, a.registrar, a.ventureId, a.initial ?? {});
   const predict = (salt: bigint) => predictProxyAddress({ factory: ENSV2_SEPOLIA.VerifiableFactory, proxyLogic: a.proxyLogic, deployer: a.registrar, salt });
   const ventureRegistry = predict(plan.registry.salt);
   const ventureResolver = predict(plan.resolver.salt);
@@ -140,7 +144,7 @@ export function buildFirstVenturePlan(a: {
     encodeFunctionData({ abi: verifiableFactoryAbi, functionName: "deployProxy", args: [p.implementation, p.salt, p.data] });
   const txs: PlannedTx[] = [
     { id: "V1-deploy-venture-registry", signer: "REGISTRAR", signerAddress: a.registrar, to: ENSV2_SEPOLIA.VerifiableFactory, data: deploy(plan.registry), value: "0", purpose: `UserRegistry for ${plan.name} (registrar REGISTRAR|RENEW only → emancipated)`, dependsOn: [], expectedResult: `ProxyDeployed(${ventureRegistry})` },
-    { id: "V2-deploy-venture-resolver", signer: "REGISTRAR", signerAddress: a.registrar, to: ENSV2_SEPOLIA.VerifiableFactory, data: deploy(plan.resolver), value: "0", purpose: `PermissionedResolver for ${plan.name}: vestige.status=workspace, vestige.ventureId=${a.ventureId}, vestige.humans=0`, dependsOn: [], expectedResult: `ProxyDeployed(${ventureResolver})` },
+    { id: "V2-deploy-venture-resolver", signer: "REGISTRAR", signerAddress: a.registrar, to: ENSV2_SEPOLIA.VerifiableFactory, data: deploy(plan.resolver), value: "0", purpose: `PermissionedResolver for ${plan.name}: vestige.status=workspace, vestige.ventureId=${a.ventureId}, vestige.humans=${a.initial?.humans ?? 0}${a.initial?.agreementHash ? `, vestige.agreement=${a.initial.agreementHash}` : ""}`, dependsOn: [], expectedResult: `ProxyDeployed(${ventureResolver})` },
     {
       id: "V3-register-venture-name", signer: "REGISTRAR", signerAddress: a.registrar, to: a.parentRegistry,
       data: encodeFunctionData({ abi: permissionedRegistryAbi, functionName: "register", args: [label, a.registrar, ventureRegistry, ventureResolver, VENTURE_TOKEN_ROLES, a.expiry] }),
@@ -168,7 +172,7 @@ export function buildFirstVenturePlan(a: {
     kind: "first-venture",
     chainId: 11155111,
     createdAt: a.createdAt ?? new Date().toISOString(),
-    inputs: { slug: a.slug, ventureId: a.ventureId, registrar: a.registrar, parentRegistry: a.parentRegistry, expiry: a.expiry.toString(), founders: a.founders ?? [] },
+    inputs: { slug: a.slug, ventureId: a.ventureId, registrar: a.registrar, parentRegistry: a.parentRegistry, expiry: a.expiry.toString(), founders: a.founders ?? [], initial: a.initial ?? { humans: 0 }, ...(a.source ? { source: a.source } : {}) },
     predicted,
     txs,
     disclosures: [

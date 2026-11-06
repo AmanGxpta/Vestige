@@ -10,7 +10,7 @@ import { isUniqueViolation, type SqlDb } from "./db";
 import { sha256, systemClock, type Clock } from "./auth";
 import { fail, IdentityError } from "./errors";
 import { assertVentureId, founderEnsName, newVentureId, toFounderLabel, toSlug, ventureEnsName, type Bytes32 } from "./ids";
-import { checkAttestSubmit, checkSeatConfirmation, type EnsPort, type SeatAttestationPort, type TreasurySummaryPort } from "./ports";
+import { checkAttestSubmit, checkSeatConfirmation, EnsAwaitingApproval, type EnsPort, type SeatAttestationPort, type TreasurySummaryPort } from "./ports";
 import { buildWorldRequest, nullifierHash, verifyWorldProof, worldAction, type WorldConfig, type WorldRequestParams } from "./world";
 
 export type ReadStatus = "UNKNOWN" | "PENDING" | "VERIFIED" | "FAILED";
@@ -526,6 +526,11 @@ export class VentureService {
         this.event({ ventureId, kind, label: "CHAIN_VERIFIED", status: c.state === "PENDING" ? "PENDING" : "FAILED", actor, txHash: txHashes.at(-1), source: "ens-sepolia", detail: c.state === "FAILED" ? c.reason : undefined });
       }
     } catch (e) {
+      if (e instanceof EnsAwaitingApproval) {
+        onStatus("PENDING");
+        this.event({ ventureId, kind, label: "CHAIN_VERIFIED", status: "PENDING", actor, source: "ens-sepolia", detail: "awaiting H-approved ENS plan (no broadcast)" });
+        return;
+      }
       onStatus("FAILED");
       this.event({ ventureId, kind, label: "CHAIN_VERIFIED", status: "FAILED", actor, source: "ens-sepolia", detail: (e as Error).message.slice(0, 200) });
     }

@@ -54,7 +54,7 @@ export interface EnsRegistrarConfig {
 /** Venture token roles: transfer admin only, reserved for the governance handover stretch. */
 export const VENTURE_TOKEN_ROLES = REG.CAN_TRANSFER_ADMIN;
 
-export function buildVenturePlan(cfg: EnsRegistrarConfig, slug: string, registrar: Address, ventureId: Bytes32) {
+export function buildVenturePlan(cfg: EnsRegistrarConfig, slug: string, registrar: Address, ventureId: Bytes32, initial: { humans?: number; agreementHash?: Hex } = {}) {
   const name = ventureEnsName(slug, cfg.parentName ?? VESTIGE_PARENT_NAME);
   if (!isVentureId(ventureId)) throw new Error("ventureId must be the server's lowercase bytes32");
   const registryInit = encodeUserRegistryInit([{ account: registrar, roleBitmap: VENTURE_REGISTRY_REGISTRAR_ROLES }]);
@@ -63,7 +63,8 @@ export function buildVenturePlan(cfg: EnsRegistrarConfig, slug: string, registra
     [
       encodeSetText(name, ENS_KEYS.status, VENTURE_STATUS_RECORD),
       encodeSetText(name, ENS_KEYS.ventureId, ventureId),
-      encodeSetText(name, ENS_KEYS.humans, "0"),
+      encodeSetText(name, ENS_KEYS.humans, String(initial.humans ?? 0)),
+      ...(initial.agreementHash ? [encodeSetText(name, ENS_KEYS.agreement, initial.agreementHash)] : []),
     ],
   );
   return {

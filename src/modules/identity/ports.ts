@@ -89,6 +89,27 @@ export interface TreasurySummaryPort {
   }>;
 }
 
+/** Thrown by the approval-gated ENS port: the write must go through an H-approved plan. */
+export class EnsAwaitingApproval extends Error {
+  constructor(what: string) {
+    super(`${what}: awaiting an H-approved ENS plan (no broadcast from the API)`);
+    this.name = "EnsAwaitingApproval";
+  }
+}
+
+/**
+ * Default live ENS mode until H approves automatic registrar writes: the API never
+ * broadcasts. Steps stay PENDING; an operator broadcasts the H-approved, digest-bound
+ * plan (scripts/first-venture.ts), and reconcileIdentity() promotes them to VERIFIED
+ * only after Universal Resolver read-back.
+ */
+export class ApprovalGatedEnsPort implements EnsPort {
+  async registerVenture(): Promise<never> { throw new EnsAwaitingApproval("registerVenture"); }
+  async registerFounder(): Promise<never> { throw new EnsAwaitingApproval("registerFounder"); }
+  async setVentureRecords(): Promise<never> { throw new EnsAwaitingApproval("setVentureRecords"); }
+  async confirm(): Promise<{ state: "PENDING" }> { return { state: "PENDING" }; }
+}
+
 /** Fail-closed port used when config/keys are absent: never fakes success. */
 export class UnconfiguredPort implements SeatAttestationPort, EnsPort {
   constructor(private what: string) {}
