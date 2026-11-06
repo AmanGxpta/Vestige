@@ -1,0 +1,23 @@
+
+ RUN  v4.1.12 /private/tmp/claude-501/-Users-amang-Code-NovemberRush-ethglobal-vestige-vestige-product/47a66e9a-a782-414c-a406-488350f476e6/scratchpad/xo
+
+stdout | cross-owner.test.ts > cross-owner: C2 live adapter × C1 a00016b × X 4d44fa8 > journey with real handlers and shared SQLite
+1 sign-in A/B/F via C1 challenge+session: ok
+2 create northstar.vestige.eth 0xf79ef250…, invite, join: ok; reused invite → NOT_READY
+3 listing: A only → 0 listed; A+B → 1 listed; consents=[true,true]; treasuryActive=null (CR-ID-05 not registered → null)
+4 World (MOCK portal, env=staging): dup → "This human already holds a seat in Northstar Labs."; seats VERIFIED/VERIFIED,VERIFIED/VERIFIED; seat.worldEnvironment reported=false (CR-C2-006 still open)
+5 terms: C2 preview == C1 docHash 0xf0700486974c15d2e9ce905fb88d910ea7a6d19c99fba70b346437d3788a1795; v1 complete; v2 reset (0 sigs); stale v1 → VERSION_SUPERSEDED
+6 treasury: unconfigured → BLOCKED; no manifest → treasury undefined (UNKNOWN); manifest → ACTIVE (LOCAL_FIXTURE_CHAIN) worldSource=TESTED_IN_SIMULATOR block=12345; X & C2 manifest validators agree on 1 valid + 3 invalid
+6b deploy → Deployment request recorded. No transaction is sent until the operator approves the exact deployment. [operation 524f5d1e-7a26-4be0-97c5-273aa3afcd36 · RESERVED]
+7 fund 1,000 USDT: X recovered C2's EIP-3009 signature and relayed via fixture IO (sends=1); readback deposits=0 (not in X shape → UI reads chain)
+8 payment: propose+A sign ok (payload cached in proposer tab); B → BLOCKED (readback lacks typedData/signerWallets: CR-C2-009); execute 1-of-2 → RELAYER_REFUSED "vestige refused to send this payment: it does not have both founders' approvals. Nothing was submitted and no gas was spent." (no send)
+8b with CR-C2-009 shape (payments[].typedData + signerWallets) simulated on X's read(): B signs, READY 2/2, execute relays (sends=2) status=EXECUTED
+9 public summary humans=2 events=19; logout DELETE → 204 and session cleared
+
+ ✓ cross-owner.test.ts > cross-owner: C2 live adapter × C1 a00016b × X 4d44fa8 > journey with real handlers and shared SQLite 222ms
+
+ Test Files  1 passed (1)
+      Tests  1 passed (1)
+   Start at  04:16:56
+   Duration  799ms (transform 100ms, setup 0ms, import 491ms, tests 223ms, environment 0ms)
+
