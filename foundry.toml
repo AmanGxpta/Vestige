@@ -1,0 +1,13 @@
+[profile.default]
+src = "contracts"
+test = "test"
+script = "script"
+out = "contracts/.artifacts"
+cache_path = "contracts/.cache"
+solc_version = "0.8.24"
+optimizer = true
+optimizer_runs = 200
+evm_version = "paris"
+
+[fuzz]
+runs = 256
