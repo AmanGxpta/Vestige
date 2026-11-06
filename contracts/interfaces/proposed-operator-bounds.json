@@ -1,0 +1,44 @@
+{
+  "kind": "PROPOSED_OPERATOR_CONFIGURATION_NOT_APPROVED",
+  "chainId": 1874,
+  "broadcastAuthorized": false,
+  "RELAYER_ENABLED": "false",
+  "publicRoles": {
+    "deployer": "0x10d8C1d6359F0694203924182d3da83843a4e052",
+    "attester": "0x84068C51A9236A869E5F05FBA96323E97597DDEd",
+    "relayer": "0xc57f2f78997e35fc2C1E0BA06249B499cD293116",
+    "registrar": "0xc63F0594309F21E35b41298C71d370c0d0A9313C"
+  },
+  "proposedEnv": {
+    "RELAYER_DAILY_WBT_BUDGET_WEI": "10000000000000000",
+    "RELAYER_MAX_GAS_LIMIT": "700000",
+    "RELAYER_MAX_FEE_PER_GAS_WEI": "10000000000",
+    "RELAYER_MIN_BALANCE_WEI": "2000000000000000",
+    "RELAYER_MAX_PER_MINUTE": "3",
+    "RELAYER_L1_FEE_RESERVE_WEI": "",
+    "RELAYER_JOURNAL_PATH": "",
+    "RELAYER_KEYSTORE_PATH": "",
+    "RELAYER_KEYSTORE_NAME": "",
+    "RELAYER_ALERT_WEBHOOK_URL": ""
+  },
+  "funding": {
+    "observationSource": "docs/agent-reports/treasury/2026-11-07-cross-worktree-readiness.json",
+    "proposedMaximumRelayerWalletWbtWei": "20000000000000000",
+    "approval": "H must approve bounded faucet funding separately; no funding performed",
+    "readinessSnapshotWbtWei": "0",
+    "readinessSnapshotFunderUsdtRaw": "0",
+    "latestObservationSource": "docs/agent-reports/treasury/2026-11-07-funding-refresh.json"
+  },
+  "blockers": [
+    "All numeric bounds above are proposals, not live policy",
+    "H must choose L1 reserve/margin/expiry from real receipt-backed measurements and recorded quotes",
+    "No fixed L1 reserve is a mathematical total-fee cap",
+    "H must provide private persistent disk and single nonce owner",
+    "H must supply an approved HTTPS alert destination and test its delivery",
+    "H must bind the isolated signer to the reviewed relayer public address without exposing its key",
+    "No signer transport or authorizeSend callback is installed by default",
+    "Blank required fields reject enabling; this file must not be loaded as an enabled env",
+    "Fresh RPC gas price was 5.001 gwei; proposed 10 gwei is only a ceiling for H review, not a live grant",
+    "Fresh balances supersede the earlier zero snapshot; H must review exposure against the proposed narrow wallet allowance"
+  ]
+}
