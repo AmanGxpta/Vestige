@@ -77,3 +77,31 @@ describe("demo override", () => {
     expect(Object.keys(handlers(h)).some((k) => /override/i.test(k))).toBe(false);
   });
 });
+
+describe("attestation of a demo-override seat (CR-ID-06 labelling)", () => {
+  it("retry skips the override unless opted in; sources and basis say MOCK_ONLY demo hash", async () => {
+    const { reconcileIdentity } = await import("../../src/modules/identity/scripts/reconcile");
+    const { h, a, b, vid } = await setup();
+    h.attester.failSubmit = true; // registry not deployed yet
+    await h.ventures.verifyWorld(a, vid, { idkitResult: new FakeHuman().prove(h.ventures.worldRequest(a, vid)) });
+    await h.ventures.demoOverrideSeat(vid, b, { reason: "demo", operator: "H" });
+    h.attester.failSubmit = false; // X deployed + granted
+    h.attester.submitted.length = 0;
+    const r1 = await reconcileIdentity(h, { retry: true });
+    expect(h.attester.submitted.map((x) => x.wallet)).toEqual([a]); // ravi NOT attested by default
+    expect(r1.needsManualReview.some((x) => x.includes(b) && x.includes("demo-override-not-attested"))).toBe(true);
+    await reconcileIdentity(h, { retry: true, attestDemoOverrides: true });
+    await h.flush();
+    expect(h.attester.submitted.find((x) => x.wallet === b)!.nullifierHash).toBe(demoOverrideHash(vid, b));
+    expect(h.ventures.expectedSeatHash(vid, b)).toEqual({ basis: "demo-override-hash", seatHash: demoOverrideHash(vid, b) });
+    expect(h.ventures.expectedSeatHash(vid, a)!.basis).toBe("world-nullifier-digest");
+    const v = h.ventures.view(vid);
+    expect(v.seats.find((s) => s.wallet === b)).toMatchObject({ demoOverride: true, attestationBasis: "demo-override-hash" });
+    expect(v.seats.find((s) => s.wallet === a)).toMatchObject({ attestationBasis: "world-nullifier-digest" });
+    const ev = h.db.all<{ actor: string; source: string; kind: string }>("SELECT actor, source, kind FROM identity_events WHERE kind LIKE 'seat_attest%'");
+    for (const e of ev.filter((x) => x.actor === b)) expect(e.source).toBe("seat-registry:demo-override-hash (MOCK_ONLY — not World ID)");
+    for (const e of ev.filter((x) => x.actor === a)) expect(e.source).toBe("seat-registry:world-nullifier-digest");
+    const pub = await (await handlers(h).publicSummary(req(), "northstar-labs.vestige.eth")).json();
+    expect(pub.founders.find((f: { wallet: string }) => f.wallet === b)).toMatchObject({ humanVerified: false, label: "SELF_REPORTED", demoOverride: true, attestationBasis: "demo-override-hash" });
+  });
+});
