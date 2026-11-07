@@ -211,6 +211,14 @@ export async function readPublicChainReport(ensName: string, cfg: ReaderConfig, 
     },
   );
 
+  // A workspace venture has not deployed a treasury yet: that is "not published", not a failed check.
+  if (treasury.status === "FAILED" && !treasury.value && resolver.status === "VERIFIED" && texts.value?.["vestige.status"] === "workspace") {
+    Object.assign(treasury, {
+      status: "UNKNOWN",
+      note: 'No treasury published yet — vestige.status is "workspace" (no Safe deployed or linked to this name).',
+    } satisfies Partial<Step<{ address: Address; via: "ENSIP-11" | "TEXT_FALLBACK" }>>);
+  }
+
   const ventureIdStep: Step<Hex> = (() => {
     const prov = ensProv("resolver.text(vestige.ventureId)", name);
     if (texts.status !== "VERIFIED") return { status: texts.status === "FAILED" ? "FAILED" : "UNKNOWN", note: "Skipped: text records not read.", provenance: prov };

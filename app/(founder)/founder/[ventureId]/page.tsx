@@ -38,13 +38,15 @@ export default function TeamPage() {
       <div className="stat-grid" data-testid="overview-stats">
         {[
           (() => {
-            const vs = verifiedSeats(v);
+            // CR-ID-06: override seats can act but are not humans — never counted here.
+            const overrides = verifiedSeats(v).filter((s) => s.demoOverride).length;
+            const vs = verifiedSeats(v).filter((s) => !s.demoOverride);
             const live = v.source !== "DEV_MOCK";
             const staging = live && vs.some((s) => s.worldEnvironment === "staging");
             const unreported = live && vs.some((s) => !s.worldEnvironment);
             // D-024: staging results are TESTED_IN_SIMULATOR and never prove two distinct real humans.
-            const q = staging ? " · TESTED IN SIMULATOR" : unreported && vs.length ? " · World env not reported" : "";
-            return { ok: vs.length >= 2 && !staging && !unreported, icon: "users" as const, title: "Founders", sub: `${vs.length} / 2 verified${q}` };
+            const q = (staging ? " · TESTED IN SIMULATOR" : unreported && vs.length ? " · World env not reported" : "") + (overrides ? ` · ${overrides} demo override` : "");
+            return { ok: vs.length >= 2 && !staging && !unreported && !overrides, icon: "users" as const, title: "Founders", sub: `${vs.length} / 2 verified${q}` };
           })(),
           { ok: termsFullySigned(v), icon: "file" as const, title: "Terms", sub: v.agreement ? (termsFullySigned(v) ? `v${v.agreement.version} signed by both` : `v${v.agreement.version} awaiting signatures`) : "Not drafted" },
           {

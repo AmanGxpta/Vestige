@@ -5,7 +5,7 @@
  */
 import { describe, expect, it } from "vitest";
 import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
-import { createLiveAdapter, toTreasuryState } from "./live-adapter";
+import { createLiveAdapter, toPublic, toTreasuryState } from "./live-adapter";
 
 const acct = privateKeyToAccount(generatePrivateKey());
 const VID = `0x${"ab".repeat(32)}` as const;
@@ -193,5 +193,28 @@ describe("CR-X-002 TreasuryReadV1 mapping", () => {
     const stale = await c.signPayment(VID, "p-stale", { wallet: acct.address }, async () => ((asked = true), "0x"));
     expect(stale).toMatchObject({ ok: false, error: { code: "NOT_READY" } });
     expect(asked).toBe(false);
+  });
+});
+
+describe("CR-ID-06 demo override labels", () => {
+  const base = {
+    ensName: "northstar.vestige.eth",
+    ventureId: `0x${"e6".repeat(32)}` as `0x${string}`,
+    humansVerified: 1,
+    agreement: null,
+    events: [],
+  };
+  it("never maps an override founder to VERIFIED, even if humanVerified is wrongly true", () => {
+    const p = toPublic({
+      ...base,
+      founders: [
+        { subname: "aman.northstar.vestige.eth", wallet: "0xfc2e2350DbE6cC7281C8A0412dd65cCE56519f3E", humanVerified: true, onchainSeatStatus: "UNKNOWN", subnameStatus: "VERIFIED", worldEnvironment: "staging" },
+        { subname: "ravi.northstar.vestige.eth", wallet: `0x${"11".repeat(20)}`, humanVerified: true, onchainSeatStatus: "UNKNOWN", subnameStatus: "UNKNOWN", demoOverride: true },
+      ],
+    });
+    expect(p.founders[0]).toMatchObject({ worldProofStatus: "VERIFIED", worldEnvironment: "staging" });
+    expect(p.founders[0].demoOverride).toBeUndefined();
+    expect(p.founders[1]).toMatchObject({ worldProofStatus: "UNKNOWN", demoOverride: true });
+    expect(p.humansVerified).toBe(1);
   });
 });

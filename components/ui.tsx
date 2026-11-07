@@ -133,10 +133,11 @@ const LABEL_HELP: Record<EvidenceLabel, string> = {
  * qualifier, not a fifth label. ENV_UNREPORTED = the API did not say which World
  * environment verified this human, so it must not read as production uniqueness.
  */
-export type EvidenceQualifier = "TESTED_IN_SIMULATOR" | "ENV_UNREPORTED";
+export type EvidenceQualifier = "TESTED_IN_SIMULATOR" | "ENV_UNREPORTED" | "DEMO_OVERRIDE";
 const QUALIFIER_TEXT: Record<EvidenceQualifier, { tag: string; help: string }> = {
   TESTED_IN_SIMULATOR: { tag: "TESTED IN SIMULATOR", help: "Verified in World's staging environment (simulator). Proves the flow, not that a real unique human verified." },
   ENV_UNREPORTED: { tag: "WORLD ENV NOT REPORTED", help: "The API did not report whether this was a production or staging World ID proof. Treat as unconfirmed." },
+  DEMO_OVERRIDE: { tag: "DEMO OVERRIDE · NOT WORLD-VERIFIED", help: "An operator marked this seat ready for the demo (CR-ID-06). No World ID proof exists for it; it is not counted as a human." },
 };
 export function EvidenceBadge({ label, source, qualifier }: { label: EvidenceLabel; source: DataSource; qualifier?: EvidenceQualifier }) {
   const mock = source === "DEV_MOCK";
@@ -168,6 +169,18 @@ export function HumanBadge({ source, worldEnvironment }: { source: DataSource; w
   const qualifier: EvidenceQualifier | undefined =
     source === "DEV_MOCK" ? undefined : worldEnvironment === "staging" ? "TESTED_IN_SIMULATOR" : worldEnvironment === "production" ? undefined : "ENV_UNREPORTED";
   return <EvidenceBadge label="HUMAN_VERIFIED" source={source} qualifier={qualifier} />;
+}
+
+/** CR-ID-06 operator override: SELF_REPORTED + explicit tag. Never HUMAN_VERIFIED. */
+export function OverrideBadge({ source }: { source: DataSource }) {
+  return <EvidenceBadge label="SELF_REPORTED" source={source} qualifier="DEMO_OVERRIDE" />;
+}
+
+/** The right World badge for a seat: override first, then HUMAN_VERIFIED with its environment qualifier. */
+export function SeatWorldBadge({ seat, source }: { seat: { worldProofStatus: string; worldEnvironment?: "production" | "staging"; demoOverride?: true }; source: DataSource }) {
+  if (seat.demoOverride) return <OverrideBadge source={source} />;
+  if (seat.worldProofStatus === "VERIFIED") return <HumanBadge source={source} worldEnvironment={seat.worldEnvironment} />;
+  return null;
 }
 
 /* ---------------- Hash / address with explorer link (real data only) ---------------- */

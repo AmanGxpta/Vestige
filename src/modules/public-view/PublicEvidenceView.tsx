@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { AdapterErrorNotice, Button, Card, CheckIcon, EvidenceBadge, HashLink, HumanBadge, LoadingCard, Notice, StatusPill } from "@/components/ui";
+import { AdapterErrorNotice, Button, Card, CheckIcon, EvidenceBadge, HashLink, LoadingCard, SeatWorldBadge, Notice, StatusPill } from "@/components/ui";
 import { ADAPTER_KIND, CONFIG, explorerAddress } from "@/src/modules/ui/config";
 import { Icon, Mountains, VentureTile } from "@/components/brand";
 import { formatTokenAmount, relativeTime, shortHex } from "@/src/modules/ui/format";
@@ -192,7 +192,14 @@ export function PublicEvidenceView({ ensName, requestedSource }: { ensName: stri
                 <br />
                 <span className="step-sub">
                   {sub}
-                  {outcome && outcome !== "ok" && <strong> · {outcomeText[outcome]}</strong>}
+                  {outcome && outcome !== "ok" && (
+                    <strong>
+                      {" · "}
+                      {key === "ens" && outcome === "partial" && report?.ens.treasury.status === "UNKNOWN" && report.ens.texts.value?.["vestige.status"] === "workspace"
+                        ? "name resolved · no treasury published yet"
+                        : outcomeText[outcome]}
+                    </strong>
+                  )}
                 </span>
               </span>
               {active && <span className="spinner" style={{ color: "var(--pending)" }} aria-label="in progress" />}
@@ -370,7 +377,7 @@ export function PublicEvidenceView({ ensName, requestedSource }: { ensName: stri
                       <div key={f.founderSubname} style={{ display: "contents" }}>
                         <dt className="mono small">{f.founderSubname}</dt>
                         <dd className="row">
-                          {f.worldProofStatus === "VERIFIED" ? <HumanBadge source={off.value.source} worldEnvironment={f.worldEnvironment} /> : <StatusPill status={f.worldProofStatus === "UNKNOWN" ? "NONE" : f.worldProofStatus} />}
+                          {f.worldProofStatus === "VERIFIED" || f.demoOverride ? <SeatWorldBadge seat={f} source={off.value.source} /> : <StatusPill status={f.worldProofStatus === "UNKNOWN" ? "NONE" : f.worldProofStatus} />}
                         </dd>
                       </div>
                     ))}
