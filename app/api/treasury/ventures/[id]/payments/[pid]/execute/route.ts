@@ -3,6 +3,5 @@ import { dispatchTreasuryRequest } from "../../../../../../../../src/modules/tre
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export async function POST(req: Request, ctx: { params: Promise<{ id: string; pid?: string }> }) {
-  await services();
-  return dispatchTreasuryRequest(req, "execute", await ctx.params);
+  return dispatchTreasuryRequest(req, "execute", await ctx.params, services);
 }
