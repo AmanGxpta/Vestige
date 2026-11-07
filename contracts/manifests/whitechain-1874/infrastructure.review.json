@@ -1,0 +1,8 @@
+{
+  "approved": true,
+  "chainId": 1874,
+  "reference": "H 2026-11-07 approval: infra deploy + decision A + pre-approved northstar sequence step 3 + receipt-log Safe/Guard binding",
+  "manifestSha256": "859cc679e05f80a3241d42196436e1325f4ff52377450a96e2e6e6e517b0d577",
+  "sourceCommit": "4504d9782084bfe1981b223807a08cdcf1f77060",
+  "approvedAt": "2026-11-07T01:04:46Z"
+}
