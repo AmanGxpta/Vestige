@@ -137,3 +137,61 @@ describe("live adapter", () => {
     expect(asked).toBe(false);
   });
 });
+
+describe("CR-X-002 TreasuryReadV1 mapping", () => {
+  const SAFE = "0x4444444444444444444444444444444444444444";
+  const v1 = (over: Record<string, unknown> = {}) => ({
+    schemaVersion: 1,
+    ventureId: VID,
+    verificationStatus: "ACTIVE",
+    treasury: { ventureId: VID, safeAddress: SAFE, chainId: 1874, ownerAddresses: [acct.address], threshold: 2, guardAddress: SAFE, registryAddress: SAFE, verificationStatus: "ACTIVE", deploymentTxHash: `0x${"11".repeat(32)}`, deploymentBlock: "7" },
+    balanceRaw: "1000000",
+    tokenDecimals: 6,
+    depositsStatus: "PENDING",
+    deposits: [],
+    payments: [
+      { paymentId: "p-fresh", ventureId: VID, safeTxHash: `0x${"22".repeat(32)}`, recipient: SAFE, tokenAddress: "0xcedfB56113143d55b2358b8CFbB0dEB5Ad2f55a7", amountRaw: "5", reason: "r", signerWallets: [acct.address.toLowerCase()], status: "AWAITING_APPROVALS", safeNonce: "0", safeTypedData: { primaryType: "SafeTx", domain: { chainId: 1874, verifyingContract: SAFE }, types: { SafeTx: [] }, message: { to: "0xcedfB56113143d55b2358b8CFbB0dEB5Ad2f55a7", value: "0", operation: 0 } }, relay: null, executedTxHash: null },
+      { paymentId: "p-stale", ventureId: VID, safeTxHash: `0x${"33".repeat(32)}`, recipient: SAFE, tokenAddress: "0xcedfB56113143d55b2358b8CFbB0dEB5Ad2f55a7", amountRaw: "5", reason: "r", signerWallets: [], status: "FAILED", safeNonce: "0", safeTypedData: null, relay: null, executedTxHash: null },
+    ],
+    evidence: [],
+    manifest: null,
+    provenance: { chainId: 1874, blockNumber: "99", blockHash: `0x${"44".repeat(32)}`, observedAt: "2026-11-07T00:00:00Z", source: "TESTED_IN_SIMULATOR" },
+    operations: [],
+    source: "API",
+    ...over,
+  });
+
+  it("maps the nested shape; null balance stays unknown; depositsStatus and provenance survive", () => {
+    const s = toTreasuryState(v1());
+    expect(s.schemaVersion).toBe(1);
+    expect(s.treasury?.safeAddress.toLowerCase()).toBe(SAFE);
+    expect(s.treasury?.deploymentBlock).toBe("7");
+    expect(s.balanceRaw).toBe("1000000");
+    expect(s.depositsStatus).toBe("PENDING");
+    expect(s.worldSource).toBe("TESTED_IN_SIMULATOR");
+    expect(s.approvalsReported).toBe(true);
+    expect(s.payments[0].safeTypedData).toBeTruthy();
+    expect(s.payments[1].safeTypedData).toBeUndefined();
+    const unknown = toTreasuryState(v1({ verificationStatus: "UNVERIFIED", treasury: null, balanceRaw: null, tokenDecimals: null, depositsStatus: "UNKNOWN", payments: [], provenance: null }));
+    expect(unknown.treasury).toBeUndefined();
+    expect(unknown.balanceRaw).toBeUndefined();
+    expect(unknown.readStatus).toBe("UNVERIFIED");
+  });
+
+  it("signs the readback's safeTypedData (any founder, after reload) and refuses a stale/terminal one", async () => {
+    let posted: unknown;
+    const { c } = await signedIn({
+      [`GET /api/treasury/ventures/${VID}`]: () => json(200, v1()),
+      [`POST /api/treasury/ventures/${VID}/payments/p-fresh/sign`]: (b) => ((posted = b), json(200, { status: "AWAITING_APPROVALS" })),
+    });
+    let signedTd: unknown;
+    const ok = await c.signPayment(VID, "p-fresh", { wallet: acct.address }, async (td) => ((signedTd = td), `0x${"11".repeat(65)}`));
+    expect(ok.ok).toBe(true);
+    expect((signedTd as { primaryType: string }).primaryType).toBe("SafeTx");
+    expect(posted).toEqual({ signature: `0x${"11".repeat(65)}` });
+    let asked = false;
+    const stale = await c.signPayment(VID, "p-stale", { wallet: acct.address }, async () => ((asked = true), "0x"));
+    expect(stale).toMatchObject({ ok: false, error: { code: "NOT_READY" } });
+    expect(asked).toBe(false);
+  });
+});

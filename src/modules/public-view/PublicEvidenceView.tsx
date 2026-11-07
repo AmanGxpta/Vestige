@@ -10,7 +10,7 @@ import type { AdapterError } from "@/src/modules/ui/adapter";
 import type { EvidenceKind, Hex, PublicOffchainEvidence } from "@/src/modules/ui/types";
 import { readPublicChainReport, type PublicChainReport, type Step } from "./chain-reader";
 import { readMockChainReport } from "./mock-chain";
-import { loadManifest } from "./manifest";
+import { loadManifest, manifestUrlFor } from "./manifest";
 import { deriveTreasuryVerdict } from "./verdict";
 
 type Phase = "ens" | "whitechain" | "offchain" | "done";
@@ -81,7 +81,7 @@ export function PublicEvidenceView({ ensName, requestedSource }: { ensName: stri
           whitechainRpcUrl: CONFIG.whitechainRpcUrl,
           usdtAddress: CONFIG.usdtAddress,
           universalResolver: CONFIG.ensUniversalResolver,
-          manifest: loadManifest(CONFIG.manifestUrl),
+          manifest: loadManifest(manifestUrlFor(CONFIG.manifestUrl, ensName)),
           apiVentureIdSource,
         });
     clearTimeout(t);

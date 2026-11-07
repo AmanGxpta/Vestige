@@ -69,7 +69,7 @@ async function installFakeWallet(page: Page, opts: { chainId: number; rejectSwit
 }
 const walletCalls = (page: Page) => page.evaluate(() => (window as unknown as { __walletCalls: { method: string; params?: unknown }[] }).__walletCalls);
 
-test("live build: connect injected wallet, explicit switch both ways, honest BLOCKED sign-in when C1 is not deployed", async ({ page }) => {
+test("live build: connect injected wallet, explicit switch both ways, honest refusal when sign-in is not configured", async ({ page }) => {
   await installFakeWallet(page, { chainId: 11155111 });
   await page.goto("/founder");
   await expect(page.getByTestId("banner-devmock")).toHaveCount(0);
@@ -89,9 +89,10 @@ test("live build: connect injected wallet, explicit switch both ways, honest BLO
   await page.getByTestId("switch-11155111").click();
   await expect(page.getByTestId("wallet-chain")).toHaveAttribute("data-chain", "11155111");
 
-  // C1 routes are not part of this build → sign-in reports BLOCKED and never asks the wallet to sign
+  // This server has no auth configuration (C1 routes absent, or present with CONFIG_MISSING) → sign-in is refused
+  // honestly and the wallet is never asked to sign.
   await page.getByTestId("wallet-signin").click();
-  await expect(page.getByTestId("wallet-menu-error")).toContainText(/Not connected yet.*\/api\/identity\/auth\/challenge.*not deployed/);
+  await expect(page.getByTestId("wallet-menu-error")).toContainText(/not deployed|CONFIG_MISSING|not configured|ORIGIN_FORBIDDEN/i);
   expect((await walletCalls(page)).some((c) => c.method === "personal_sign")).toBe(false);
 });
 

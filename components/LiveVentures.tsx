@@ -12,6 +12,13 @@ import type { VentureSummary } from "@/src/modules/ui/types";
 function SummaryChip({ ok, yes, no, unknown = "Unknown", source }: { ok: boolean | null; yes: string; no: string; unknown?: string; source: VentureSummary["source"] }) {
   if (ok === null) return <span className="chip">{unknown}</span>;
   if (!ok) return <span className="chip">{no}</span>;
+  // API summaries are cached and founder-consented — never a green "verified" claim.
+  if (source !== "DEV_MOCK")
+    return (
+      <span className="chip" title="Reported by the vestige API — confirm on the evidence page">
+        {yes} <span className="faint">· reported</span>
+      </span>
+    );
   return (
     <span className={`pill pill-VERIFIED${source === "DEV_MOCK" ? " pill-mock" : ""}`} title={source === "DEV_MOCK" ? "DEV MOCK — simulated" : "Reported by the vestige API — confirm on the evidence page"}>
       {yes}

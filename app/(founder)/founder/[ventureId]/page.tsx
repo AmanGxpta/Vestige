@@ -37,7 +37,15 @@ export default function TeamPage() {
     <>
       <div className="stat-grid" data-testid="overview-stats">
         {[
-          { ok: verifiedSeats(v).length >= 2, icon: "users" as const, title: "Founders", sub: `${verifiedSeats(v).length} / 2 verified` },
+          (() => {
+            const vs = verifiedSeats(v);
+            const live = v.source !== "DEV_MOCK";
+            const staging = live && vs.some((s) => s.worldEnvironment === "staging");
+            const unreported = live && vs.some((s) => !s.worldEnvironment);
+            // D-024: staging results are TESTED_IN_SIMULATOR and never prove two distinct real humans.
+            const q = staging ? " · TESTED IN SIMULATOR" : unreported && vs.length ? " · World env not reported" : "";
+            return { ok: vs.length >= 2 && !staging && !unreported, icon: "users" as const, title: "Founders", sub: `${vs.length} / 2 verified${q}` };
+          })(),
           { ok: termsFullySigned(v), icon: "file" as const, title: "Terms", sub: v.agreement ? (termsFullySigned(v) ? `v${v.agreement.version} signed by both` : `v${v.agreement.version} awaiting signatures`) : "Not drafted" },
           {
             ok: isTreasuryActive(treasury.data?.treasury),

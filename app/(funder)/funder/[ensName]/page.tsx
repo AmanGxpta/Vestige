@@ -166,7 +166,7 @@ export default function FundVenturePage() {
                 const r = await fund.run(() =>
                   client.fundTreasury(
                     ventureId,
-                    { from: address, to: target, amountRaw: rawAmt.toString() },
+                    { from: address, to: target, amountRaw: rawAmt.toString(), ensName },
                     signer({
                       title: `Approve sending ${human} USDT to the ${ensName} treasury`,
                       lines: [
