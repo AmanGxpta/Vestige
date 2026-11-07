@@ -44,7 +44,7 @@ function WalletControl() {
   if (!address)
     return (
       <span className="row" style={{ gap: 6 }}>
-        <button type="button" className="btn btn-sm" data-testid="wallet-connect" disabled={wallet.connecting} onClick={() => void connect()}>
+        <button type="button" className="btn btn-header" data-testid="wallet-connect" disabled={wallet.connecting} onClick={() => void connect()}>
           {wallet.connecting ? "Connecting…" : "Connect wallet"}
         </button>
         {wallet.error && (
@@ -183,7 +183,7 @@ function PublicHeader() {
         </nav>
         <div className="header-spacer" />
         <RoleSwitcher />
-        <Link className="btn" href="/founder" data-testid="header-create">
+        <Link className="btn btn-header" href="/founder" data-testid="header-create">
           Create a Venture <Icon name="arrow" size={16} />
         </Link>
       </div>
@@ -273,7 +273,6 @@ export function AppShell({ children }: { children: ReactNode }) {
   return (
     <VestigeProvider>
       <div className={`shell ${inter.variable}`}>
-        <TestnetBanner />
         <DevMockBanner />
         <Frame>{children}</Frame>
         <PromptHost />

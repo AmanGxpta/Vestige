@@ -26,7 +26,6 @@ test("founder A + founder B + funder + public verifier (DEV MOCK)", async ({ con
   const slug = `e2e${Date.now().toString(36)}`;
   const a = await context.newPage();
   await a.goto("/");
-  await expect(a.getByTestId("banner-testnet")).toContainText(/testnet/i);
   await expect(a.getByTestId("banner-devmock")).toBeVisible();
   await asRole(a, "founderA");
 

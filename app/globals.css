@@ -198,6 +198,7 @@ code, .mono { font-family: var(--mono); font-size: 0.88em; }
 .btn-danger { background: var(--failed); }
 .btn-danger:hover:not(:disabled) { background: #8f2019; }
 .btn-sm { padding: 8px 12px; font-size: 13px; }
+.btn-header { height: 44px; min-width: 176px; padding: 0 18px; font-size: 14px; }
 .btn-lg { padding: 15px 22px; font-size: 15px; }
 .btn-block { width: 100%; }
 .btn-wrap { display: inline-flex; flex-direction: column; gap: 6px; align-items: flex-start; }
