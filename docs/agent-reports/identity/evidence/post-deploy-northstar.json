@@ -1,0 +1,127 @@
+{
+  "label": "LIVE_SEPOLIA_READBACK — read-only; world proofs for founders are TESTED_IN_SIMULATOR (staging)",
+  "reconcile": {
+    "mode": "read-only",
+    "at": "2026-11-07T00:34:54.854Z",
+    "attestationsChecked": 0,
+    "ensVerifiedByReadback": 2,
+    "agreementsVerifiedByReadback": [],
+    "retried": [],
+    "needsManualReview": [],
+    "stillOpen": []
+  },
+  "serverStateAfter": {
+    "ensName": "northstar.vestige.eth",
+    "ensStatus": "VERIFIED",
+    "seats": [
+      {
+        "label": "aman",
+        "worldProofStatus": "VERIFIED",
+        "worldEnvironment": "staging",
+        "subnameStatus": "VERIFIED"
+      },
+      {
+        "label": "ravi",
+        "worldProofStatus": "PENDING",
+        "worldEnvironment": null,
+        "subnameStatus": "UNKNOWN"
+      }
+    ]
+  },
+  "postDeploymentChecks": {
+    "block": "12080140",
+    "ok": true,
+    "checks": [
+      {
+        "id": "readback-ventureId",
+        "ok": true,
+        "detail": "vestige.ventureId=0xe68b1b43989080cfe7581731204a977009d67e3b3660062d24157562cc93e3ff"
+      },
+      {
+        "id": "readback-status-workspace",
+        "ok": true,
+        "detail": "vestige.status=workspace"
+      },
+      {
+        "id": "readback-humans",
+        "ok": true,
+        "detail": "vestige.humans=1 expected=1"
+      },
+      {
+        "id": "venture-registry-linked",
+        "ok": true,
+        "detail": "subregistry=0x0300FAE41e372C5c8BEF564F8348d4292FB36101"
+      },
+      {
+        "id": "venture-registry-emancipated",
+        "ok": true,
+        "detail": "isEmancipated=true"
+      },
+      {
+        "id": "venture-registrar-lacks-UNREGISTER",
+        "ok": true,
+        "detail": "not held"
+      },
+      {
+        "id": "venture-registrar-lacks-SET_SUBREGISTRY",
+        "ok": true,
+        "detail": "not held"
+      },
+      {
+        "id": "venture-registrar-lacks-SET_RESOLVER",
+        "ok": true,
+        "detail": "not held"
+      },
+      {
+        "id": "venture-registrar-lacks-SET_PARENT",
+        "ok": true,
+        "detail": "not held"
+      },
+      {
+        "id": "venture-registrar-lacks-UPGRADE",
+        "ok": true,
+        "detail": "not held"
+      },
+      {
+        "id": "venture-registrar-lacks-CAN_TRANSFER_ADMIN",
+        "ok": true,
+        "detail": "not held"
+      },
+      {
+        "id": "readback-addr:aman.northstar.vestige.eth",
+        "ok": true,
+        "detail": "addr=0xfc2e2350DbE6cC7281C8A0412dd65cCE56519f3E"
+      },
+      {
+        "id": "owner:aman.northstar.vestige.eth",
+        "ok": true,
+        "detail": "ownerOf=0xfc2e2350DbE6cC7281C8A0412dd65cCE56519f3E"
+      },
+      {
+        "id": "negative-safeTransferFrom:aman.northstar.vestige.eth",
+        "ok": true,
+        "detail": "reverted: TransferDisallowed"
+      },
+      {
+        "id": "negative-unsafeTransfer:aman.northstar.vestige.eth",
+        "ok": true,
+        "detail": "reverted: TransferDisallowed"
+      },
+      {
+        "id": "negative-registrar-writes-founder-resolver:aman.northstar.vestige.eth",
+        "ok": true,
+        "detail": "reverted: EACUnauthorizedAccountRoles"
+      },
+      {
+        "id": "sanity-founder-writes-own-resolver:aman.northstar.vestige.eth",
+        "ok": true,
+        "detail": "eth_call succeeded"
+      },
+      {
+        "id": "negative-founder-writes-venture-resolver:aman",
+        "ok": true,
+        "detail": "reverted: EACUnauthorizedAccountRoles"
+      }
+    ]
+  }
+}

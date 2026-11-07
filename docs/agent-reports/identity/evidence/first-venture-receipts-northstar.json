@@ -1,0 +1,48 @@
+{
+  "label": "LIVE_SEPOLIA_BROADCAST \u2014 H-approved plan digest ebc2115fe57a2e8f4bcbd5e82bc941bd420a3a3b7850ba818ed0195eebbb50cf",
+  "chainId": 11155111,
+  "signer": "0xc63F0594309F21E35b41298C71d370c0d0A9313C",
+  "confirmationsWaited": 2,
+  "receipts": [
+    {
+      "id": "V1-deploy-venture-registry",
+      "to": "0xda70306c98e97ece36f997a21368e53298572991",
+      "txHash": "0xa11e884ab4131b8fcb129d5f7a12a1977bc113edff9aa34c9ff582d381f9623b",
+      "status": "0x1",
+      "blockNumber": 12080129,
+      "gasUsed": 902938
+    },
+    {
+      "id": "V2-deploy-venture-resolver",
+      "to": "0xda70306c98e97ece36f997a21368e53298572991",
+      "txHash": "0x9af16690cf3ab772c54a155e99db4a9e23e4d442ba1140b8288e19ede2f6af9b",
+      "status": "0x1",
+      "blockNumber": 12080131,
+      "gasUsed": 1712263
+    },
+    {
+      "id": "V3-register-venture-name",
+      "to": "0x61Dc50fE2099012bD1d0A684192071Ef51d7Aa73",
+      "txHash": "0x941bb725a2d7e7efddcc739cd7c62640d9e5e87d392fb91e9e4f490989173ab0",
+      "status": "0x1",
+      "blockNumber": 12080133,
+      "gasUsed": 715863
+    },
+    {
+      "id": "F-aman-deploy-resolver",
+      "to": "0xda70306c98e97ece36f997a21368e53298572991",
+      "txHash": "0x0d9df8d536db797952c0c01025bc9d85bf0840c64a3c04c7cdc722bdedfdfcdc",
+      "status": "0x1",
+      "blockNumber": 12080135,
+      "gasUsed": 1134697
+    },
+    {
+      "id": "F-aman-register",
+      "to": "0x0300FAE41e372C5c8BEF564F8348d4292FB36101",
+      "txHash": "0x282286c7c1478b1ddeec7c43fe3a71d395f8329026888f6813e5b5b28114028f",
+      "status": "0x1",
+      "blockNumber": 12080137,
+      "gasUsed": 274542
+    }
+  ]
+}
