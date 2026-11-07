@@ -17,7 +17,7 @@ const RPC='https://rpc.testnet.whitechain.io',SESSION=process.env.RELAY_SESSION_
 if(!SESSION)throw new Error('RELAY_SESSION_DIR_REQUIRED');
 export const SESSION_LIMITS={dailyBudgetWei:10_000_000_000_000_000n,maxGas:300000n,maxGasPrice:10_000_000_000n,l1FeeReserveWei:1_000_000_000_000n,minBalanceWei:2_000_000_000_000_000n,maxPerMinute:3};
 const SELECTORS={fund:'0xcf092995',pay:'0x6a761202'}; // transferWithAuthorization(address,address,uint256,uint256,uint256,bytes32,bytes); execTransaction
-const [mode,requestPath]=process.argv.slice(2);if(!SELECTORS[mode]||!requestPath)throw new Error('USAGE');
+const [mode,requestPath]=process.argv.slice(2);if(!(SELECTORS[mode]||mode==='confirm')||!requestPath)throw new Error('USAGE'); // confirm <journal id>: receipt reconciliation only, never signs
 const m=await loadManifest('contracts/manifests/whitechain-1874/northstar.vestige.eth.json');const {manifest,token}=adaptDeploymentManifest(m);
 const client=createPublicClient({transport:http(RPC)});
 function relayerKey(){
@@ -29,6 +29,7 @@ const account=privateKeyToAccount(relayerKey());
 if(account.address.toLowerCase()!==operators.relayer.toLowerCase())throw new Error('RELAYER_ADDRESS_MISMATCH');
 // Independent signer allowlist: exact target + selector for this mode only, zero value, bounded gas/price.
 const send=async call=>{
+ if(!SELECTORS[mode])throw new Error('SIGNER_SCOPE_REFUSED');
  const target=mode==='fund'?token.address:manifest.safe;
  if(call.to.toLowerCase()!==target.toLowerCase()||call.data.slice(0,10)!==SELECTORS[mode]||(call.value??0n)!==0n)throw new Error('SIGNER_SCOPE_REFUSED');
  if(call.gas>SESSION_LIMITS.maxGas||call.gasPrice>SESSION_LIMITS.maxGasPrice||await client.getChainId()!==1874)throw new Error('SIGNER_BOUNDS_REFUSED');
@@ -43,13 +44,14 @@ const alerts=new AlertHooks(async body=>{await appendFile(SESSION+'/alerts.jsonl
 const safety=new RelaySafety({review,alerts,roles:{deployer:operators.deployer,registrar:operators.registrar}});
 await mkdir(SESSION,{recursive:true,mode:0o700});
 const relay=new RestrictedRelayer({manifests:[manifest],token,io,journal:new FileJournal(SESSION+'/journal.json'),limits:SESSION_LIMITS,safety,enabled:true});
+const j=x=>JSON.stringify(x,(_,v)=>typeof v==='bigint'?String(v):v);
+const settle=async id=>{for(let i=0;i<90;i++){try{const c=await relay.confirm(id);console.log(j(c));await writeFile(SESSION+`/${mode}-${id.split(':')[0]}-confirm.json`,j(c));return c;}
+ catch(e){if(e.message!=='RECEIPT_PENDING'&&!/could not be found/i.test(e.message))throw e;await new Promise(r=>setTimeout(r,2000));}}throw new Error('CONFIRM_TIMEOUT');};
+if(mode==='confirm'){await settle(requestPath);process.exit(0);}
 const req=JSON.parse(await readFile(requestPath,'utf8'));
 const big=x=>BigInt(x);
 const result=mode==='fund'
  ?await relay.fund({ventureId:m.ventureId,from:req.from,to:manifest.safe,value:big(req.value),validAfter:big(req.validAfter),validBefore:big(req.validBefore),nonce:req.nonce,signature:req.signature})
  :await relay.execute({ventureId:m.ventureId,recipient:req.recipient,amount:big(req.amountRaw),nonce:big(req.safeNonce),signatures:req.signatures});
-console.log(JSON.stringify(result));
-// Wait for >=2 confirmations then confirm through the relayer's own receipt verifier.
-for(let i=0;i<90;i++){try{const item={...(JSON.parse(await readFile(SESSION+'/journal.json','utf8')).requests?.[result.id]||{}),hash:result.hash};
- const c=await io.confirm(item,manifest,token);console.log(JSON.stringify(c,(_,v)=>typeof v==='bigint'?String(v):v));await writeFile(SESSION+`/${mode}-confirm.json`,JSON.stringify({result,confirm:c},(_,v)=>typeof v==='bigint'?String(v):v,1));break;}
- catch(e){if(e.message!=='RECEIPT_PENDING'&&!/could not be found/i.test(e.message))throw e;await new Promise(r=>setTimeout(r,2000));}}
+console.log(j(result));
+await settle(result.id); // Journal-updating relayer confirmation (EXECUTED/FAILED), >=2 confirmations.
