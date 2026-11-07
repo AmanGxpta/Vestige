@@ -2,9 +2,9 @@
   "label": "LIVE_SEPOLIA_READBACK — read-only; world proofs for founders are TESTED_IN_SIMULATOR (staging)",
   "reconcile": {
     "mode": "read-only",
-    "at": "2026-11-07T00:34:54.854Z",
+    "at": "2026-11-07T01:28:42.185Z",
     "attestationsChecked": 0,
-    "ensVerifiedByReadback": 2,
+    "ensVerifiedByReadback": 0,
     "agreementsVerifiedByReadback": [],
     "retried": [],
     "needsManualReview": [],
@@ -22,14 +22,14 @@
       },
       {
         "label": "ravi",
-        "worldProofStatus": "PENDING",
+        "worldProofStatus": "VERIFIED",
         "worldEnvironment": null,
         "subnameStatus": "UNKNOWN"
       }
     ]
   },
   "postDeploymentChecks": {
-    "block": "12080140",
+    "block": "12080407",
     "ok": true,
     "checks": [
       {
