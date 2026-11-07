@@ -4,14 +4,19 @@
  * only reported VERIFIED after receipt + read-back.
  */
 import { randomBytes } from "node:crypto";
-import type { Address, Hex } from "viem";
+import { keccak256, stringToHex, type Address, type Hex } from "viem";
 import { MAX_FOUNDER_SEATS } from "./config";
 import { isUniqueViolation, type SqlDb } from "./db";
 import { sha256, systemClock, type Clock } from "./auth";
 import { fail, IdentityError } from "./errors";
 import { assertVentureId, founderEnsName, newVentureId, toFounderLabel, toSlug, ventureEnsName, type Bytes32 } from "./ids";
-import { checkAttestSubmit, checkSeatConfirmation, type EnsPort, type SeatAttestationPort, type TreasurySummaryPort } from "./ports";
+import { checkAttestSubmit, checkSeatConfirmation, EnsAwaitingApproval, type EnsPort, type SeatAttestationPort, type TreasurySummaryPort } from "./ports";
 import { buildWorldRequest, nullifierHash, verifyWorldProof, worldAction, type WorldConfig, type WorldRequestParams } from "./world";
+
+/** Namespaced seat hash for demo overrides: can never collide with keccak256(abi.encode(uint256 nullifier)). */
+export function demoOverrideHash(ventureId: Bytes32, wallet: Address): Bytes32 {
+  return keccak256(stringToHex(`vestige.demo-override/1|${ventureId}|${wallet.toLowerCase()}`));
+}
 
 export type ReadStatus = "UNKNOWN" | "PENDING" | "VERIFIED" | "FAILED";
 export type EvidenceLabel = "HUMAN_VERIFIED" | "SIGNED" | "CHAIN_VERIFIED" | "SELF_REPORTED";
@@ -28,6 +33,11 @@ export interface FounderSeat {
   attestationTxHash?: Hex;
   /** CR-C2-006 (C1-ACKed, H pending): World environment of the accepted proof. "staging" ⇒ TESTED_IN_SIMULATOR. */
   worldEnvironment?: "production" | "staging";
+  /**
+   * CR-ID-06 DEMO override: seat marked ready by an operator, NOT by World ID. The UI must
+   * show "DEMO OVERRIDE — not World-verified"; never HUMAN_VERIFIED.
+   */
+  demoOverride?: true;
 }
 
 /** CR-C2-001 public list item: non-PII, cached, with provenance. */
@@ -119,6 +129,7 @@ export class VentureService {
         .all<{ wallet: string; environment: string }>("SELECT wallet, environment FROM identity_world_nullifiers WHERE venture_id = ?", ventureId)
         .map((r) => [r.wallet, r.environment]),
     );
+    const overrides = new Set(this.overriddenWallets(ventureId));
     const seats = this.d.db
       .all<SeatRow>("SELECT * FROM identity_seats WHERE venture_id = ? ORDER BY created_at, wallet", ventureId)
       .map((s): FounderSeat => ({
@@ -131,6 +142,7 @@ export class VentureService {
         subnameStatus: s.subname_status as ReadStatus,
         ...(s.attestation_tx_hash ? { attestationTxHash: s.attestation_tx_hash as Hex } : {}),
         ...(envs.get(s.wallet) === "staging" || envs.get(s.wallet) === "production" ? { worldEnvironment: envs.get(s.wallet) as "staging" | "production" } : {}),
+        ...(overrides.has(s.wallet as Address) ? { demoOverride: true as const } : {}),
       }));
     return {
       ventureId,
@@ -140,7 +152,8 @@ export class VentureService {
       status: "workspace",
       ensStatus: v.ens_status as ReadStatus,
       seats,
-      humansVerified: seats.filter((s) => s.worldProofStatus === "VERIFIED").length,
+      // Only real World ID proofs count as humans; demo overrides never do.
+      humansVerified: seats.filter((s) => s.worldProofStatus === "VERIFIED" && !s.demoOverride).length,
       maxSeats: MAX_FOUNDER_SEATS,
       listing: this.listing(ventureId),
     };
@@ -220,6 +233,21 @@ export class VentureService {
     return s;
   }
 
+  overriddenWallets(ventureId: string): Address[] {
+    return this.d.db.all<{ wallet: string }>("SELECT wallet FROM identity_seat_overrides WHERE venture_id = ?", ventureId).map((r) => r.wallet as Address);
+  }
+
+  /** Seats backed by a real World ID proof (excludes demo overrides). Drives humansVerified / vestige.humans. */
+  worldVerifiedFounders(ventureId: Bytes32): Address[] {
+    return this.d.db
+      .all<{ wallet: string }>(
+        "SELECT s.wallet FROM identity_seats s JOIN identity_world_nullifiers n ON n.venture_id = s.venture_id AND n.wallet = s.wallet WHERE s.venture_id = ? AND s.world_status = 'VERIFIED' ORDER BY s.wallet",
+        ventureId,
+      )
+      .map((r) => r.wallet as Address);
+  }
+
+  /** Founders who may act (sign terms, own the treasury): World-verified seats plus any demo override. */
   verifiedFounders(ventureId: Bytes32): Address[] {
     return this.d.db
       .all<{ wallet: string }>("SELECT wallet FROM identity_seats WHERE venture_id = ? AND world_status = 'VERIFIED' ORDER BY wallet", ventureId)
@@ -368,16 +396,16 @@ export class VentureService {
       throw e;
     }
 
-    const attestation = await this.submitAttestation(ventureId, wallet, human.nullifier);
+    const attestation = await this.submitAttestation(ventureId, wallet, nullifierHash(human.nullifier));
     this.defer(() => this.syncFounderName(ventureId, wallet));
     this.defer(() => this.syncHumansRecord(ventureId));
     return { seat: this.view(ventureId).seats.find((x) => x.wallet === wallet)!, attestation };
   }
 
-  private async submitAttestation(ventureId: Bytes32, wallet: Address, nullifier: string) {
+  private async submitAttestation(ventureId: Bytes32, wallet: Address, seatHash: Bytes32) {
     try {
       // CR-ID-04: only the keccak digest leaves C1; the raw nullifier never reaches X or the chain.
-      const { txHash, chainId } = checkAttestSubmit(await this.d.attester.attestSeat({ ventureId, wallet, nullifierHash: nullifierHash(nullifier) }));
+      const { txHash, chainId } = checkAttestSubmit(await this.d.attester.attestSeat({ ventureId, wallet, nullifierHash: seatHash }));
       this.d.db.run("UPDATE identity_seats SET attestation_tx_hash = ?, attestation_chain_id = ? WHERE venture_id = ? AND wallet = ?", txHash, chainId, ventureId, wallet);
       this.event({ ventureId, kind: "seat_attestation_submitted", label: "CHAIN_VERIFIED", status: "PENDING", actor: wallet, chainId, txHash, source: "seat-registry" });
       this.defer(() => this.refreshAttestation(ventureId, wallet).then(() => undefined));
@@ -424,9 +452,10 @@ export class VentureService {
     if (!s || s.world_status !== "VERIFIED") fail("NOT_VERIFIED_FOUNDER", "Seat is not World-verified.");
     if (s.attestation_tx_hash) return this.refreshAttestation(ventureId, wallet);
     const n = this.d.db.get<{ nullifier: string }>("SELECT nullifier FROM identity_world_nullifiers WHERE venture_id = ? AND wallet = ?", ventureId, wallet);
-    if (!n) fail("NOT_VERIFIED_FOUNDER", "Seat is not World-verified.");
+    const isOverride = this.overriddenWallets(ventureId).includes(wallet);
+    if (!n && !isOverride) fail("NOT_VERIFIED_FOUNDER", "Seat is not World-verified.");
     this.d.db.run("UPDATE identity_seats SET onchain_status = 'PENDING' WHERE venture_id = ? AND wallet = ?", ventureId, wallet);
-    return (await this.submitAttestation(ventureId, wallet, n.nullifier)).status;
+    return (await this.submitAttestation(ventureId, wallet, n ? nullifierHash(n.nullifier) : demoOverrideHash(ventureId, wallet))).status;
   }
 
   /**
@@ -452,7 +481,7 @@ export class VentureService {
       } else stillOpen.push(`ens-venture:${v.ens_name}:${v.ens_status}`);
     }
     for (const s of this.d.db.all<SeatRow & { slug: string }>(
-      "SELECT s.*, v.slug AS slug FROM identity_seats s JOIN identity_ventures v USING (venture_id) WHERE s.world_status = 'VERIFIED' AND s.subname_status IN ('PENDING','FAILED','UNKNOWN')",
+      "SELECT s.*, v.slug AS slug FROM identity_seats s JOIN identity_ventures v USING (venture_id) WHERE s.world_status = 'VERIFIED' AND s.subname_status IN ('PENDING','FAILED','UNKNOWN') AND NOT EXISTS (SELECT 1 FROM identity_seat_overrides o WHERE o.venture_id = s.venture_id AND o.wallet = s.wallet)",
     )) {
       const name = founderEnsName(s.founder_label, s.slug, this.d.parentName);
       const ok = await (this.checks.founderName?.(name, s.wallet as Address) ?? Promise.resolve(false)).catch(() => false);
@@ -464,7 +493,7 @@ export class VentureService {
     }
     // vestige.humans must equal the live verified count (derived, never from a request).
     for (const v of this.d.db.all<VentureRow>("SELECT * FROM identity_ventures WHERE ens_status = 'VERIFIED'")) {
-      const n = this.verifiedFounders(v.venture_id as Bytes32).length;
+      const n = this.worldVerifiedFounders(v.venture_id as Bytes32).length;
       const ok = await (this.checks.humans?.(v.ens_name, n) ?? Promise.resolve(false)).catch(() => false);
       if (!ok) stillOpen.push(`ens-humans:${v.ens_name}:expected=${n}`);
     }
@@ -492,7 +521,7 @@ export class VentureService {
       retried.push(`ens-venture:${v.ens_name}`);
     }
     for (const s of this.d.db.all<SeatRow & { slug: string }>(
-      "SELECT s.*, v.slug AS slug FROM identity_seats s JOIN identity_ventures v USING (venture_id) WHERE v.ens_status = 'VERIFIED' AND s.world_status = 'VERIFIED' AND s.subname_status IN ('FAILED','UNKNOWN')",
+      "SELECT s.*, v.slug AS slug FROM identity_seats s JOIN identity_ventures v USING (venture_id) WHERE v.ens_status = 'VERIFIED' AND s.world_status = 'VERIFIED' AND s.subname_status IN ('FAILED','UNKNOWN') AND NOT EXISTS (SELECT 1 FROM identity_seat_overrides o WHERE o.venture_id = s.venture_id AND o.wallet = s.wallet)",
     )) {
       const name = founderEnsName(s.founder_label, s.slug, this.d.parentName);
       const ok = await (this.checks.founderName?.(name, s.wallet as Address) ?? Promise.resolve(false)).catch(() => false);
@@ -502,13 +531,48 @@ export class VentureService {
       retried.push(`ens-founder:${name}`);
     }
     for (const v of this.d.db.all<VentureRow>("SELECT * FROM identity_ventures WHERE ens_status = 'VERIFIED'")) {
-      const n = this.verifiedFounders(v.venture_id as Bytes32).length;
+      const n = this.worldVerifiedFounders(v.venture_id as Bytes32).length;
       const ok = await (this.checks.humans?.(v.ens_name, n) ?? Promise.resolve(false)).catch(() => false);
       if (ok) continue;
       await this.syncHumansRecord(v.venture_id as Bytes32);
       retried.push(`ens-humans:${v.ens_name}`);
     }
     return { retried, skipped };
+  }
+
+  /**
+   * CR-ID-06 DEMO override (H-requested, time-boxed): an OPERATOR marks one PENDING seat ready
+   * so the terms/treasury flow can be demonstrated while only one founder can produce a World
+   * staging proof. Operator CLI only (no HTTP route). Refuses unless:
+   *   - World is not production for this venture: every real proof in it is `staging`,
+   *   - at least one OTHER seat holds a real World proof,
+   *   - the target seat is PENDING and no override exists yet in this venture.
+   * Effects: seat world_status=VERIFIED (so it can sign/own), override row + SELF_REPORTED event;
+   * no World nullifier row, no ENS subname, not counted in humansVerified / vestige.humans.
+   * The SeatRegistry attestation (if X is wired) uses demoOverrideHash, never a World digest.
+   */
+  async demoOverrideSeat(ventureIdInput: unknown, walletInput: unknown, a: { reason: string; operator: string }) {
+    const ventureId = assertVentureId(ventureIdInput);
+    const wallet = String(walletInput ?? "").toLowerCase() as Address;
+    this.ventureRow(ventureId);
+    const s = this.seat(ventureId, wallet);
+    if (!s) fail("NOT_FOUND", "No seat for that wallet in this venture.");
+    if (s.world_status === "VERIFIED") fail("ALREADY_VERIFIED", "Seat is already verified.");
+    if (!a.reason?.trim() || !a.operator?.trim()) fail("BAD_REQUEST", "reason and operator are required.");
+    const envs = this.d.db.all<{ environment: string; wallet: string }>("SELECT environment, wallet FROM identity_world_nullifiers WHERE venture_id = ?", ventureId);
+    if (envs.length === 0) fail("FORBIDDEN", "Demo override needs one founder with a real World ID proof first.");
+    if (envs.some((e) => e.environment !== "staging")) fail("FORBIDDEN", "Demo override is never allowed for a production World ID venture.");
+    if (this.d.world && this.d.world.environment !== "staging") fail("FORBIDDEN", "Demo override is disabled when World is configured for production.");
+    if (this.overriddenWallets(ventureId).length > 0) fail("FORBIDDEN", "This venture already has a demo override.");
+    const now = this.clock.now();
+    this.d.db.tx(() => {
+      this.d.db.run("INSERT INTO identity_seat_overrides (venture_id, wallet, reason, operator, created_at) VALUES (?,?,?,?,?)", ventureId, wallet, a.reason.slice(0, 300), a.operator.slice(0, 80), now);
+      const upd = this.d.db.run("UPDATE identity_seats SET world_status = 'VERIFIED', verified_at = ?, onchain_status = 'PENDING' WHERE venture_id = ? AND wallet = ? AND world_status = 'PENDING'", now, ventureId, wallet);
+      if (upd.changes !== 1) fail("ALREADY_VERIFIED", "Seat changed while overriding.");
+      this.event({ ventureId, kind: "founder_demo_override", label: "SELF_REPORTED", status: "VERIFIED", actor: wallet, source: "operator-demo-override (MOCK_ONLY, not World ID)", detail: a.reason.slice(0, 200) });
+    });
+    const attestation = await this.submitAttestation(ventureId, wallet, demoOverrideHash(ventureId, wallet));
+    return { seat: this.view(ventureId).seats.find((x) => x.wallet === wallet)!, attestation };
   }
 
   // ---------- ENS sync (registrar-signed, never client-triggered values) ----------
@@ -526,6 +590,11 @@ export class VentureService {
         this.event({ ventureId, kind, label: "CHAIN_VERIFIED", status: c.state === "PENDING" ? "PENDING" : "FAILED", actor, txHash: txHashes.at(-1), source: "ens-sepolia", detail: c.state === "FAILED" ? c.reason : undefined });
       }
     } catch (e) {
+      if (e instanceof EnsAwaitingApproval) {
+        onStatus("PENDING");
+        this.event({ ventureId, kind, label: "CHAIN_VERIFIED", status: "PENDING", actor, source: "ens-sepolia", detail: "awaiting H-approved ENS plan (no broadcast)" });
+        return;
+      }
       onStatus("FAILED");
       this.event({ ventureId, kind, label: "CHAIN_VERIFIED", status: "FAILED", actor, source: "ens-sepolia", detail: (e as Error).message.slice(0, 200) });
     }
@@ -553,6 +622,7 @@ export class VentureService {
     const v = this.ventureRow(ventureId);
     const s = this.seat(ventureId, wallet);
     if (!s || s.world_status !== "VERIFIED") return; // subnames only for verified humans
+    if (this.overriddenWallets(ventureId).includes(wallet)) return; // never mint a subname for a demo override
     const name = founderEnsName(s.founder_label, v.slug, this.d.parentName);
     await this.ensStep(
       ventureId, "ens_founder_registered",
@@ -565,7 +635,7 @@ export class VentureService {
 
   async syncHumansRecord(ventureId: Bytes32) {
     const v = this.ventureRow(ventureId);
-    const n = this.verifiedFounders(ventureId).length; // derived from live state, never from the request
+    const n = this.worldVerifiedFounders(ventureId).length; // real World proofs only; never demo overrides
     await this.ensStep(
       ventureId, "ens_humans_record",
       () => this.d.ens.setVentureRecords({ slug: v.slug, records: { humans: n } }),

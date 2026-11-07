@@ -24,6 +24,8 @@ export interface PublicIdentitySummary {
     subnameStatus: ReadStatus;
     /** CR-C2-006: present once World-verified. "staging" ⇒ the UI must show TESTED_IN_SIMULATOR. */
     worldEnvironment?: "production" | "staging";
+    /** CR-ID-06: operator demo override — humanVerified is false and label is SELF_REPORTED. */
+    demoOverride?: true;
   }[];
   humansVerified: number;
   agreement: null | {
@@ -41,7 +43,7 @@ export interface PublicIdentitySummary {
 
 const PUBLIC_EVENT_KINDS = new Set([
   "venture_created", "founder_joined", "founder_verified", "duplicate_human_refused", "seat_attestation_submitted", "seat_attested",
-  "agreement_version_created", "agreement_signed", "ens_venture_registered", "ens_founder_registered", "ens_humans_record", "ens_agreement_record",
+  "agreement_version_created", "agreement_signed", "founder_demo_override", "ens_venture_registered", "ens_founder_registered", "ens_humans_record", "ens_agreement_record",
 ]);
 
 export function publicSummary(db: SqlDb, ventures: VentureService, agreements: AgreementService, ensNameInput: unknown, parentName?: string): PublicIdentitySummary {
@@ -73,12 +75,13 @@ export function publicSummary(db: SqlDb, ventures: VentureService, agreements: A
     founders: v.seats.map((s) => ({
       subname: s.founderSubname,
       wallet: s.wallet,
-      humanVerified: s.worldProofStatus === "VERIFIED",
-      label: s.worldProofStatus === "VERIFIED" ? "HUMAN_VERIFIED" : "SELF_REPORTED",
+      humanVerified: s.worldProofStatus === "VERIFIED" && !s.demoOverride,
+      label: s.worldProofStatus === "VERIFIED" && !s.demoOverride ? "HUMAN_VERIFIED" : "SELF_REPORTED",
       onchainSeatStatus: s.onchainSeatStatus,
       ...(s.attestationTxHash ? { attestationTxHash: s.attestationTxHash } : {}),
       subnameStatus: s.subnameStatus,
       ...(s.worldEnvironment ? { worldEnvironment: s.worldEnvironment } : {}),
+      ...(s.demoOverride ? { demoOverride: true as const } : {}),
     })),
     humansVerified: v.humansVerified,
     agreement: a

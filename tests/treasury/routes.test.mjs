@@ -114,3 +114,28 @@ test('revisiting an executed payment never rewrites its history to FAILED',async
 test('bearer routes reject an insecure non-local authentication origin',()=>{
  assert.throws(()=>createTreasuryHandlers({}, {authURI:'http://public.invalid'}),/HTTPS_AUTH_ORIGIN_REQUIRED/);
 });
+
+test('root readiness failure stays inside the fail-closed dispatch boundary and never reaches the service',async()=>{
+ const f=setup();const old=process.env.VESTIGE_AUTH_URI;
+ try{
+  const {registerTreasuryRuntime}=await import('../../src/modules/treasury/runtime.mjs');
+  const {dispatchTreasuryRequest}=await import('../../src/modules/treasury/routes.mjs');
+  let calls=0;const service=new Proxy(f.service,{get(t,k){if(k==='mutate'||k==='read')calls++;return Reflect.get(t,k);}});
+  registerTreasuryRuntime(service);process.env.VESTIGE_AUTH_URI='http://localhost:3200';
+  const failing=async()=>{throw new Error('ROOT_CONFIG_REQUIRED /private/secret/path');};
+  for(const [req,action] of [[f.request({recipient:addr(600),amountRaw:'1',reason:'x'},'prepfail1'),'payments'],[new Request('http://localhost:3200/api/treasury'),'read']]){
+   const res=await dispatchTreasuryRequest(req,action,{id:ventureId},failing);
+   assert.equal(res.status,503);assert.equal(res.headers.get('cache-control'),'no-store');
+   const text=await res.text();assert.deepEqual(JSON.parse(text),{error:{code:'TREASURY_UNCONFIGURED',message:'Treasury configuration is incomplete.'}});
+   assert.ok(!text.includes('secret'));
+  }
+  assert.equal(calls,0);assert.equal(f.db.get('SELECT count(*) n FROM treasury_operations').n,0);
+  // An unauthenticated mutation is refused before root preparation is attempted.
+  let prepared=0;const unauth=await dispatchTreasuryRequest(new Request('http://localhost:3200/api/treasury',{method:'POST',body:'{}'}),'deploy',{id:ventureId},async()=>{prepared++;});
+  assert.equal(unauth.status,401);assert.equal(prepared,0);
+  // A successful prepare runs before runtime lookup and then forwards normally.
+  const order=[];const ok=await dispatchTreasuryRequest(f.request({recipient:addr(600),amountRaw:'1',reason:'prepared'},'prepok12'),'payments',{id:ventureId},async()=>{order.push('prepare');});
+  assert.equal(ok.status,200);assert.deepEqual(order,['prepare']);assert.equal(calls,1);
+ }finally{const {registerTreasuryRuntime}=await import('../../src/modules/treasury/runtime.mjs');registerTreasuryRuntime(null);
+  if(old===undefined)delete process.env.VESTIGE_AUTH_URI;else process.env.VESTIGE_AUTH_URI=old;f.close();}
+});

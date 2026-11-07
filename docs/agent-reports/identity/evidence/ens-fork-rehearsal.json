@@ -1,0 +1,305 @@
+{
+  "label": "LOCAL_FORK_REHEARSAL — anvil fork of Sepolia; impersonated signers; NOT Sepolia evidence; World proofs DEV MOCK",
+  "forkBlock": "12079729",
+  "parent": {
+    "digest": "1471c7880a7d7b89931c2320e6ce4cce252234c9164df8b01d4fec9b1e49576a",
+    "p1": "inherited from Sepolia (tx 0x3a32aca8086f8c8bcc3d4026e98e5caea28cf921259d39e5d87d753c1b30e151)",
+    "p2OnForkStatus": "success",
+    "readback": {
+      "block": "12079730",
+      "parentName": "vestige.eth",
+      "parentExpiry": "1825560312",
+      "ok": true,
+      "checks": [
+        {
+          "id": "parent-name-registered",
+          "ok": true,
+          "detail": "vestige.eth status=REGISTERED"
+        },
+        {
+          "id": "P2-subregistry-points-to-parent",
+          "ok": true,
+          "detail": "getSubregistry(\"vestige\")=0x61Dc50fE2099012bD1d0A684192071Ef51d7Aa73"
+        },
+        {
+          "id": "P1-parent-has-code",
+          "ok": true,
+          "detail": "code bytes=77"
+        },
+        {
+          "id": "registrar-has-REGISTRAR|RENEW",
+          "ok": true,
+          "detail": "roles=65537"
+        },
+        {
+          "id": "registrar-lacks-UNREGISTER",
+          "ok": true,
+          "detail": "not held"
+        },
+        {
+          "id": "registrar-lacks-SET_SUBREGISTRY",
+          "ok": true,
+          "detail": "not held"
+        },
+        {
+          "id": "registrar-lacks-SET_RESOLVER",
+          "ok": true,
+          "detail": "not held"
+        },
+        {
+          "id": "registrar-lacks-SET_PARENT",
+          "ok": true,
+          "detail": "not held"
+        },
+        {
+          "id": "registrar-lacks-UPGRADE",
+          "ok": true,
+          "detail": "not held"
+        },
+        {
+          "id": "registrar-lacks-CAN_TRANSFER_ADMIN",
+          "ok": true,
+          "detail": "not held"
+        },
+        {
+          "id": "owner-root-roles-on-parent",
+          "ok": true,
+          "detail": "owner holds no root roles on the parent (as planned)"
+        },
+        {
+          "id": "registrar-funded",
+          "ok": true,
+          "detail": "balance wei=299999097023552608"
+        }
+      ]
+    }
+  },
+  "firstVenture": {
+    "ventureId": "0xfc1f861be741b78dfb188d2d5bb28732e065a9d43e6cd898714c5dc1f54ee4ea",
+    "ensName": "rehearsal-713262.vestige.eth",
+    "digest": "6e2e7b3ca053e447f2abe5a615fa38f45ef2d7b082f85cdb63e61445dfe14492",
+    "preflight": [
+      {
+        "id": "parent-readback",
+        "ok": true,
+        "detail": "all parent checks pass"
+      },
+      {
+        "id": "expiry-within-parent",
+        "ok": true,
+        "detail": "expiry=1825560312 parentExpiry=1825560312"
+      },
+      {
+        "id": "venture-ens-not-verified",
+        "ok": true,
+        "detail": "server ensStatus=PENDING"
+      },
+      {
+        "id": "venture-label-available",
+        "ok": true,
+        "detail": "rehearsal-713262 status=AVAILABLE"
+      }
+    ],
+    "dryRun": [
+      {
+        "id": "V1-deploy-venture-registry",
+        "ok": true,
+        "detail": "eth_call ok, returned 0x000000000000000000000000653c1d7d76941ee8a6359d21033a3d863eadb8ca"
+      },
+      {
+        "id": "V2-deploy-venture-resolver",
+        "ok": true,
+        "detail": "eth_call ok, returned 0x000000000000000000000000413d5b534ce5ca0e6f130767ddb85ce1641d5474"
+      },
+      {
+        "id": "V3-register-venture-name",
+        "ok": true,
+        "detail": "eth_call ok, returned 0x12b13472c1028ce11d77a6506ac0e9009f8c20ef85c07eb643300b1100000000"
+      },
+      {
+        "id": "F-ada-deploy-resolver",
+        "ok": true,
+        "detail": "eth_call ok, returned 0x000000000000000000000000ca37c8c49773ddca52368cde2763c82176bdd31f"
+      },
+      {
+        "id": "F-ada-register",
+        "ok": false,
+        "detail": "no contract at 0x653c1d7d76941ee8a6359d21033A3d863eadb8ca yet (expected until its dependency is executed: V3, F-ada-deploy-resolver)"
+      },
+      {
+        "id": "F-bob-deploy-resolver",
+        "ok": true,
+        "detail": "eth_call ok, returned 0x000000000000000000000000d85e5bb7859ce3bff46982cb5ba00e4a5d31de93"
+      },
+      {
+        "id": "F-bob-register",
+        "ok": false,
+        "detail": "no contract at 0x653c1d7d76941ee8a6359d21033A3d863eadb8ca yet (expected until its dependency is executed: V3, F-bob-deploy-resolver)"
+      }
+    ],
+    "executed": [
+      "V1-deploy-venture-registry",
+      "V2-deploy-venture-resolver",
+      "V3-register-venture-name",
+      "F-ada-deploy-resolver",
+      "F-ada-register",
+      "F-bob-deploy-resolver",
+      "F-bob-register"
+    ],
+    "wrongDigestRefused": true
+  },
+  "reconcile": {
+    "mode": "read-only",
+    "at": "2026-11-06T23:12:30.038Z",
+    "attestationsChecked": 0,
+    "ensVerifiedByReadback": 3,
+    "agreementsVerifiedByReadback": [],
+    "retried": [],
+    "needsManualReview": [],
+    "stillOpen": []
+  },
+  "serverStateAfter": {
+    "ensStatus": "VERIFIED",
+    "seats": [
+      {
+        "label": "ada",
+        "subnameStatus": "VERIFIED"
+      },
+      {
+        "label": "bob",
+        "subnameStatus": "VERIFIED"
+      }
+    ]
+  },
+  "postDeploymentChecks": {
+    "block": "12079737",
+    "ok": true,
+    "checks": [
+      {
+        "id": "readback-ventureId",
+        "ok": true,
+        "detail": "vestige.ventureId=0xfc1f861be741b78dfb188d2d5bb28732e065a9d43e6cd898714c5dc1f54ee4ea"
+      },
+      {
+        "id": "readback-status-workspace",
+        "ok": true,
+        "detail": "vestige.status=workspace"
+      },
+      {
+        "id": "readback-humans",
+        "ok": true,
+        "detail": "vestige.humans=2 expected=2"
+      },
+      {
+        "id": "venture-registry-linked",
+        "ok": true,
+        "detail": "subregistry=0x653c1d7d76941ee8a6359d21033A3d863eadb8ca"
+      },
+      {
+        "id": "venture-registry-emancipated",
+        "ok": true,
+        "detail": "isEmancipated=true"
+      },
+      {
+        "id": "venture-registrar-lacks-UNREGISTER",
+        "ok": true,
+        "detail": "not held"
+      },
+      {
+        "id": "venture-registrar-lacks-SET_SUBREGISTRY",
+        "ok": true,
+        "detail": "not held"
+      },
+      {
+        "id": "venture-registrar-lacks-SET_RESOLVER",
+        "ok": true,
+        "detail": "not held"
+      },
+      {
+        "id": "venture-registrar-lacks-SET_PARENT",
+        "ok": true,
+        "detail": "not held"
+      },
+      {
+        "id": "venture-registrar-lacks-UPGRADE",
+        "ok": true,
+        "detail": "not held"
+      },
+      {
+        "id": "venture-registrar-lacks-CAN_TRANSFER_ADMIN",
+        "ok": true,
+        "detail": "not held"
+      },
+      {
+        "id": "readback-addr:ada.rehearsal-713262.vestige.eth",
+        "ok": true,
+        "detail": "addr=0x0A676192C0AB6B2a22090DDaa83534f89c43748B"
+      },
+      {
+        "id": "owner:ada.rehearsal-713262.vestige.eth",
+        "ok": true,
+        "detail": "ownerOf=0x0A676192C0AB6B2a22090DDaa83534f89c43748B"
+      },
+      {
+        "id": "negative-safeTransferFrom:ada.rehearsal-713262.vestige.eth",
+        "ok": true,
+        "detail": "reverted: TransferDisallowed"
+      },
+      {
+        "id": "negative-unsafeTransfer:ada.rehearsal-713262.vestige.eth",
+        "ok": true,
+        "detail": "reverted: TransferDisallowed"
+      },
+      {
+        "id": "negative-registrar-writes-founder-resolver:ada.rehearsal-713262.vestige.eth",
+        "ok": true,
+        "detail": "reverted: EACUnauthorizedAccountRoles"
+      },
+      {
+        "id": "sanity-founder-writes-own-resolver:ada.rehearsal-713262.vestige.eth",
+        "ok": true,
+        "detail": "eth_call succeeded"
+      },
+      {
+        "id": "negative-founder-writes-venture-resolver:ada",
+        "ok": true,
+        "detail": "reverted: EACUnauthorizedAccountRoles"
+      },
+      {
+        "id": "readback-addr:bob.rehearsal-713262.vestige.eth",
+        "ok": true,
+        "detail": "addr=0xe0Ed84cb1A5D321C2EC983918eA2AbeBac4F0035"
+      },
+      {
+        "id": "owner:bob.rehearsal-713262.vestige.eth",
+        "ok": true,
+        "detail": "ownerOf=0xe0Ed84cb1A5D321C2EC983918eA2AbeBac4F0035"
+      },
+      {
+        "id": "negative-safeTransferFrom:bob.rehearsal-713262.vestige.eth",
+        "ok": true,
+        "detail": "reverted: TransferDisallowed"
+      },
+      {
+        "id": "negative-unsafeTransfer:bob.rehearsal-713262.vestige.eth",
+        "ok": true,
+        "detail": "reverted: TransferDisallowed"
+      },
+      {
+        "id": "negative-registrar-writes-founder-resolver:bob.rehearsal-713262.vestige.eth",
+        "ok": true,
+        "detail": "reverted: EACUnauthorizedAccountRoles"
+      },
+      {
+        "id": "sanity-founder-writes-own-resolver:bob.rehearsal-713262.vestige.eth",
+        "ok": true,
+        "detail": "eth_call succeeded"
+      },
+      {
+        "id": "negative-founder-writes-venture-resolver:bob",
+        "ok": true,
+        "detail": "reverted: EACUnauthorizedAccountRoles"
+      }
+    ]
+  }
+}

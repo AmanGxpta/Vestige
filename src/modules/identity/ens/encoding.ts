@@ -30,6 +30,9 @@ export const permissionedRegistryAbi = parseAbi([
   "function revokeRootRoles(uint256 roleBitmap, address account) returns (bool)",
   "function unsafeTransfer(address to, uint256 tokenId, bytes data)",
   "function getTokenId(uint256 anyId) view returns (uint256)",
+  "function getExpiry(uint256 anyId) view returns (uint64)",
+  "function ownerOf(uint256 tokenId) view returns (address)",
+  "function safeTransferFrom(address from, address to, uint256 id, uint256 amount, bytes data)",
   "error TransferDisallowed(uint256 tokenId, address from)",
 ]);
 

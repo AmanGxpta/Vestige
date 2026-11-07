@@ -78,3 +78,14 @@ describe.skipIf(!live || !process.env.REVIEW_PLAN)("LIVE re-verification of a re
     expect(out.identicalCalldata).toEqual([true, true]);
   });
 });
+
+describe.skipIf(!live)("LIVE parent read-back (read-only)", () => {
+  it("independently reads back the vestige.eth parent registry state", async () => {
+    const { readParentState } = await import("../../../src/modules/identity/scripts/first-venture");
+    const r = await readParentState(client, { parentRegistry: "0x61Dc50fE2099012bD1d0A684192071Ef51d7Aa73", registrar: REGISTRAR, owner: "0x1ed73ee055b7B5379CcD398748281C5A82e9A41E" });
+    const out = { label: "READ_ONLY_LIVE_READBACK", ...r, parentExpiry: r.parentExpiry.toString() };
+    writeFileSync(`${repo}docs/agent-reports/identity/evidence/ens-parent-readback.json`, JSON.stringify(out, null, 2) + "\n");
+    console.log(JSON.stringify(out));
+    expect(r.checks.find((c) => c.id === "P1-parent-has-code")!.ok).toBe(true);
+  });
+});
