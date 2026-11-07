@@ -40,6 +40,11 @@ export function SeatList({ seats, source, me }: { seats: FounderSeat[]; source: 
                 <div className="row" style={{ gap: 8 }}>
                   <StatusPill status={s.onchainSeatStatus === "UNKNOWN" ? "NONE" : s.onchainSeatStatus} mock={source === "DEV_MOCK"}>{chainText[s.onchainSeatStatus]}</StatusPill>
                   {s.attestationTxHash && <HashLink value={s.attestationTxHash} chainId={1874} source={source} />}
+                  {s.demoOverride && s.onchainSeatStatus !== "UNKNOWN" && (
+                    <span className="badge badge-mock-tag" title="Attested from the demo-override hash (CR-ID-06), not a World ID nullifier." data-testid="seat-override-hash">
+                      DEMO-OVERRIDE HASH · MOCK_ONLY
+                    </span>
+                  )}
                 </div>
               </td>
             </tr>

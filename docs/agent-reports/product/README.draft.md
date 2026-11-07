@@ -72,32 +72,66 @@ Anyone can check all three from ENS and the chain, without trusting vestige.
 
 ### Whitechain testnet (1874): treasury
 
-| What | Tx / address |
+**vestige infrastructure, LIVE.** Deployed by X under H approval on 2026-11-07, with at least 2 confirmations. Runtime code hashes were re-read today and match `contracts/manifests/whitechain-1874/infrastructure.json`.
+
+| Contract | Address | Deployment tx | Block |
+|---|---|---|---|
+| SeatRegistry (attester `0x8406…DDEd`) | [`0xe91BF256Afa7c5453e715c39Ab2431EAd492bcBA`](https://explorer.testnet.whitechain.io/address/0xe91BF256Afa7c5453e715c39Ab2431EAd492bcBA) | [`0x4b3303aa…d6ff`](https://explorer.testnet.whitechain.io/tx/0x4b3303aaec451196264af6ef4faf0df072d24456311c99fec98cc97b6e72d6ff) | 12417009 |
+| SafeSetup (singleton `0x29fc…C762`) | [`0x153406cd0509E71d302eD49E787051Bb98231558`](https://explorer.testnet.whitechain.io/address/0x153406cd0509E71d302eD49E787051Bb98231558) | [`0xb8f34f2b…4adb`](https://explorer.testnet.whitechain.io/tx/0xb8f34f2b425cd80ac512ee44d7cc18f9301a25a71a2223e0a79e4334e79f4adb) | 12417015 |
+
+**Pre-existing canonical contracts the treasury is built on** (provenance explained below):
+
+| Contract | Address | Creation tx | Block |
+|---|---|---|---|
+| Safe L2 singleton v1.4.1 | [`0x29fcB43b46531BcA003ddC8FCB67FFE91900C762`](https://explorer.testnet.whitechain.io/address/0x29fcB43b46531BcA003ddC8FCB67FFE91900C762) | [`0x4c296f74…8f84`](https://explorer.testnet.whitechain.io/tx/0x4c296f740fe3fdd0bea056c40ee5522d00ea65e5a58a45304d9386429fb68f84) | 2509810 |
+| Safe proxy factory v1.4.1 | [`0x4e1DCf7AD4e460CfD30791CCC4F9c8a4f820ec67`](https://explorer.testnet.whitechain.io/address/0x4e1DCf7AD4e460CfD30791CCC4F9c8a4f820ec67) | [`0xa1994d4c…bd24`](https://explorer.testnet.whitechain.io/tx/0xa1994d4c061ac168a223873875a0255d225165643dd0104dd4b6ed3f288abd24) | 2509796 |
+| Official test USDT (proxy, 6 decimals) | [`0xcedfB56113143d55b2358b8CFbB0dEB5Ad2f55a7`](https://explorer.testnet.whitechain.io/address/0xcedfB56113143d55b2358b8CFbB0dEB5Ad2f55a7) | [`0xabf14f3d…99f5`](https://explorer.testnet.whitechain.io/tx/0xabf14f3df9f912b513edff9ec77fbfa9bf80ea5a5e9186e76f3e647df5b999f5) | 10321991 |
+| Test USDT implementation | [`0x26425662D126412128967ECf0a02EC48573026F7`](https://explorer.testnet.whitechain.io/address/0x26425662D126412128967ECf0a02EC48573026F7) | [`0xb73e02b2…06b9`](https://explorer.testnet.whitechain.io/tx/0xb73e02b23eacaea76bb2845ba5f71003095f7c498e378bd324e414e33a6406b9) | 7957063 |
+
+**Role funding (H-approved transfers, not deployments):**
+
+| What | Tx |
 |---|---|
-| Official test USDT (6 decimals) | [`0xcedfB56113143d55b2358b8CFbB0dEB5Ad2f55a7`](https://explorer.testnet.whitechain.io/address/0xcedfB56113143d55b2358b8CFbB0dEB5Ad2f55a7) |
-| H-approved role funding: deployer 0.80 WBT | [`0xa067edca…64ef`](https://explorer.testnet.whitechain.io/tx/0xa067edca93578197bae5bfea6b02164534a128306c5463cd04394a13876064ef) |
-| H-approved role funding: relayer 0.80 WBT | [`0x975654d8…7a21`](https://explorer.testnet.whitechain.io/tx/0x975654d820334026fa9eeceb79f37585ac7ae9a2dfea328cf7ba5246e6ee7a21) |
-| H-approved role funding: attester 0.20 WBT | [`0x671ffa95…89a9`](https://explorer.testnet.whitechain.io/tx/0x671ffa9548b2e3495c69443d0306f245d6e39bb57f1aa5c232cc8e1dfcfd89a9) |
-| H-approved role funding: isolated failed-tx sender 0.05 WBT | [`0x7d91fa75…a936`](https://explorer.testnet.whitechain.io/tx/0x7d91fa759e916d3ccf14cd4dca9a71d388e53b60a229a679cc61de470ba0a936) |
-| H-approved funding: demo funder 100 test USDT | [`0x31c4345c…a10d`](https://explorer.testnet.whitechain.io/tx/0x31c4345cca60ba544d08be0c74c361169d4d09ec9e4b2324887a852797c4a10d) |
-| SeatRegistry | **PENDING (X)**: not deployed |
-| VestigeGuard | **PENDING (X)**: not deployed |
-| northstar Safe (2-of-2) | **PENDING (X)**: not deployed |
-| Deposit 100 USDT → Safe (EIP-3009, relayed) | **PENDING (X)** |
-| 2-of-2 payment 50 USDT | **PENDING (X)** |
-| Rejected 1-of-2 attempt (on-chain revert `GS020`) | **PENDING (X / H approval)** |
-| Reviewed manifest `public/manifests/northstar.vestige.eth.json` | **PENDING (X)** |
+| Deployer 0.80 WBT | [`0xa067edca…64ef`](https://explorer.testnet.whitechain.io/tx/0xa067edca93578197bae5bfea6b02164534a128306c5463cd04394a13876064ef) |
+| Relayer 0.80 WBT | [`0x975654d8…7a21`](https://explorer.testnet.whitechain.io/tx/0x975654d820334026fa9eeceb79f37585ac7ae9a2dfea328cf7ba5246e6ee7a21) |
+| Attester 0.20 WBT | [`0x671ffa95…89a9`](https://explorer.testnet.whitechain.io/tx/0x671ffa9548b2e3495c69443d0306f245d6e39bb57f1aa5c232cc8e1dfcfd89a9) |
+| Isolated failed-tx sender 0.05 WBT | [`0x7d91fa75…a936`](https://explorer.testnet.whitechain.io/tx/0x7d91fa759e916d3ccf14cd4dca9a71d388e53b60a229a679cc61de470ba0a936) |
+| Demo funder 100 test USDT | [`0x31c4345c…a10d`](https://explorer.testnet.whitechain.io/tx/0x31c4345cca60ba544d08be0c74c361169d4d09ec9e4b2324887a852797c4a10d) |
+
+**northstar treasury.** Rows are filled only from receipts X or C1 report and C2 re-reads on-chain (status, block, `to` = SeatRegistry, `from` = attester `0x8406…DDEd`, `attestSeat` calldata decoded). Until then each one stays PENDING.
+
+| Step | Tx / address | Block | Status |
+|---|---|---|---|
+| Seat attested: `aman` (World staging nullifier digest) | [`0x4c123b4f…cec2`](https://explorer.testnet.whitechain.io/tx/0x4c123b4f9e3e4d93fb25b9abeaadb69a94a1ad1aa6c37f508bcc5bb00e29cec2) | 12418426 | **LIVE**. `isSeat(northstar, 0xfc2e…9f3E) = true`; TESTED IN SIMULATOR |
+| Seat attested: `ravi` (**demo-override hash, MOCK_ONLY**) | [`0x2d185976…28de`](https://explorer.testnet.whitechain.io/tx/0x2d1859763c7b5b621fc251e37b3d60c81b1242bdc7cb5411118be2045a7728de) | 12418471 | **LIVE chain fact, MOCK_ONLY human.** `isSeat(northstar, 0x1711…3454) = true`. The calldata seat hash `0xa512…05dc` equals `keccak256("vestige.demo-override/1\|ventureId\|wallet")`, not a World digest |
+| northstar Safe [`0xE707…23A2`](https://explorer.testnet.whitechain.io/address/0xE707e3e99Da85B0D8F3814a640976b3B08A123A2) (2-of-2) + VestigeGuard [`0x3255…fa6B`](https://explorer.testnet.whitechain.io/address/0x3255A0C5d39167FC55b6dE917DCf6F014F6efa6B), created through the proxy factory with the SafeSetup initializer | [`0x93ef2146…6293`](https://explorer.testnet.whitechain.io/tx/0x93ef21464c92d8a903df9b885cc4801386b39d76f9d0808bf26e8f36b9116293) | 12418659 | **LIVE.** Owners aman + ravi, threshold 2, guard slot = Guard, no modules; `Guard.safe/registry/ventureId` match; code hashes match the manifest |
+| ENSIP-11 `addr(northstar, 2147485522)` = Safe, and `vestige.guard` set (Sepolia) | PENDING | | **PENDING (C1 / H ENS plan).** Re-read 2026-11-07: not set. Until it is, the public and funder pages can't reach the Safe from ENS and say "No treasury linked", never ACTIVE |
+| Reviewed manifest `public/manifests/northstar.vestige.eth.json` | SHA-256 `ebee2686…02ef` | | **Published.** Byte-identical copy of X's `contracts/manifests/published/northstar.vestige.eth-4504d9782084.json`. Accepted by both C2's and X's validators |
+| Gasless deposit, 10 USDT funder → Safe (EIP-3009 `transferWithAuthorization`, relayed) | [`0x80a0323b…ddef`](https://explorer.testnet.whitechain.io/tx/0x80a0323b7e3397135bea641644ca5c391c1c2e93d003e58b7d2fc1ce93caddef) | 12418978 | **LIVE.** Transfer `0xD613…d43A` → Safe 10.000000 USDT. Sent by relayer `0xc57f…3116`; the funder holds 0 WBT |
+| 2-of-2 payment, 5 USDT Safe → `0xabdc…a8d8` (`execTransaction`, both owner signatures, relayed) | [`0x9be37d58…d4ad`](https://explorer.testnet.whitechain.io/tx/0x9be37d5801a42dc9427325c1204db156725fa61c9948e37748cc596a532bd4ad) | 12419847 | **LIVE.** Safe nonce 0 → 1; Safe balance now 5.000000 USDT |
+| Rejected 1-of-2 `execTransaction` from the isolated sender `0xd03c…C852`, reverted **`GS020`** | [`0x7a0691c2…883a`](https://explorer.testnet.whitechain.io/tx/0x7a0691c2dd082938514418955ec40d6a39e291c682957f62a8bbd2694c82883a) | 12419728 | **LIVE (mined, status 0).** C2 replayed the same call at parent block 12419727: `execution reverted: GS020`. Blockscout shows the same revert reason |
+
+#### How the pre-existing contracts are proven
+
+The Safe singleton, the Safe proxy factory and the test USDT proxy and implementation were deployed long before vestige existed. The public Whitechain RPC doesn't allow `debug_traceTransaction` and prunes historical state older than about 27 hours. So X's strict check reports `MANIFEST_CREATION_UNPROVEN` for these four, and the manifest records their creation transactions as **explorer-attested** (taken from Blockscout's indexer).
+
+Each part of that claim can still be checked independently from the public RPC alone (`docs/agent-reports/product/2026-11-07-infra-provenance-check.txt`):
+
+- **Code.** Today's runtime code keccak equals the manifest's `runtimeCodeHash` for all six contracts.
+- **Token proxy and implementation.** The creation transaction's receipt `contractAddress` is exactly the manifest address.
+- **Singleton and factory.** Both were created through the deterministic deployer `0x914d…43d7`. `keccak256(0xff ‖ deployer ‖ salt ‖ keccak256(initcode))`, computed from each transaction's own input, gives exactly the manifest address, and the transaction succeeded (status 1).
+- **What stays explorer-attested:** only the historical execution trace. Whether to accept this mode or require a tracing RPC is H's decision; X did not weaken the check.
 
 ## What is simulated, mocked or not yet live (honest list)
 
 | Area | Status |
 |---|---|
 | **World ID** | **Staging (simulator) only.** Every seat proof is labelled TESTED IN SIMULATOR. The duplicate-human refusal (same identity, second wallet, same venture) is real staging evidence. **Two distinct founders is MOCK_ONLY** (D-024): the simulator returned the same nullifier for two test identities. **No real humans** have verified; no production uniqueness is claimed. |
-| **Second founder on northstar** | `ravi` is not World-verified. For the demo an operator may mark that seat ready with the **CR-ID-06 demo override**. It is labelled `SELF_REPORTED · DEMO OVERRIDE · NOT WORLD-VERIFIED`, is never counted in `humansVerified` or `vestige.humans` (still `1`), and gets no ENS subname. |
+| **Second founder on northstar: demo-override seat (MOCK_ONLY)** | `ravi` is not World-verified. An operator marks that seat ready with the **CR-ID-06 demo override** so the terms and treasury flow can be shown with only one simulator identity. **What is real:** if attested, the SeatRegistry seat is a real Whitechain fact, and the Safe owner, Guard and 2-of-2 rule are real. **What is not:** the seat hash is `keccak256("vestige.demo-override/1\|ventureId\|wallet")`, namespaced so it can never collide with a World nullifier digest. No human proof stands behind it. Everywhere it appears it is labelled `SELF_REPORTED · DEMO OVERRIDE · NOT WORLD-VERIFIED`, and attestation events are `DEMO-OVERRIDE HASH · MOCK_ONLY`. It is never counted in `humansVerified` or `vestige.humans` (still `1`), and it gets no ENS subname. The public and funder pages say so next to the seat check, even when the treasury is ACTIVE. |
 | **ENS for new ventures** | The API never broadcasts. A venture created live gets its ENS steps **PENDING** until an operator broadcasts an H-approved, digest-bound plan. `northstar` went through exactly that path. |
-| **Whitechain treasury** | Contracts are written and tested (Foundry, local fork), and the deploy plan is reviewed, but **nothing vestige-owned is deployed on 1874 yet**. The UI shows "Deployment requested — waiting for operator approval" and the public page never says ACTIVE without a reviewed manifest and live reads. |
-| **Relayer (gasless USDT)** | Implemented with simulation, allowlists, rate limits and a budget cap, but **disabled** (`RELAYER_ENABLED=false`) until H approves activation. No relayed transaction exists yet. |
-| **Seat attestation on Whitechain** | The attester is wired through the root composition in read-only mode (`authorizeSend: false`). On-chain seats read "not attested". |
+| **Whitechain treasury** | **Live:** SeatRegistry, SafeSetup, the northstar Safe and Guard, the reviewed manifest, a 10 USDT gasless deposit, a 5 USDT 2-of-2 payment and the mined GS020 revert. **Pending:** the Sepolia ENS records pointing northstar at the Safe. The public and funder pages show ACTIVE only from independent chain reads (ENS → Safe → Guard → SeatRegistry → code hashes → USDT) against the reviewed manifest, never from the vestige API. |
+| **Relayer (gasless USDT)** | Implemented with simulation, allowlists, rate limits and a budget cap. It ran **only in an H-approved, session-only mode** to relay the deposit and the payment above, and was **disabled again** afterwards (X evidence `2026-11-07-23-relay-session/`). The funder paid no WBT. |
+| **Seat attestation on Whitechain** | **Live for northstar** (both seats, table above). The attester signer is limited to `attestSeat` on the manifest registry (exact calldata, value 0, gas and fee caps). The relayer has no signer. The `ravi` seat is a real chain seat built on the MOCK_ONLY override hash. |
 | **Venture list summaries** | Reported by the API and shown as `· reported`, never green. Treasury and funding values are **Unknown** until X's chain-backed summary port is live. |
 | **DEV MOCK** | A development adapter exists for UI work. It is visibly labelled DEV MOCK on every screen and **forced off in production builds**. |
 | **Legal** | Not a company. No incorporation, no legal rights. |

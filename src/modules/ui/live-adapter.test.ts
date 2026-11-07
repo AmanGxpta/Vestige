@@ -217,4 +217,15 @@ describe("CR-ID-06 demo override labels", () => {
     expect(p.founders[1]).toMatchObject({ worldProofStatus: "UNKNOWN", demoOverride: true });
     expect(p.humansVerified).toBe(1);
   });
+  it("qualifies SeatRegistry events built on the demo-override hash as DEMO_OVERRIDE, never as a World seat", () => {
+    const p = toPublic({
+      ...base,
+      founders: [],
+      events: [
+        { kind: "seat_attested", label: "CHAIN_VERIFIED", status: "VERIFIED", chainId: 1874, txHash: `0x${"ab".repeat(32)}`, at: "2026-11-07T02:00:00Z", source: "seat-registry:demo-override-hash (MOCK_ONLY — not World ID)" },
+        { kind: "seat_attested", label: "CHAIN_VERIFIED", status: "VERIFIED", chainId: 1874, txHash: `0x${"cd".repeat(32)}`, at: "2026-11-07T02:00:00Z", source: "seat-registry:world-nullifier-digest" },
+      ],
+    });
+    expect(p.evidence.map((e) => e.qualifier)).toEqual(["DEMO_OVERRIDE", undefined]);
+  });
 });

@@ -121,7 +121,8 @@ export function deriveTreasuryVerdict(r: PublicChainReport): TreasuryVerdict {
   }
 
   add("modules", "No Safe modules (they would bypass the Guard)", w.modules.status, w.modules.note ?? "No modules enabled");
-  add("seats", "Every owner is a verified-human seat", w.seats.status, w.seats.note ?? "SeatRegistry.isSeat is true for both owners");
+  // Chain fact only: the attester wrote a seat. Whether that seat came from World ID is an off-chain fact the page adds.
+  add("seats", "Every owner holds a SeatRegistry seat", w.seats.status, w.seats.note ?? "SeatRegistry.isSeat is true for both owners (written by the vestige attester)");
 
   const status = texts["vestige.status"];
   if (status !== undefined)

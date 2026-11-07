@@ -17,6 +17,8 @@ export interface ContractArtifact {
   abiPath: string;
   abiSha256: string;
   verifiedSourceUrl?: string;
+  /** H decision A: only the four pinned pre-existing anchors may carry this (creation tx from the explorer indexer). */
+  provenance?: "EXPLORER_ATTESTED";
 }
 export interface TokenDomain {
   name: "Tether USD";
@@ -66,8 +68,15 @@ export const MANIFEST_ANCHORS = {
   factory: "0x4e1DCf7AD4e460CfD30791CCC4F9c8a4f820ec67",
   token: "0xcedfB56113143d55b2358b8CFbB0dEB5Ad2f55a7",
 } as const;
+/** H decision A (mirrors X's EXPLORER_ATTESTED_ANCHORS): the ONLY artifacts allowed provenance:"EXPLORER_ATTESTED". */
+export const EXPLORER_ATTESTED_ANCHORS = {
+  singleton: { address: "0x29fcB43b46531BcA003ddC8FCB67FFE91900C762", runtimeCodeHash: "0xb1f926978a0f44a2c0ec8fe822418ae969bd8c3f18d61e5103100339894f81ff" },
+  factory: { address: "0x4e1DCf7AD4e460CfD30791CCC4F9c8a4f820ec67", runtimeCodeHash: "0x50c3cdc4074750a7a974204a716c999edd37482f907608d960b2b025ee0b3317" },
+  token: { address: "0xcedfB56113143d55b2358b8CFbB0dEB5Ad2f55a7", runtimeCodeHash: "0x4d9be648c5bf39973670d9f8b481d5d0b971e6a2db2deccc6b98cde21c5dd83e" },
+  "token.implementation": { address: "0x26425662D126412128967ECf0a02EC48573026F7", runtimeCodeHash: "0xb5c69874a061f6c8750294eefc2de2f45a7c229e961b03fc901f3612010822d6" },
+} as const;
 const EXPLORERS = ["https://explorer.testnet.whitechain.io", "https://explorer.testnet.whitechain.io/"];
-const ART_KEYS = ["address", "deploymentTxHash", "deploymentBlock", "runtimeCodeHash", "abiPath", "abiSha256", "verifiedSourceUrl"];
+const ART_KEYS = ["address", "deploymentTxHash", "deploymentBlock", "runtimeCodeHash", "abiPath", "abiSha256", "verifiedSourceUrl", "provenance"];
 const TOKEN_KEYS = [...ART_KEYS, "decimals", "eip712Domain", "domainSeparator", "implementation"];
 const TOP_KEYS = ["schemaVersion", "chainId", "sourceCommit", "approvedAt", "explorerBaseUrl", "contracts", "network", "deploymentBlock", "ventureId", "ensName", "owners", "threshold", "setupInitializerHash"];
 const eqi = (a: unknown, b: unknown) => typeof a === "string" && typeof b === "string" && a.toLowerCase() === b.toLowerCase();
@@ -86,6 +95,11 @@ function artifactProblems(name: string, a: unknown, token = false): string[] {
   if (typeof x.abiPath !== "string" || !/^contracts\/abi\/[A-Za-z0-9_.-]+\.json$/.test(x.abiPath)) p.push(`contracts.${name}.abiPath must be contracts/abi/<name>.json`);
   if (typeof x.abiSha256 !== "string" || !/^[0-9a-f]{64}$/.test(x.abiSha256)) p.push(`contracts.${name}.abiSha256 is not a lowercase sha256`);
   if (x.verifiedSourceUrl !== undefined && !/^https:\/\//.test(String(x.verifiedSourceUrl))) p.push(`contracts.${name}.verifiedSourceUrl must be https`);
+  if (x.provenance !== undefined) {
+    const anchor = (EXPLORER_ATTESTED_ANCHORS as Record<string, { address: string; runtimeCodeHash: string }>)[name];
+    if (x.provenance !== "EXPLORER_ATTESTED" || !anchor || !eqi(x.address, anchor.address) || String(x.runtimeCodeHash).toLowerCase() !== anchor.runtimeCodeHash)
+      p.push(`contracts.${name}.provenance is only allowed as EXPLORER_ATTESTED on the pinned pre-existing anchors`);
+  }
   return p;
 }
 

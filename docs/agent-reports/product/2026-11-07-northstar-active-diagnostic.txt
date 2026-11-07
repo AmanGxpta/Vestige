@@ -1,0 +1,26 @@
+# DIAGNOSTIC — NOT a page result. 2026-11-07T01:54:24Z
+# Real Sepolia ENS texts + real Whitechain reads + the published manifest (sha256 ebee2686…02ef);
+# ONLY addr(northstar.vestige.eth, 2147485522) was injected as 0xE707…23A2 because it is NOT set on Sepolia.
+# Purpose: show that every Whitechain check passes and the ENS link is the only missing piece.
+{
+ "state": "ACTIVE",
+ "balance": "5000000",
+ "block": "12419887",
+ "transfers": 2,
+ "checks": [
+  "ens:VERIFIED",
+  "link:VERIFIED",
+  "ventureId:VERIFIED",
+  "manifest:VERIFIED",
+  "safe:VERIFIED",
+  "owners:VERIFIED",
+  "threshold:VERIFIED",
+  "guard:VERIFIED",
+  "binding:VERIFIED",
+  "codehash:VERIFIED",
+  "modules:VERIFIED",
+  "seats:VERIFIED",
+  "status:VERIFIED"
+ ]
+}
+# Real (no injection) chain-only verdict at the same time: UNRESOLVED — checks [ens:VERIFIED, link:UNKNOWN, safe:UNKNOWN]

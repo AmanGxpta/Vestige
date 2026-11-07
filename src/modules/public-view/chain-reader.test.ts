@@ -31,9 +31,9 @@ describe("ENS wildcard: unregistered subname under a registered parent", () => {
     const r = await readPublicChainReport("northstar.vestige.eth", cfg, { sepolia: sep });
     expect(r.ens.resolver.status).toBe("VERIFIED");
     expect(r.ens.ventureId.value).toBe(VID);
-    // workspace + no Safe linked → "not published yet" (UNKNOWN), never VERIFIED, never ACTIVE
+    // workspace + no Safe linked → "not linked yet" (UNKNOWN), never VERIFIED, never ACTIVE
     expect(r.ens.treasury.status).toBe("UNKNOWN");
-    expect(r.ens.treasury.note).toMatch(/No treasury published yet/);
+    expect(r.ens.treasury.note).toMatch(/No treasury linked from this name yet/);
     expect(deriveTreasuryVerdict(r).state).toBe("UNRESOLVED");
   });
 });

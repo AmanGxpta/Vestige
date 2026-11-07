@@ -131,6 +131,7 @@ export type EvidenceKind =
   | "FOUNDER_VERIFIED"
   | "SEAT_ATTESTED"
   | "DUPLICATE_REFUSED"
+  | "DEMO_OVERRIDE"
   | "AGREEMENT_VERSION"
   | "AGREEMENT_SIGNED"
   | "SAFE_DEPLOYED"
@@ -154,7 +155,7 @@ export type Evidence = {
   confirmedAt?: string;
   source: DataSource;
   /** World evidence from the staging environment (CONTRACTS: separate qualifier, not a label). */
-  qualifier?: "TESTED_IN_SIMULATOR";
+  qualifier?: "TESTED_IN_SIMULATOR" | "DEMO_OVERRIDE";
 };
 
 /** Contract v0 `GET /api/identity/ventures/:id` — "founder seat + ENS + verification summaries". */
