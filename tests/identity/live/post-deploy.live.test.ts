@@ -35,7 +35,8 @@ describe.skipIf(!RUN)("OPERATOR: post-deploy reconcile + checks (read-only)", ()
     const agreements = new AgreementService(db, ventures, new ApprovalGatedEnsPort(), { checkAgreementRecord: async (n, h) => (await r.text(n, ENS_KEYS.agreement))?.toLowerCase() === h.toLowerCase() });
     const rec = await reconcileIdentity({ db, ventures, agreements } as never);
     const v = ventures.view(process.env.VENTURE_ID);
-    const founders = v.seats.filter((s) => s.worldProofStatus === "VERIFIED").map((s) => ({ label: s.founderLabel, wallet: s.wallet as Address }));
+    // ENS subnames + vestige.humans cover real World proofs only; demo overrides (CR-ID-06) never get them.
+    const founders = v.seats.filter((s) => s.worldProofStatus === "VERIFIED" && !s.demoOverride).map((s) => ({ label: s.founderLabel, wallet: s.wallet as Address }));
     const checks = await postDeploymentChecks(client as never, {
       ensName: v.ensName, ventureId: v.ventureId,
       parentRegistry: (process.env.VESTIGE_PARENT_REGISTRY ?? "0x61Dc50fE2099012bD1d0A684192071Ef51d7Aa73") as Address,

@@ -43,3 +43,23 @@ describe("ENS setup plans (no broadcast)", () => {
     await expect(broadcastApproved({ plan: changed, approvedDigest: planDigest(p), wallet: fake, client: fake, env: { VESTIGE_ENS_BROADCAST: "I_HAVE_H_APPROVAL" } })).rejects.toThrow(/digest/);
   });
 });
+
+describe("treasury record plan", () => {
+  it("one registrar multicall on the venture resolver: ENSIP-11 addr(2147485522)=Safe + vestige.guard", async () => {
+    const { buildTreasuryRecordPlan } = await import("../../src/modules/identity/scripts/ens-plans");
+    const { permissionedResolverAbi } = await import("../../src/modules/identity/ens/encoding");
+    const safe = "0x1111111111111111111111111111111111111111", guard = "0x2222222222222222222222222222222222222222";
+    const p = buildTreasuryRecordPlan({ registrar, ensName: "northstar.vestige.eth", ventureResolver: "0x17cb013B4E8B3d47A7A1F3A8D08A5a4a04189C08", safe, guard, createdAt: at });
+    expect(p.kind).toBe("treasury-records");
+    expect(p.txs).toHaveLength(1);
+    expect(p.txs[0]!.to).toBe("0x17cb013B4E8B3d47A7A1F3A8D08A5a4a04189C08");
+    const d = decodeFunctionData({ abi: permissionedResolverAbi, data: p.txs[0]!.data });
+    expect(d.functionName).toBe("multicall");
+    const inner = (d.args![0] as `0x${string}`[]).map((c) => decodeFunctionData({ abi: permissionedResolverAbi, data: c }));
+    expect(inner.map((x) => x.functionName)).toEqual(["setText", "setAddress"]);
+    expect(inner[1]!.args![1]).toBe(2147485522n);
+    expect((inner[1]!.args![2] as string).toLowerCase()).toBe(safe);
+    expect(inner[0]!.args!.slice(1)).toEqual(["vestige.guard", guard]);
+    expect(planDigest(p)).toBe(planDigest(buildTreasuryRecordPlan({ registrar, ensName: "northstar.vestige.eth", ventureResolver: "0x17cb013B4E8B3d47A7A1F3A8D08A5a4a04189C08", safe, guard, createdAt: at })));
+  });
+});

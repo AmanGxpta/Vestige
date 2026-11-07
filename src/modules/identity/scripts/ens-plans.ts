@@ -25,16 +25,18 @@ import {
   type PublicClient,
   type WalletClient,
 } from "viem";
-import { ENSV2_SEPOLIA, VESTIGE_PARENT_NAME } from "../config";
+import { ENS_KEYS, ENSV2_SEPOLIA, VESTIGE_PARENT_NAME, WHITECHAIN_COIN_TYPE } from "../config";
 import {
+  encodeSetText,
   encodeUserRegistryInit,
+  permissionedResolverAbi,
   permissionedRegistryAbi,
   predictProxyAddress,
   REG,
   ventureRegistrySalt,
   verifiableFactoryAbi,
 } from "../ens/encoding";
-import { buildFounderPlan, buildVenturePlan, VENTURE_TOKEN_ROLES } from "../ens/registrar";
+import { buildFounderPlan, buildVenturePlan, recordCalls, VENTURE_TOKEN_ROLES } from "../ens/registrar";
 import type { Bytes32 } from "../ids";
 
 export interface PlannedTx {
@@ -51,7 +53,7 @@ export interface PlannedTx {
 
 export interface EnsPlan {
   schema: "vestige.ens-plan/1";
-  kind: "parent-setup" | "first-venture";
+  kind: "parent-setup" | "first-venture" | "treasury-records";
   chainId: 11155111;
   createdAt: string;
   inputs: Record<string, unknown>;
@@ -235,4 +237,40 @@ export async function broadcastApproved(a: { plan: EnsPlan; approvedDigest: stri
     receipts.push({ id: tx.id, hash, block: r.blockNumber });
   }
   return receipts;
+}
+
+/**
+ * Treasury records on an EXISTING venture name (after X's Safe deploy): one registrar
+ * multicall on the venture's PermissionedResolver setting ENSIP-11 addr(2147485522)=Safe and
+ * text vestige.guard=Guard (CONTRACTS v0 ENS records). Optional vestige.treasury text fallback.
+ * Plan + digest for H approval only; executed via broadcastApproved like the others.
+ */
+export function buildTreasuryRecordPlan(a: {
+  registrar: Address;
+  ensName: string; // <slug>.vestige.eth
+  ventureResolver: Address; // read from the parent registry, never assumed
+  safe: Address;
+  guard: Address;
+  includeTextFallback?: boolean;
+  source?: Record<string, unknown>;
+  createdAt?: string;
+}): EnsPlan {
+  const calls = recordCalls(a.ensName, { treasury: a.safe, guard: a.guard });
+  if (a.includeTextFallback) calls.push(encodeSetText(a.ensName, ENS_KEYS.treasuryFallback, a.safe));
+  return {
+    schema: "vestige.ens-plan/1",
+    kind: "treasury-records",
+    chainId: 11155111,
+    createdAt: a.createdAt ?? new Date().toISOString(),
+    inputs: { ensName: a.ensName, ventureResolver: a.ventureResolver, safe: a.safe, guard: a.guard, coinType: WHITECHAIN_COIN_TYPE.toString(), textFallback: !!a.includeTextFallback, ...(a.source ? { source: a.source } : {}) },
+    predicted: {},
+    txs: [{
+      id: "T1-set-treasury-records", signer: "REGISTRAR", signerAddress: a.registrar, to: a.ventureResolver,
+      data: encodeFunctionData({ abi: permissionedResolverAbi, functionName: "multicall", args: [calls] }), value: "0",
+      purpose: `${a.ensName}: addr(${WHITECHAIN_COIN_TYPE})=${a.safe}; text vestige.guard=${a.guard}${a.includeTextFallback ? `; text vestige.treasury=${a.safe}` : ""}`,
+      dependsOn: ["X Safe + Guard deployed and read back on Whitechain 1874"],
+      expectedResult: `UniversalResolver addr(${a.ensName}, ${WHITECHAIN_COIN_TYPE}) == ${a.safe}`,
+    }],
+    disclosures: ["Records point to Whitechain contracts; verifiers must still read Safe owners/threshold/Guard on Whitechain (ENS is a pointer, not proof)."],
+  };
 }

@@ -1,0 +1,271 @@
+{
+  "label": "LIVE_WHITECHAIN_ATTESTATION \u2014 SeatRegistry 0xe91BF256Afa7c5453e715c39Ab2431EAd492bcBA (chain 1874)",
+  "composition": "src/shared/composition.ts services() (X's SeatAttester + attester transport); attester key supplied via env from the vestige-attester keystore, never logged (checked)",
+  "hApproval": "H instructed reconcileIdentity({retry:true, attestDemoOverrides:true})",
+  "seats": [
+    {
+      "founder": "aman",
+      "wallet": "0xfc2e2350dbe6cc7281c8a0412dd65cce56519f3e",
+      "basis": "world-nullifier-digest",
+      "evidenceLabel": "HUMAN_VERIFIED + TESTED_IN_SIMULATOR",
+      "seatHash": "0xefaf4efd0fbb44c30f7640d091ad9815fc383a4e4c877d7faa61e571a738fba3",
+      "txHash": "0x4c123b4f9e3e4d93fb25b9abeaadb69a94a1ad1aa6c37f508bcc5bb00e29cec2",
+      "block": 12418426,
+      "status": "success",
+      "isSeat": true,
+      "serverOnchainSeatStatus": "VERIFIED"
+    },
+    {
+      "founder": "ravi",
+      "wallet": "0x1711c70699d3d2040861677a277c365c9c283454",
+      "basis": "demo-override-hash",
+      "evidenceLabel": "MOCK_ONLY demo override (CR-ID-06) \u2014 NOT World ID",
+      "seatHash": "0xa512e12b3274d4a4076a800f4efbe271c6b3af48c9217494a7f18a653d1605dc",
+      "seatHashRecipe": "keccak256('vestige.demo-override/1|<ventureId>|<wallet>')",
+      "txHash": "0x2d1859763c7b5b621fc251e37b3d60c81b1242bdc7cb5411118be2045a7728de",
+      "block": 12418471,
+      "status": "success",
+      "isSeat": true,
+      "serverOnchainSeatStatus": "VERIFIED"
+    }
+  ],
+  "independentReadback": {
+    "tool": "cast receipt / cast call (separate from app code)",
+    "headBlock": 12418516,
+    "from": "0x84068c51a9236a869e5f05fba96323e97597dded (attester)",
+    "eventHashesMatchExpected": true,
+    "isSeatBoth": true
+  },
+  "notes": [
+    "pass 1 attested aman; ravi refused ATTESTER_NONCE_LOCK (X: one in-flight attestation) while aman was pending; pass 2 attested ravi"
+  ],
+  "pass1": {
+    "label": "LIVE_WHITECHAIN_ATTESTATION_EVIDENCE",
+    "composition": "src/shared/composition.ts services()",
+    "mode": "READ_ONLY",
+    "attesterMode": "ENABLED",
+    "attestDemoOverrides": true,
+    "before": {
+      "chainId": 1874,
+      "block": "12418421",
+      "registry": "0xe91BF256Afa7c5453e715c39Ab2431EAd492bcBA",
+      "ventureId": "0xe68b1b43989080cfe7581731204a977009d67e3b3660062d24157562cc93e3ff",
+      "ensName": "northstar.vestige.eth",
+      "seats": [
+        {
+          "wallet": "0xfc2e2350dbe6cc7281c8a0412dd65cce56519f3e",
+          "label": "aman",
+          "evidenceLabel": "HUMAN_VERIFIED + TESTED_IN_SIMULATOR",
+          "basis": "world-nullifier-digest",
+          "expectedSeatHash": "0xefaf4efd0fbb44c30f7640d091ad9815fc383a4e4c877d7faa61e571a738fba3",
+          "serverOnchainStatus": "FAILED",
+          "txHash": null,
+          "receipt": null,
+          "onchainEventHash": null,
+          "eventHashMatchesExpected": false,
+          "isSeatAtLatest": false
+        },
+        {
+          "wallet": "0x1711c70699d3d2040861677a277c365c9c283454",
+          "label": "ravi",
+          "evidenceLabel": "MOCK_ONLY demo override (not World ID)",
+          "basis": "demo-override-hash",
+          "expectedSeatHash": "0xa512e12b3274d4a4076a800f4efbe271c6b3af48c9217494a7f18a653d1605dc",
+          "serverOnchainStatus": "FAILED",
+          "txHash": null,
+          "receipt": null,
+          "onchainEventHash": null,
+          "eventHashMatchesExpected": false,
+          "isSeatAtLatest": false
+        }
+      ]
+    },
+    "reconcile": [
+      {
+        "mode": "retry",
+        "at": "2026-11-07T01:26:34.931Z",
+        "attestationsChecked": 0,
+        "ensVerifiedByReadback": 0,
+        "agreementsVerifiedByReadback": [],
+        "retried": [
+          "ens-humans:northstar.vestige.eth",
+          "attestation:0xe68b1b43989080cfe7581731204a977009d67e3b3660062d24157562cc93e3ff:0xfc2e2350dbe6cc7281c8a0412dd65cce56519f3e",
+          "attestation:0xe68b1b43989080cfe7581731204a977009d67e3b3660062d24157562cc93e3ff:0x1711c70699d3d2040861677a277c365c9c283454"
+        ],
+        "needsManualReview": [],
+        "stillOpen": [
+          "ens-humans:northstar.vestige.eth:expected=1"
+        ]
+      },
+      {
+        "mode": "read-only",
+        "at": "2026-11-07T01:26:46.917Z",
+        "attestationsChecked": 1,
+        "ensVerifiedByReadback": 0,
+        "agreementsVerifiedByReadback": [],
+        "retried": [],
+        "needsManualReview": [],
+        "stillOpen": [
+          "ens-humans:northstar.vestige.eth:expected=1"
+        ]
+      }
+    ],
+    "after": {
+      "chainId": 1874,
+      "block": "12418439",
+      "registry": "0xe91BF256Afa7c5453e715c39Ab2431EAd492bcBA",
+      "ventureId": "0xe68b1b43989080cfe7581731204a977009d67e3b3660062d24157562cc93e3ff",
+      "ensName": "northstar.vestige.eth",
+      "seats": [
+        {
+          "wallet": "0xfc2e2350dbe6cc7281c8a0412dd65cce56519f3e",
+          "label": "aman",
+          "evidenceLabel": "HUMAN_VERIFIED + TESTED_IN_SIMULATOR",
+          "basis": "world-nullifier-digest",
+          "expectedSeatHash": "0xefaf4efd0fbb44c30f7640d091ad9815fc383a4e4c877d7faa61e571a738fba3",
+          "serverOnchainStatus": "VERIFIED",
+          "txHash": "0x4c123b4f9e3e4d93fb25b9abeaadb69a94a1ad1aa6c37f508bcc5bb00e29cec2",
+          "receipt": {
+            "status": "success",
+            "blockNumber": "12418426",
+            "blockHash": "0x92aea4c2fad6672755ffa722d401c6369251647c45bb2e2d2e7772ec1e89f850"
+          },
+          "onchainEventHash": "0xefaf4efd0fbb44c30f7640d091ad9815fc383a4e4c877d7faa61e571a738fba3",
+          "eventHashMatchesExpected": true,
+          "isSeatAtLatest": true
+        },
+        {
+          "wallet": "0x1711c70699d3d2040861677a277c365c9c283454",
+          "label": "ravi",
+          "evidenceLabel": "MOCK_ONLY demo override (not World ID)",
+          "basis": "demo-override-hash",
+          "expectedSeatHash": "0xa512e12b3274d4a4076a800f4efbe271c6b3af48c9217494a7f18a653d1605dc",
+          "serverOnchainStatus": "FAILED",
+          "txHash": null,
+          "receipt": null,
+          "onchainEventHash": null,
+          "eventHashMatchesExpected": false,
+          "isSeatAtLatest": false
+        }
+      ]
+    }
+  },
+  "pass2": {
+    "label": "LIVE_WHITECHAIN_ATTESTATION_EVIDENCE",
+    "composition": "src/shared/composition.ts services()",
+    "mode": "READ_ONLY",
+    "attesterMode": "ENABLED",
+    "attestDemoOverrides": true,
+    "before": {
+      "chainId": 1874,
+      "block": "12418465",
+      "registry": "0xe91BF256Afa7c5453e715c39Ab2431EAd492bcBA",
+      "ventureId": "0xe68b1b43989080cfe7581731204a977009d67e3b3660062d24157562cc93e3ff",
+      "ensName": "northstar.vestige.eth",
+      "seats": [
+        {
+          "wallet": "0xfc2e2350dbe6cc7281c8a0412dd65cce56519f3e",
+          "label": "aman",
+          "evidenceLabel": "HUMAN_VERIFIED + TESTED_IN_SIMULATOR",
+          "basis": "world-nullifier-digest",
+          "expectedSeatHash": "0xefaf4efd0fbb44c30f7640d091ad9815fc383a4e4c877d7faa61e571a738fba3",
+          "serverOnchainStatus": "VERIFIED",
+          "txHash": "0x4c123b4f9e3e4d93fb25b9abeaadb69a94a1ad1aa6c37f508bcc5bb00e29cec2",
+          "receipt": {
+            "status": "success",
+            "blockNumber": "12418426",
+            "blockHash": "0x92aea4c2fad6672755ffa722d401c6369251647c45bb2e2d2e7772ec1e89f850"
+          },
+          "onchainEventHash": "0xefaf4efd0fbb44c30f7640d091ad9815fc383a4e4c877d7faa61e571a738fba3",
+          "eventHashMatchesExpected": true,
+          "isSeatAtLatest": true
+        },
+        {
+          "wallet": "0x1711c70699d3d2040861677a277c365c9c283454",
+          "label": "ravi",
+          "evidenceLabel": "MOCK_ONLY demo override (not World ID)",
+          "basis": "demo-override-hash",
+          "expectedSeatHash": "0xa512e12b3274d4a4076a800f4efbe271c6b3af48c9217494a7f18a653d1605dc",
+          "serverOnchainStatus": "FAILED",
+          "txHash": null,
+          "receipt": null,
+          "onchainEventHash": null,
+          "eventHashMatchesExpected": false,
+          "isSeatAtLatest": false
+        }
+      ]
+    },
+    "reconcile": [
+      {
+        "mode": "retry",
+        "at": "2026-11-07T01:27:17.781Z",
+        "attestationsChecked": 0,
+        "ensVerifiedByReadback": 0,
+        "agreementsVerifiedByReadback": [],
+        "retried": [
+          "ens-humans:northstar.vestige.eth",
+          "attestation:0xe68b1b43989080cfe7581731204a977009d67e3b3660062d24157562cc93e3ff:0x1711c70699d3d2040861677a277c365c9c283454"
+        ],
+        "needsManualReview": [],
+        "stillOpen": [
+          "ens-humans:northstar.vestige.eth:expected=1"
+        ]
+      },
+      {
+        "mode": "read-only",
+        "at": "2026-11-07T01:27:29.743Z",
+        "attestationsChecked": 1,
+        "ensVerifiedByReadback": 0,
+        "agreementsVerifiedByReadback": [],
+        "retried": [],
+        "needsManualReview": [],
+        "stillOpen": [
+          "ens-humans:northstar.vestige.eth:expected=1"
+        ]
+      }
+    ],
+    "after": {
+      "chainId": 1874,
+      "block": "12418481",
+      "registry": "0xe91BF256Afa7c5453e715c39Ab2431EAd492bcBA",
+      "ventureId": "0xe68b1b43989080cfe7581731204a977009d67e3b3660062d24157562cc93e3ff",
+      "ensName": "northstar.vestige.eth",
+      "seats": [
+        {
+          "wallet": "0xfc2e2350dbe6cc7281c8a0412dd65cce56519f3e",
+          "label": "aman",
+          "evidenceLabel": "HUMAN_VERIFIED + TESTED_IN_SIMULATOR",
+          "basis": "world-nullifier-digest",
+          "expectedSeatHash": "0xefaf4efd0fbb44c30f7640d091ad9815fc383a4e4c877d7faa61e571a738fba3",
+          "serverOnchainStatus": "VERIFIED",
+          "txHash": "0x4c123b4f9e3e4d93fb25b9abeaadb69a94a1ad1aa6c37f508bcc5bb00e29cec2",
+          "receipt": {
+            "status": "success",
+            "blockNumber": "12418426",
+            "blockHash": "0x92aea4c2fad6672755ffa722d401c6369251647c45bb2e2d2e7772ec1e89f850"
+          },
+          "onchainEventHash": "0xefaf4efd0fbb44c30f7640d091ad9815fc383a4e4c877d7faa61e571a738fba3",
+          "eventHashMatchesExpected": true,
+          "isSeatAtLatest": true
+        },
+        {
+          "wallet": "0x1711c70699d3d2040861677a277c365c9c283454",
+          "label": "ravi",
+          "evidenceLabel": "MOCK_ONLY demo override (not World ID)",
+          "basis": "demo-override-hash",
+          "expectedSeatHash": "0xa512e12b3274d4a4076a800f4efbe271c6b3af48c9217494a7f18a653d1605dc",
+          "serverOnchainStatus": "VERIFIED",
+          "txHash": "0x2d1859763c7b5b621fc251e37b3d60c81b1242bdc7cb5411118be2045a7728de",
+          "receipt": {
+            "status": "success",
+            "blockNumber": "12418471",
+            "blockHash": "0x7b1cf25f4933722243338a33f028e4ad7f1a81d585cd9d5ebed998a76a786895"
+          },
+          "onchainEventHash": "0xa512e12b3274d4a4076a800f4efbe271c6b3af48c9217494a7f18a653d1605dc",
+          "eventHashMatchesExpected": true,
+          "isSeatAtLatest": true
+        }
+      ]
+    }
+  }
+}
