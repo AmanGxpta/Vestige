@@ -60,14 +60,19 @@ test('two authenticated owners sign the stored proposal and a stale nonce clears
   assert.equal(f.db.get('SELECT count(*) n FROM treasury_signatures').n,0);assert.equal(f.sends.length,0);
  }finally{f.close();}
 });
-test('Next route wrapper forwards authentication and never bypasses the service',async()=>{
- const f=setup();const old=process.env.VESTIGE_AUTH_URI;
- try{
-  const {registerTreasuryRuntime}=await import('../../src/modules/treasury/runtime.mjs');registerTreasuryRuntime(f.service);process.env.VESTIGE_AUTH_URI='http://localhost:3200';
-  const {POST}=await import('../../app/api/treasury/ventures/[id]/payments/route.ts');
-  const res=await POST(f.request({recipient:addr(600),amountRaw:'1',reason:'route wrapper'}),{params:Promise.resolve({id:ventureId})});assert.equal(res.status,200);
-  registerTreasuryRuntime(null);
- }finally{if(old===undefined)delete process.env.VESTIGE_AUTH_URI;else process.env.VESTIGE_AUTH_URI=old;f.close();}
+test('every Next treasury wrapper delegates to dispatch with root readiness inside the fail-closed boundary',async()=>{
+ // The composed wrapper imports H's @/ alias and C1 TypeScript, which plain Node cannot load;
+ // dispatch+prepare behavior is exercised in the readiness test below.
+ const {readFile}=await import('node:fs/promises');
+ const expected={'ventures/[id]/route.ts':['GET','read'],'ventures/[id]/deploy/route.ts':['POST','deploy'],'ventures/[id]/fund/route.ts':['POST','fund'],
+  'ventures/[id]/payments/route.ts':['POST','payments'],'ventures/[id]/payments/[pid]/sign/route.ts':['POST','sign'],'ventures/[id]/payments/[pid]/execute/route.ts':['POST','execute']};
+ for(const [path,[method,action]] of Object.entries(expected)){
+  const src=await readFile(new URL('../../app/api/treasury/'+path,import.meta.url),'utf8');
+  assert.match(src,/^import \{ services \} from "@\/src\/shared\/composition";$/m,path);
+  assert.deepEqual([...src.matchAll(/export async function (\w+)/g)].map(m=>m[1]),[method],path);
+  assert.ok(src.includes(`return dispatchTreasuryRequest(req, "${action}", await ctx.params, services);`),path);
+  assert.ok(!/await services\(\)/.test(src),path+' must not await root readiness outside dispatch');
+ }
 });
 
 test('a pending off-chain seat cannot propose even if the chain has its wallet',async()=>{
