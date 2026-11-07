@@ -1,0 +1,64 @@
+{
+  "kind": "UNAPPROVED_BUILD_REVIEW",
+  "sourceCommit": "10af5047c9730175d35f62e788c392a56717e3cc",
+  "chainId": 1874,
+  "compiler": "v0.8.24+commit.e11b9ed9",
+  "optimizerRuns": 200,
+  "evmVersion": "paris",
+  "broadcastAuthorized": false,
+  "deployments": [
+    {
+      "contract": "contracts/SeatRegistry.sol:SeatRegistry",
+      "sourceSha256": "a06551c3a673e3e4afe871814b1016bb551801febb491e4f56433988c9ed125b",
+      "constructorArgs": [
+        "0x84068C51A9236A869E5F05FBA96323E97597DDEd"
+      ],
+      "encodedConstructorArgs": "0x00000000000000000000000084068c51a9236a869e5f05fba96323e97597dded",
+      "creationBytecodeKeccak256": "0xcd87a6dd6244b5a81563f18bfcd8b580b9c69f4421a87a7f71838808617a37a1",
+      "initCodeKeccak256": "0xc45ff6c2d7fa0c03ee852ab1a1a9a2d8a7ed00a7b70e9cc91f12bda7a81ee6d0",
+      "compiledRuntimeTemplateKeccak256": "0x88e6e1eb607de9b6b7e7a216b503a5e6b463db698e5f6aa91829dce948a92083",
+      "immutableReferences": {
+        "106": [
+          {
+            "start": 159,
+            "length": 32
+          },
+          {
+            "start": 324,
+            "length": 32
+          }
+        ]
+      }
+    },
+    {
+      "contract": "contracts/SafeSetup.sol:SafeSetup",
+      "sourceSha256": "99b6728302694e5b505819440581ca07acae0c495b6292a2fe37af7fff7fa1b5",
+      "constructorArgs": [
+        "0x29fcB43b46531BcA003ddC8FCB67FFE91900C762"
+      ],
+      "encodedConstructorArgs": "0x00000000000000000000000029fcb43b46531bca003ddc8fcb67ffe91900c762",
+      "creationBytecodeKeccak256": "0x76ed7805fa60d6e213aec4a3aa5e550fd111340afaca7f97b6e35753b22f40d3",
+      "initCodeKeccak256": "0x5b593af29b3ea5d22ab83d04043639224f42e0392ae71824e57ebc96a0782b16",
+      "compiledRuntimeTemplateKeccak256": "0xe5eeb040ed08eb3a9116619c79f15f30c047ac83830a5b7225248145459824b3",
+      "immutableReferences": {
+        "9": [
+          {
+            "start": 166,
+            "length": 32
+          }
+        ],
+        "11": [
+          {
+            "start": 94,
+            "length": 32
+          },
+          {
+            "start": 299,
+            "length": 32
+          }
+        ]
+      }
+    }
+  ],
+  "warning": "Runtime template hashes are not live code hashes: constructor immutables must be read from actual deployed code."
+}

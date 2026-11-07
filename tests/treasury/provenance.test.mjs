@@ -19,3 +19,10 @@ test('reverted creation subtrees and unavailable traces never establish deployme
  await assert.rejects(verifyManifestProvenance(client,m),/MANIFEST_CREATION_UNPROVEN/);
  client.request=async()=>{throw new Error('trace unavailable');};await assert.rejects(verifyManifestProvenance(client,m),/MANIFEST_CREATION_UNPROVEN/);
 });
+test('direct creation receipts bind each asset without requiring debug tracing',async()=>{
+ const {m,client}=fixture(),addresses=new Map();let i=1;
+ for(const a of [...Object.values(m.contracts),m.contracts.token.implementation]){a.deploymentTxHash='0x'+String(i++).padStart(64,'0');addresses.set(a.deploymentTxHash,a.address);}
+ client.getTransactionReceipt=async({hash})=>({status:'success',blockNumber:1n,blockHash,contractAddress:addresses.get(hash)});
+ client.request=async()=>{throw new Error('direct deployment must not need tracing');};
+ assert.deepEqual(await verifyManifestProvenance(client,m),{infrastructure:true});
+});

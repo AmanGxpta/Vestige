@@ -22,6 +22,8 @@ simulation review; observed gas price was 5.001 gwei, not an approved gas-price 
 Regenerate read-only immediately before approval:
 
 ```sh
+forge build
+node script/treasury/build-review.mjs
 node script/treasury/infrastructure-review.mjs
 node script/treasury/public-funding-read.mjs
 ATTESTER_ADDRESS=0x84068C51A9236A869E5F05FBA96323E97597DDEd forge script script/treasury/DeployInfrastructure.s.sol:DeployInfrastructure --rpc-url "$WHITECHAIN_RPC_URL" --sender 0x10d8C1d6359F0694203924182d3da83843a4e052 --non-interactive
@@ -31,6 +33,10 @@ No keystore and no broadcast flag are present. If simulation fails, record failu
 do not skip checks or report deployment. H must separately approve exact signing
 parameters and bounded wallet exposure before any actual deployment command is used.
 No live deployment command is granted by this packet.
+
+build-review.mjs prints exact public constructor/init-code digests from the compiled
+artifacts for H's approval binding. Runtime template hashes contain unresolved
+constructor immutables and must never be copied into a live manifest as code hashes.
 
 X ran this unsigned simulation successfully: 2564488 estimated total gas;
 estimated fee 0.025644880002564488 WBT at max fee 10.000000001 gwei. These are
@@ -71,6 +77,15 @@ fields reject enabling. Alerts must be tested for delivery and failure; kill swi
 actual sender/nonce, simulation, rate/budget and fee drift gates remain mandatory.
 The fee record must bind limitsDigest and actual measurements, and cannot use Anvil's
 local fee values. A finite L1 reserve is not a mathematical total-fee cap.
+
+The future opaque signer must independently check chain 1874, its exact public
+role address, zero native value, approved token/registered Safe targets, allowed
+selectors, reviewed nonce and gas/fee ceilings before signing. It must not accept
+arbitrary calldata from HTTP, deployments or the deliberate one-signature attempt.
+Use one process/nonce owner and persistent reservations; restart with an uncertain
+nonce requires reviewed reconciliation, never automatic resubmission. Attester
+transport is separate, restricted to the reviewed Registry.attestSeat input only;
+its gas/fee envelope still needs simulation/approval. No signer loader is installed.
 
 ## Genuine manifest publication and C1/C2 handoff — conditional future step
 
