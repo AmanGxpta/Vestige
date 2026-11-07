@@ -110,7 +110,7 @@ export interface VestigeClient {
   /** POST /api/treasury/ventures/:id/deploy {} */
   deployTreasury(ventureId: VentureId, input: { wallet: Address }): Promise<Result<TreasuryState>>;
   /** EIP-3009 authorization → POST /api/treasury/ventures/:id/fund */
-  fundTreasury(ventureId: VentureId, input: { from: Address; to: Address; amountRaw: string }, sign: TypedDataSigner): Promise<Result<TreasuryState>>;
+  fundTreasury(ventureId: VentureId, input: { from: Address; to: Address; amountRaw: string; ensName?: string }, sign: TypedDataSigner): Promise<Result<TreasuryState>>;
   /** POST /api/treasury/ventures/:id/payments { recipient, amountRaw, reason } */
   proposePayment(ventureId: VentureId, input: { recipient: Address; amountRaw: string; reason: string; wallet: Address }): Promise<Result<TreasuryState>>;
   /** Safe typed data from the proposal → POST /api/treasury/ventures/:id/payments/:pid/sign { signature } */

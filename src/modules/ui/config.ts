@@ -7,7 +7,8 @@
  *   NEXT_PUBLIC_WHITECHAIN_RPC_URL
  *   NEXT_PUBLIC_WHITECHAIN_EXPLORER_URL
  *   NEXT_PUBLIC_ENS_UNIVERSAL_RESOLVER
- *   NEXT_PUBLIC_VESTIGE_DEPLOYMENT_MANIFEST_URL  reviewed DeploymentManifestV1 (Guard/Registry/token come from here)
+ *   NEXT_PUBLIC_VESTIGE_DEPLOYMENT_MANIFEST_URL  reviewed DeploymentManifestV1; may contain "{ensName}" (CR-C2-008),
+ *                                                e.g. "/manifests/{ensName}.json" → public/manifests/<name>.json
  *
  * The per-address env vars C2 proposed earlier (guard/registry/USDT/rejected tx) were
  * replaced by the manifest and receipt-backed evidence records; they are gone.

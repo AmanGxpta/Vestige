@@ -13,7 +13,7 @@ import { AuthService } from "./auth";
 import { migrateIdentity, SqliteDb } from "./db";
 import { EnsReader, ViemEnsRegistrar } from "./ens/registrar";
 import type { IdentityServices } from "./http";
-import { ApprovalGatedEnsPort, UnconfiguredPort, type EnsPort, type SeatAttestationPort } from "./ports";
+import { ApprovalGatedEnsPort, UnconfiguredPort, type EnsPort, type SeatAttestationPort, type TreasurySummaryPort } from "./ports";
 import { VentureService } from "./ventures";
 import type { WorldConfig } from "./world";
 import { ENS_KEYS } from "./config";
@@ -51,6 +51,9 @@ export function worldConfigFromEnv(env: NodeJS.ProcessEnv): WorldConfig | null {
 }
 
 /** X injects its SeatRegistry attester here at integration (CR-ID-03, the only seam). */
+let treasuryOverride: TreasurySummaryPort | undefined;
+export function registerTreasurySummary(p: TreasurySummaryPort) { treasuryOverride = p; singleton = null; }
+
 let attesterOverride: SeatAttestationPort | null = null;
 export function registerSeatAttester(p: SeatAttestationPort) {
   attesterOverride = p;
@@ -82,7 +85,7 @@ export function getIdentityServices(env: NodeJS.ProcessEnv = process.env): Ident
     }
   }
 
-  const ventures = new VentureService({ db, world, attester: attesterOverride ?? new UnconfiguredPort("SeatRegistry attester"), ens, parentName });
+  const ventures = new VentureService({ db, world, treasury: treasuryOverride, attester: attesterOverride ?? new UnconfiguredPort("SeatRegistry attester"), ens, parentName });
   if (reader) {
     const r = reader;
     ventures.checks = {

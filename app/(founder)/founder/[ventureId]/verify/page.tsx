@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { AdapterErrorNotice, Button, Card, HashLink, Notice, StatusPill } from "@/components/ui";
 import { SeatList } from "@/components/SeatList";
+import { Icon } from "@/components/brand";
 import { useVestige } from "@/src/modules/ui/provider";
 import { attestedSeats, seatFor } from "@/src/modules/ui/progress";
 import { useAction } from "@/src/modules/ui/useAction";
@@ -36,23 +37,37 @@ export default function VerifyPage() {
 
   return (
     <>
-      <Card title="Prove you're a unique human" testId="card-verify">
+      <Card testId="card-verify">
         <div className="stack">
-          <p>
-            A 2-of-2 treasury only protects a funder if the two signers are <strong>two different people</strong>. Before you take a seat, you prove
-            with World ID that you haven&apos;t already taken one in {v.displayName}.
-          </p>
-          <div className="grid-2 small">
-            <div className="stack-sm">
-              <strong>Why Proof of Human — and nothing more</strong>
-              <span className="muted">
-                The question is &ldquo;are these two distinct people?&rdquo;, not &ldquo;who are they?&rdquo;. Proof of Human answers exactly that. A
-                passport check would collect far more personal data than this needs.
-              </span>
+          <div className="verify-hero">
+            <div className="page-head" style={{ alignItems: "center" }}>
+              <h1>Verify as a real human</h1>
+              <p style={{ maxWidth: "52ch" }}>
+                Each founder proves they&apos;re a unique human with World ID. The same person can&apos;t take both seats in {v.displayName} — that is what
+                makes a 2-of-2 treasury mean two people.
+              </p>
             </div>
-            <div className="stack-sm">
-              <strong>What becomes public</strong>
-              <span className="muted">Only that seat {seat ? <span className="mono">{seat.founderSubname}</span> : "this seat"} is held by a verified unique human. No name, no document, no raw nullifier.</span>
+            <div className="orb" aria-hidden />
+            <strong style={{ fontSize: 17 }}>Verify with World ID</strong>
+            <div className="verify-props">
+              <div>
+                <span className="ico">
+                  <Icon name="user" />
+                </span>
+                Proves you&apos;re a real human — Proof of Human, nothing more
+              </div>
+              <div>
+                <span className="ico">
+                  <Icon name="users" />
+                </span>
+                Ensures one person, one seat in this venture
+              </div>
+              <div>
+                <span className="ico">
+                  <Icon name="lock" />
+                </span>
+                Private: only your seat is marked verified. No name, no document.
+              </div>
             </div>
           </div>
 
@@ -107,9 +122,9 @@ export default function VerifyPage() {
                 </Notice>
               )}
               {action.error && !duplicate && <AdapterErrorNotice error={action.error} />}
-              <div>
-                <Button onClick={verify} loading={action.busy} disabledReason={disabledReason} data-testid="verify-start">
-                  {duplicate || action.cancelled ? "Try again" : "Verify with World ID"}
+              <div style={{ display: "flex", justifyContent: "center" }}>
+                <Button onClick={verify} loading={action.busy} disabledReason={disabledReason} data-testid="verify-start" className="btn-lg">
+                  {duplicate || action.cancelled ? "Try again" : "Verify with World ID"} <Icon name="globe" size={17} />
                 </Button>
               </div>
             </div>

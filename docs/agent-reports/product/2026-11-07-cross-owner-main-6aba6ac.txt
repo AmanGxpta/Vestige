@@ -1,0 +1,39 @@
+
+ RUN  v4.1.12 /Users/amang/Code/NovemberRush/ethglobal/vestige/vestige-product
+
+stdout | tests/e2e/cross-owner/cross-owner.test.ts > cross-owner (X default v0 readback) > journey with real handlers and shared SQLite
+mode=v0
+1 sign-in A/B/F via C1 challenge+session: ok
+2 create northstar.vestige.eth 0x3be5d2a1…, invite, join: ok; reused invite → NOT_READY
+3 listing: A only → 0 listed; A+B → 1 listed; consents=[true,true]; treasuryActive=null (CR-ID-05 not registered → null)
+4 World (MOCK portal, env=staging): dup → "This human already holds a seat in Northstar Labs."; seats VERIFIED/VERIFIED/staging,VERIFIED/VERIFIED/staging (CR-C2-006 delivered)
+5 terms: C2 preview == C1 docHash 0xeafaeffdc8e3da26f55a5247690f6a53c59fbff5f9f79e23a92bedcdf2060914; v1 complete; v2 reset (0 sigs); stale v1 → VERSION_SUPERSEDED
+6 treasury: unconfigured → BLOCKED; no manifest → treasury undefined (UNKNOWN); manifest → ACTIVE (LOCAL_FIXTURE_CHAIN) worldSource=TESTED_IN_SIMULATOR block=12345; X & C2 manifest validators agree on 1 valid + 3 invalid
+6b deploy → Deployment request recorded. No transaction is sent until the operator approves the exact deployment. [operation da4419fe-6fbc-4cdf-b195-d4a17bfd4bda · RESERVED]
+7 fund 1,000 USDT: X recovered C2's EIP-3009 signature and relayed via fixture IO (sends=1); readback deposits=0 depositsStatus=n/a (v0) (UI reads balance/deposits from chain)
+8 execute with 1 of 2 approvals → RELAYER_REFUSED "vestige refused to send this payment: it does not have both founders' approvals. Nothing was submitted and no gas was spent." (no send)
+8a v0: founder B (other browser) → BLOCKED — readback carries no payload (CR-X-002 not yet the default)
+
+ ✓ tests/e2e/cross-owner/cross-owner.test.ts > cross-owner (X default v0 readback) > journey with real handlers and shared SQLite 229ms
+stdout | tests/e2e/cross-owner/cross-owner.test.ts > cross-owner (X CR-X-002 candidate readback) > journey with real handlers and shared SQLite
+mode=v1
+1 sign-in A/B/F via C1 challenge+session: ok
+2 create northstar.vestige.eth 0x8f3f9f9e…, invite, join: ok; reused invite → NOT_READY
+3 listing: A only → 0 listed; A+B → 1 listed; consents=[true,true]; treasuryActive=null (CR-ID-05 not registered → null)
+4 World (MOCK portal, env=staging): dup → "This human already holds a seat in Northstar Labs."; seats VERIFIED/VERIFIED/staging,VERIFIED/VERIFIED/staging (CR-C2-006 delivered)
+5 terms: C2 preview == C1 docHash 0x77655f6f53e4bfb56335f32faddc51d9ca6b8413cf7d8fe1a9c49361781c2451; v1 complete; v2 reset (0 sigs); stale v1 → VERSION_SUPERSEDED
+6 treasury: unconfigured → BLOCKED; no manifest → treasury undefined (UNKNOWN); manifest → ACTIVE (LOCAL_FIXTURE_CHAIN) worldSource=TESTED_IN_SIMULATOR block=12345; X & C2 manifest validators agree on 1 valid + 3 invalid
+6b deploy → Deployment request recorded. No transaction is sent until the operator approves the exact deployment. [operation f2f1eaf2-18ff-4019-b684-3febfdeb0315 · RESERVED]
+7 fund 1,000 USDT: X recovered C2's EIP-3009 signature and relayed via fixture IO (sends=1); readback deposits=0 depositsStatus=UNKNOWN (UI reads balance/deposits from chain)
+8 execute with 1 of 2 approvals → RELAYER_REFUSED "vestige refused to send this payment: it does not have both founders' approvals. Nothing was submitted and no gas was spent." (no send)
+8b v1: fresh founder-B adapter reloads safeTypedData + signerWallets, approves, READY 2/2, execute relays (sends=2) → EXECUTED; stale/terminal safeTypedData=null (unsignable)
+8c v1 public read: payments=0, balance=unknown, depositsStatus=UNKNOWN, evidence=0 (no mined GS020)
+9 public summary humans=2 (env=staging/staging), FOUNDER_VERIFIED events qualified TESTED_IN_SIMULATOR=2; logout DELETE → 204 and session cleared
+
+ ✓ tests/e2e/cross-owner/cross-owner.test.ts > cross-owner (X CR-X-002 candidate readback) > journey with real handlers and shared SQLite 56ms
+
+ Test Files  1 passed (1)
+      Tests  2 passed (2)
+   Start at  05:30:53
+   Duration  894ms (transform 112ms, setup 0ms, import 519ms, tests 286ms, environment 0ms)
+
