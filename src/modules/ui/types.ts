@@ -59,6 +59,11 @@ export type FounderSeat = {
   attestationTxHash?: Hex;
   /** CR-C2-006 (proposed): which World environment verified this seat. Unknown → treated as unconfirmed. */
   worldEnvironment?: WorldEnvironment;
+  /**
+   * CR-ID-06: an OPERATOR marked this seat ready (demo override). It may act (sign/own) but is
+   * NOT World-verified: never HUMAN_VERIFIED, never counted as a human.
+   */
+  demoOverride?: true;
 };
 
 export type AgreementSignature = {
@@ -214,6 +219,8 @@ export type PublicOffchainEvidence = {
     verifiedAt?: string;
     /** CR-C2-006 (proposed). */
     worldEnvironment?: WorldEnvironment;
+    /** CR-ID-06 operator demo override — SELF_REPORTED, not a human proof. */
+    demoOverride?: true;
   }[];
   agreement?: {
     version: number;

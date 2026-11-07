@@ -53,6 +53,8 @@ type C1Seat = {
   subnameStatus: ReadStatus;
   attestationTxHash?: Hex;
   worldEnvironment?: WorldEnvironment;
+  /** CR-ID-06: operator demo override (seat may act; not World-verified). */
+  demoOverride?: true;
 };
 type C1Venture = {
   ventureId: VentureId;
@@ -81,7 +83,7 @@ type C1Agreement = {
 type C1Public = {
   ensName: string;
   ventureId: VentureId;
-  founders: { subname: string; wallet: Address; humanVerified: boolean; onchainSeatStatus: ReadStatus; attestationTxHash?: Hex; subnameStatus: ReadStatus; worldEnvironment?: WorldEnvironment }[];
+  founders: { subname: string; wallet: Address; humanVerified: boolean; onchainSeatStatus: ReadStatus; attestationTxHash?: Hex; subnameStatus: ReadStatus; worldEnvironment?: WorldEnvironment; demoOverride?: true }[];
   humansVerified: number;
   agreement: null | { version: number; docHash: Hex; signedBy: Address[]; requiredSigners: number; complete: boolean; ensRecordStatus: ReadStatus };
   events: { kind: string; label: EvidenceLabel; status: ReadStatus; chainId?: number; txHash?: Hex; blockNumber?: number; at: string; source?: string }[];
@@ -277,6 +279,7 @@ export function createLiveAdapter(deps: LiveDeps = {}): VestigeClient {
     subnameStatus: s.subnameStatus,
     ...(s.attestationTxHash ? { attestationTxHash: s.attestationTxHash } : {}),
     ...(s.worldEnvironment ? { worldEnvironment: s.worldEnvironment } : {}),
+    ...(s.demoOverride === true ? { demoOverride: true as const } : {}),
   });
 
   const toAgreement = (a: C1Agreement): Agreement => ({
@@ -667,7 +670,9 @@ export function toPublic(p: C1Public): PublicOffchainEvidence {
     founders: p.founders.map((f) => ({
       founderSubname: f.subname,
       wallet: f.wallet,
-      worldProofStatus: f.humanVerified ? "VERIFIED" : "UNKNOWN",
+      // CR-ID-06: an override is never a human proof, whatever else the payload says.
+      worldProofStatus: f.humanVerified && f.demoOverride !== true ? "VERIFIED" : "UNKNOWN",
+      ...(f.demoOverride === true ? { demoOverride: true as const } : {}),
       onchainSeatStatus: f.onchainSeatStatus,
       ...(f.attestationTxHash ? { attestationTxHash: f.attestationTxHash } : {}),
       ...(envByWallet.get(f.wallet.toLowerCase()) ? { worldEnvironment: envByWallet.get(f.wallet.toLowerCase()) } : {}),

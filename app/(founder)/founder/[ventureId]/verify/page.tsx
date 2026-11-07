@@ -71,7 +71,12 @@ export default function VerifyPage() {
             </div>
           </div>
 
-          {seat?.worldProofStatus === "VERIFIED" ? (
+          {seat?.demoOverride ? (
+            <Notice tone="mock" title="Demo override — not World-verified" testId="verify-override">
+              An operator marked this seat ready for the demo (CR-ID-06) so the terms and treasury flow can be shown. No World ID proof exists for it, it is
+              labelled SELF_REPORTED, and it is not counted as a human here or in the ENS <span className="mono">vestige.humans</span> record.
+            </Notice>
+          ) : seat?.worldProofStatus === "VERIFIED" ? (
             <div className="stack">
               <Notice
                 tone={v.source === "DEV_MOCK" || env !== "production" ? "mock" : "success"}

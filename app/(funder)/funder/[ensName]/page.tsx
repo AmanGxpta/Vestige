@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { AdapterErrorNotice, Button, Card, CheckIcon, Field, HashLink, HumanBadge, LoadingCard, Notice, SignInNotice, StatusPill } from "@/components/ui";
+import { AdapterErrorNotice, Button, Card, CheckIcon, Field, HashLink, HumanBadge, LoadingCard, OverrideBadge, Notice, SignInNotice, StatusPill } from "@/components/ui";
 import { RelayerExplainer } from "@/components/RelayerExplainer";
 import { ADAPTER_KIND, CONFIG } from "@/src/modules/ui/config";
 import { formatTokenAmount, parseTokenAmount } from "@/src/modules/ui/format";
@@ -96,9 +96,14 @@ export default function FundVenturePage() {
                 {p && (
                   <span className="row" style={{ marginTop: 4 }}>
                     {p.founders
-                      .filter((f) => f.worldProofStatus === "VERIFIED")
+                      .filter((f) => f.worldProofStatus === "VERIFIED" && !f.demoOverride)
                       .map((f) => (
                         <HumanBadge key={f.founderSubname} source={p.source} worldEnvironment={f.worldEnvironment} />
+                      ))}
+                    {p.founders
+                      .filter((f) => f.demoOverride)
+                      .map((f) => (
+                        <OverrideBadge key={f.founderSubname} source={p.source} />
                       ))}
                   </span>
                 )}

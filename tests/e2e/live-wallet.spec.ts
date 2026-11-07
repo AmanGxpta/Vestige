@@ -92,7 +92,9 @@ test("live build: connect injected wallet, explicit switch both ways, honest ref
   // This server has no auth configuration (C1 routes absent, or present with CONFIG_MISSING) → sign-in is refused
   // honestly and the wallet is never asked to sign.
   await page.getByTestId("wallet-signin").click();
-  await expect(page.getByTestId("wallet-menu-error")).toContainText(/not deployed|CONFIG_MISSING|not configured|ORIGIN_FORBIDDEN/i);
+  // Since main 770bf00 the shared root composition throws ROOT_CONFIG_REQUIRED (bare HTTP 500) when server env
+  // is absent, instead of C1's CONFIG_MISSING envelope. Either way: an honest refusal and no signature request.
+  await expect(page.getByTestId("wallet-menu-error")).toContainText(/not deployed|CONFIG_MISSING|not configured|ORIGIN_FORBIDDEN|HTTP 5\d\d/i);
   expect((await walletCalls(page)).some((c) => c.method === "personal_sign")).toBe(false);
 });
 

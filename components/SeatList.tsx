@@ -1,6 +1,6 @@
 "use client";
 
-import { HashLink, HumanBadge, StatusPill } from "./ui";
+import { HashLink, SeatWorldBadge, StatusPill } from "./ui";
 import type { FounderSeat, DataSource, Address } from "@/src/modules/ui/types";
 import { shortHex } from "@/src/modules/ui/format";
 
@@ -20,7 +20,7 @@ export function SeatList({ seats, source, me }: { seats: FounderSeat[]; source: 
         </thead>
         <tbody>
           {seats.map((s) => (
-            <tr key={s.wallet} data-testid="seat-row" data-world={s.worldProofStatus} data-chain={s.onchainSeatStatus}>
+            <tr key={s.wallet} data-testid="seat-row" data-world={s.demoOverride ? "DEMO_OVERRIDE" : s.worldProofStatus} data-chain={s.onchainSeatStatus}>
               <td>
                 <div className="stack-sm" style={{ gap: 2 }}>
                   <span className="mono small">{s.founderSubname}</span>
@@ -30,8 +30,8 @@ export function SeatList({ seats, source, me }: { seats: FounderSeat[]; source: 
                 </div>
               </td>
               <td>
-                {s.worldProofStatus === "VERIFIED" ? (
-                  <HumanBadge source={source} worldEnvironment={s.worldEnvironment} />
+                {s.worldProofStatus === "VERIFIED" || s.demoOverride ? (
+                  <SeatWorldBadge seat={s} source={source} />
                 ) : (
                   <StatusPill status={s.worldProofStatus === "UNKNOWN" ? "NONE" : s.worldProofStatus} mock={source === "DEV_MOCK"}>{worldText[s.worldProofStatus]}</StatusPill>
                 )}
