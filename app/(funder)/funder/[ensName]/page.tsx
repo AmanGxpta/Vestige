@@ -12,6 +12,8 @@ import { useAdapterQuery, useVestige } from "@/src/modules/ui/provider";
 import { useAction } from "@/src/modules/ui/useAction";
 import { ok } from "@/src/modules/ui/adapter";
 import { resolveEnsVenture } from "@/src/modules/public-view/chain-reader";
+import { readChainVerdict } from "@/src/modules/public-view/chain-verdict";
+import type { TreasuryVerdict } from "@/src/modules/public-view/verdict";
 import { useChainTreasury } from "@/src/modules/ui/useChainTreasury";
 import type { Address, Hex, TreasuryState, VentureId } from "@/src/modules/ui/types";
 
@@ -45,6 +47,21 @@ export default function FundVenturePage() {
     };
   }, [ensName, pubVentureId]);
 
+  // ACTIVE on this page comes ONLY from independent chain reads (same verdict as /v/<name>), never from our API.
+  const [chainVerdict, setChainVerdict] = useState<TreasuryVerdict | "error" | null>(null);
+  useEffect(() => {
+    if (ADAPTER_KIND === "dev-mock") return;
+    let alive = true;
+    setChainVerdict(null);
+    readChainVerdict(ensName).then(
+      (r) => alive && setChainVerdict(r.verdict),
+      () => alive && setChainVerdict("error"),
+    );
+    return () => {
+      alive = false;
+    };
+  }, [ensName]);
+
   const ventureId: VentureId | undefined = ens.status === "ok" ? ens.ventureId : ADAPTER_KIND === "dev-mock" ? pubVentureId : undefined;
   const treasury = useAdapterQuery((c) => (ventureId ? c.getTreasury(ventureId) : Promise.resolve(ok<TreasuryState | null>(null))), [ventureId], {
     pollMs: (t) => (t && hasPending(undefined, t) ? 1200 : undefined),
@@ -60,7 +77,10 @@ export default function FundVenturePage() {
   const t = treasury.status === "ok" ? treasury.data : null;
   const tr = t?.treasury;
   const decimals = t?.tokenDecimals ?? 6;
-  const active = isTreasuryActive(tr);
+  const cv = chainVerdict && chainVerdict !== "error" ? chainVerdict : null;
+  const active = ADAPTER_KIND === "dev-mock" ? isTreasuryActive(tr) : cv?.state === "ACTIVE";
+  const cvPassed = cv ? cv.checks.filter((c) => c.kind !== "info" && c.status === "VERIFIED").length : 0;
+  const cvRequired = cv ? cv.checks.filter((c) => c.kind !== "info").length : 0;
   const rawAmt = parseTokenAmount(amount, decimals);
   const mock = ADAPTER_KIND === "dev-mock";
   const target: Address | undefined = ens.status === "ok" ? ens.safe : mock ? tr?.safeAddress : undefined;
@@ -120,24 +140,41 @@ export default function FundVenturePage() {
               <span />
             </li>
             <li>
-              <CheckIcon status={ens.status === "ok" ? "VERIFIED" : ens.status === "failed" ? "FAILED" : mock ? "NONE" : "PENDING"} />
+              <CheckIcon status={ens.status === "ok" ? "VERIFIED" : ens.status === "failed" ? (/has no Whitechain treasury address/.test(ens.reason) ? "UNKNOWN" : "FAILED") : mock ? "NONE" : "PENDING"} />
               <span>
                 <strong className="small">Destination resolved from ENS</strong>
                 <br />
                 <span className="small muted" data-testid="funder-ens-status">
-                  {mock ? "DEV MOCK: names are not on Sepolia; the mock treasury record is used." : ens.status === "ok" ? `Safe and ventureId read from ${ensName} on Sepolia` : ens.status === "failed" ? ens.reason : "Resolving on Sepolia…"}
+                  {mock ? "DEV MOCK: names are not on Sepolia; the mock treasury record is used." : ens.status === "ok" ? `Safe and ventureId read from ${ensName} on Sepolia` : ens.status === "failed" ? (/has no Whitechain treasury address/.test(ens.reason) ? `${ensName} resolves, but no treasury is linked to it yet` : ens.reason) : "Resolving on Sepolia…"}
                 </span>
               </span>
               <span />
             </li>
             <li>
-              <CheckIcon status={active ? (mock ? "VERIFIED" : "PENDING") : "UNKNOWN"} mock={mock} />
+              <CheckIcon status={active ? "VERIFIED" : mock ? "UNKNOWN" : chainVerdict === null ? "PENDING" : cv?.state === "NOT_ACTIVE" ? "FAILED" : "UNKNOWN"} mock={mock} />
               <span>
                 <strong className="small">2-of-2 treasury active on Whitechain</strong>
                 <br />
-                <span className="small muted">
-                  {active ? (mock ? "Simulated readback (DEV MOCK)" : "Reported by vestige's treasury readback — confirm it on the evidence page") : treasury.status === "error" ? "Treasury status unavailable" : "Not active yet"}
+                <span className="small muted" data-testid="funder-chain-verdict" data-state={mock ? "DEV_MOCK" : chainVerdict === "error" ? "ERROR" : (cv?.state ?? "LOADING")}>
+                  {mock
+                    ? active
+                      ? "Simulated readback (DEV MOCK)"
+                      : "Not active yet"
+                    : chainVerdict === null
+                      ? "Reading Sepolia and Whitechain…"
+                      : chainVerdict === "error"
+                        ? "Chain reads failed — try again"
+                        : active
+                          ? `Verified from chain reads only: ${cvPassed} of ${cvRequired} checks (ENS, Safe, Guard, SeatRegistry, code, USDT)`
+                          : cv?.state === "UNRESOLVED"
+                            ? "Not active: no treasury linked from ENS yet"
+                            : `Not active: ${cvPassed} of ${cvRequired} chain checks pass`}
                 </span>
+                {!mock && active && p?.founders.some((f) => f.demoOverride) && (
+                  <span className="small" style={{ display: "block" }} data-testid="funder-override-qualifier">
+                    One owner seat is a MOCK_ONLY demo override, not a World ID proof.
+                  </span>
+                )}
               </span>
               <span />
             </li>

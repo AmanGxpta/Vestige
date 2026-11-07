@@ -167,6 +167,7 @@ const KIND_MAP: Record<string, EvidenceKind> = {
   founder_joined: "FOUNDER_JOINED",
   founder_verified: "FOUNDER_VERIFIED",
   duplicate_human_refused: "DUPLICATE_REFUSED",
+  founder_demo_override: "DEMO_OVERRIDE",
   seat_attestation_submitted: "SEAT_ATTESTED",
   seat_attested: "SEAT_ATTESTED",
   agreement_version_created: "AGREEMENT_VERSION",
@@ -649,6 +650,7 @@ export function toPublic(p: C1Public): PublicOffchainEvidence {
     .filter((e) => KIND_MAP[e.kind])
     .map((e, i) => {
       const staging = e.source?.includes("staging");
+      const override = e.source?.includes("demo-override");
       return {
         id: `${i}-${e.kind}`,
         ventureId: p.ventureId,
@@ -660,7 +662,7 @@ export function toPublic(p: C1Public): PublicOffchainEvidence {
         ...(e.blockNumber !== undefined ? { blockNumber: e.blockNumber } : {}),
         confirmedAt: e.at,
         source: "API" as const,
-        ...(staging ? { qualifier: "TESTED_IN_SIMULATOR" as const } : {}),
+        ...(override ? { qualifier: "DEMO_OVERRIDE" as const } : staging ? { qualifier: "TESTED_IN_SIMULATOR" as const } : {}),
       };
     });
   return {

@@ -23,6 +23,7 @@ const KIND_TEXT: Record<EvidenceKind, string> = {
   FOUNDER_VERIFIED: "Founder verified as a unique human",
   SEAT_ATTESTED: "Seat attested on Whitechain",
   DUPLICATE_REFUSED: "Duplicate human refused a second seat",
+  DEMO_OVERRIDE: "Operator marked a seat ready (demo override, not World ID)",
   AGREEMENT_VERSION: "Agreement version created",
   AGREEMENT_SIGNED: "Agreement signed",
   SAFE_DEPLOYED: "Treasury Safe deployed",
@@ -104,6 +105,9 @@ export function PublicEvidenceView({ ensName, requestedSource }: { ensName: stri
   const offv = off?.ok ? off.value : undefined;
   const isMock = report?.source === "DEV_MOCK";
 
+  // CR-ID-06: an owner seat attested from the MOCK_ONLY demo-override hash is a real chain seat, not a World ID human.
+  const overrideOwners = (offv?.founders ?? []).filter((f) => f.demoOverride && f.wallet && w?.owners.value?.some((o) => o.toLowerCase() === f.wallet!.toLowerCase()));
+  const overrideFounders = (offv?.founders ?? []).filter((f) => f.demoOverride);
   const agreementOnEns = texts["vestige.agreement"];
   const agreementMatch = offv?.agreement && agreementOnEns ? agreementOnEns.toLowerCase() === offv.agreement.docHash.toLowerCase() : undefined;
 
@@ -163,6 +167,12 @@ export function PublicEvidenceView({ ensName, requestedSource }: { ensName: stri
           </div>
         </header>
         <div className="pv-overlap">
+      {overrideFounders.length > 0 && !isMock && (
+        <Notice tone="mock" title="One founder seat is a demo override (MOCK_ONLY)" testId="public-override-notice">
+          {overrideFounders.map((f) => f.founderSubname).join(", ")} was marked ready by an operator for the demo (CR-ID-06). It is not World-verified and is not counted
+          as a human{overrideOwners.length ? "; its on-chain seat was attested from a demo-override hash, not a World ID nullifier" : ""}. The chain checks below are real; this seat&apos;s humanity is not.
+        </Notice>
+      )}
       <ol className="card card-pad steps" aria-label="Verification order" style={{ listStyle: "none", margin: 0 }}>
         {(
           [
@@ -286,6 +296,11 @@ export function PublicEvidenceView({ ensName, requestedSource }: { ensName: stri
                             <strong className="small">{c.label}</strong>
                             <br />
                             <span className="small muted">{c.detail}</span>
+                            {c.id === "seats" && overrideOwners.length > 0 && (
+                              <span className="small" style={{ display: "block", color: "var(--warn, #8a5a00)" }} data-testid="seats-override-qualifier">
+                                {overrideOwners.length} owner seat{overrideOwners.length > 1 ? "s were" : " was"} attested from a MOCK_ONLY demo-override hash — not a World ID proof.
+                              </span>
+                            )}
                           </span>
                           {c.status === "VERIFIED" && !isMock ? <EvidenceBadge label="CHAIN_VERIFIED" source="CHAIN" /> : isMock && c.status === "VERIFIED" ? <EvidenceBadge label="CHAIN_VERIFIED" source="DEV_MOCK" /> : null}
                         </li>
@@ -436,14 +451,16 @@ export function PublicEvidenceView({ ensName, requestedSource }: { ensName: stri
           </div>
 
           <aside className="stack" style={{ position: "sticky", top: 16 }}>
-            <Card title="Why a funder can trust this">
+            <Card title="What vestige checks">
               <div className="stack-sm small">
                 <p>
-                  <strong>Two people, not two keys.</strong> Each founder proved with World ID that they are a unique human. The same person cannot hold
-                  both seats.
+                  <strong>Two people, not two keys.</strong> A seat is meant to be written only after a World ID uniqueness check, so one person can&apos;t hold
+                  both seats. Section 3 shows what this venture actually has.
+                  {overrideFounders.length > 0 && <> Here, one seat is a labelled demo override with no World ID proof.</>}
                 </p>
                 <p>
-                  <strong>Neither can move money alone.</strong> The treasury is a Safe that needs both signatures, read live from Whitechain above.
+                  <strong>Neither can move money alone.</strong> The treasury is a Safe that needs both signatures, read live from Whitechain above
+                  {verdict?.state === "ACTIVE" ? "." : " once it is deployed and linked."}
                 </p>
                 <p>
                   <strong>The rule can&apos;t be quietly switched off.</strong> The vestige Guard rejects swapping an owner for an unverified wallet.
