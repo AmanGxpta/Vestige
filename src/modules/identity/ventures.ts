@@ -38,6 +38,8 @@ export interface FounderSeat {
    * show "DEMO OVERRIDE — not World-verified"; never HUMAN_VERIFIED.
    */
   demoOverride?: true;
+  /** What attestSeat writes as nullifierHash: the World digest, or the MOCK_ONLY demo-override hash. */
+  attestationBasis?: "world-nullifier-digest" | "demo-override-hash";
 }
 
 /** CR-C2-001 public list item: non-PII, cached, with provenance. */
@@ -142,7 +144,7 @@ export class VentureService {
         subnameStatus: s.subname_status as ReadStatus,
         ...(s.attestation_tx_hash ? { attestationTxHash: s.attestation_tx_hash as Hex } : {}),
         ...(envs.get(s.wallet) === "staging" || envs.get(s.wallet) === "production" ? { worldEnvironment: envs.get(s.wallet) as "staging" | "production" } : {}),
-        ...(overrides.has(s.wallet as Address) ? { demoOverride: true as const } : {}),
+        ...(overrides.has(s.wallet as Address) ? { demoOverride: true as const, attestationBasis: "demo-override-hash" as const } : envs.has(s.wallet) ? { attestationBasis: "world-nullifier-digest" as const } : {}),
       }));
     return {
       ventureId,
@@ -231,6 +233,23 @@ export class VentureService {
     const s = this.seat(ventureId, wallet);
     if (!s) fail("FORBIDDEN", "Only this venture's founders can do that.");
     return s;
+  }
+
+  /**
+   * Evidence source for SeatRegistry events. A demo-override seat is a real chain fact
+   * (isSeat=true) built on a NON-World hash; the source says so in every event and API view.
+   */
+  attestationSource(ventureId: string, wallet: Address): string {
+    return this.overriddenWallets(ventureId).includes(wallet)
+      ? "seat-registry:demo-override-hash (MOCK_ONLY — not World ID)"
+      : "seat-registry:world-nullifier-digest";
+  }
+
+  /** The exact bytes32 C1 passes to attestSeat for this seat (public digest, never the raw nullifier). */
+  expectedSeatHash(ventureId: Bytes32, wallet: Address): { basis: "world-nullifier-digest" | "demo-override-hash"; seatHash: Bytes32 } | null {
+    if (this.overriddenWallets(ventureId).includes(wallet)) return { basis: "demo-override-hash", seatHash: demoOverrideHash(ventureId, wallet) };
+    const n = this.d.db.get<{ nullifier: string }>("SELECT nullifier FROM identity_world_nullifiers WHERE venture_id = ? AND wallet = ?", ventureId, wallet);
+    return n ? { basis: "world-nullifier-digest", seatHash: nullifierHash(n.nullifier) } : null;
   }
 
   overriddenWallets(ventureId: string): Address[] {
@@ -407,13 +426,13 @@ export class VentureService {
       // CR-ID-04: only the keccak digest leaves C1; the raw nullifier never reaches X or the chain.
       const { txHash, chainId } = checkAttestSubmit(await this.d.attester.attestSeat({ ventureId, wallet, nullifierHash: seatHash }));
       this.d.db.run("UPDATE identity_seats SET attestation_tx_hash = ?, attestation_chain_id = ? WHERE venture_id = ? AND wallet = ?", txHash, chainId, ventureId, wallet);
-      this.event({ ventureId, kind: "seat_attestation_submitted", label: "CHAIN_VERIFIED", status: "PENDING", actor: wallet, chainId, txHash, source: "seat-registry" });
+      this.event({ ventureId, kind: "seat_attestation_submitted", label: "CHAIN_VERIFIED", status: "PENDING", actor: wallet, chainId, txHash, source: this.attestationSource(ventureId, wallet), detail: `seatHash ${seatHash}` });
       this.defer(() => this.refreshAttestation(ventureId, wallet).then(() => undefined));
       return { status: "PENDING" as ReadStatus, txHash };
     } catch (e) {
       // The human is verified off-chain; the on-chain seat is not. Never claim otherwise.
       this.d.db.run("UPDATE identity_seats SET onchain_status = 'FAILED' WHERE venture_id = ? AND wallet = ?", ventureId, wallet);
-      this.event({ ventureId, kind: "seat_attestation_failed", label: "CHAIN_VERIFIED", status: "FAILED", actor: wallet, source: "seat-registry", detail: (e as Error).message.slice(0, 200) });
+      this.event({ ventureId, kind: "seat_attestation_failed", label: "CHAIN_VERIFIED", status: "FAILED", actor: wallet, source: this.attestationSource(ventureId, wallet), detail: (e as Error).message.slice(0, 200) });
       return { status: "FAILED" as ReadStatus };
     }
   }
@@ -431,14 +450,14 @@ export class VentureService {
     if (c.state === "PENDING") return "PENDING";
     if (c.state === "FAILED") {
       this.d.db.run("UPDATE identity_seats SET onchain_status = 'FAILED' WHERE venture_id = ? AND wallet = ?", ventureId, wallet);
-      this.event({ ventureId, kind: "seat_attested", label: "CHAIN_VERIFIED", status: "FAILED", actor: wallet, txHash: s.attestation_tx_hash, source: "seat-registry", detail: c.reason });
+      this.event({ ventureId, kind: "seat_attested", label: "CHAIN_VERIFIED", status: "FAILED", actor: wallet, txHash: s.attestation_tx_hash, source: this.attestationSource(ventureId, wallet), detail: c.reason });
       return "FAILED";
     }
     this.d.db.run(
       "UPDATE identity_seats SET onchain_status = 'VERIFIED', attestation_block = ?, attested_at = ? WHERE venture_id = ? AND wallet = ?",
       Number(c.blockNumber), c.confirmedAt, ventureId, wallet,
     );
-    this.event({ ventureId, kind: "seat_attested", label: "CHAIN_VERIFIED", status: "VERIFIED", actor: wallet, chainId: c.chainId, txHash: s.attestation_tx_hash, blockNumber: c.blockNumber, confirmedAt: c.confirmedAt, source: "seat-registry" });
+    this.event({ ventureId, kind: "seat_attested", label: "CHAIN_VERIFIED", status: "VERIFIED", actor: wallet, chainId: c.chainId, txHash: s.attestation_tx_hash, blockNumber: c.blockNumber, confirmedAt: c.confirmedAt, source: this.attestationSource(ventureId, wallet) });
     return "VERIFIED";
   }
 

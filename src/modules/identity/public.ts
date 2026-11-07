@@ -26,6 +26,7 @@ export interface PublicIdentitySummary {
     worldEnvironment?: "production" | "staging";
     /** CR-ID-06: operator demo override — humanVerified is false and label is SELF_REPORTED. */
     demoOverride?: true;
+    attestationBasis?: "world-nullifier-digest" | "demo-override-hash";
   }[];
   humansVerified: number;
   agreement: null | {
@@ -82,6 +83,7 @@ export function publicSummary(db: SqlDb, ventures: VentureService, agreements: A
       subnameStatus: s.subnameStatus,
       ...(s.worldEnvironment ? { worldEnvironment: s.worldEnvironment } : {}),
       ...(s.demoOverride ? { demoOverride: true as const } : {}),
+      ...(s.attestationBasis ? { attestationBasis: s.attestationBasis } : {}),
     })),
     humansVerified: v.humansVerified,
     agreement: a
