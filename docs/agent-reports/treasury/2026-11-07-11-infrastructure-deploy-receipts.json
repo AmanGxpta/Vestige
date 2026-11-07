@@ -1,0 +1,93 @@
+{
+  "claim": "LIVE_TESTNET_RECEIPTS",
+  "chainId": 1874,
+  "approval": "H 2026-11-07: deploy SeatRegistry+SafeSetup exactly per 2026-11-07-10-approval-packet-refresh.json",
+  "sender": "0x10d8C1d6359F0694203924182d3da83843a4e052",
+  "deployments": {
+    "SeatRegistry": {
+      "constructorArg": "0x84068C51A9236A869E5F05FBA96323E97597DDEd",
+      "initCodeKeccak256": "0xc45ff6c2d7fa0c03ee852ab1a1a9a2d8a7ed00a7b70e9cc91f12bda7a81ee6d0",
+      "gasLimit": 329781,
+      "receipt": {
+        "type": "0x2",
+        "status": "0x1",
+        "cumulativeGasUsed": "0x49392",
+        "logs": [],
+        "logsBloom": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+        "transactionHash": "0x4b3303aaec451196264af6ef4faf0df072d24456311c99fec98cc97b6e72d6ff",
+        "transactionIndex": "0x1",
+        "blockHash": "0x772c0332dbdda1d3e038dcc7ac8e10397e42fd39c08412ae248eed2244ccaff5",
+        "blockNumber": "0xbd77f1",
+        "gasUsed": "0x3df38",
+        "effectiveGasPrice": "0x12a05f201",
+        "blobGasUsed": "0x49890",
+        "from": "0x10d8c1d6359f0694203924182d3da83843a4e052",
+        "to": null,
+        "contractAddress": "0xe91bf256afa7c5453e715c39ab2431ead492bcba"
+      },
+      "readback": {
+        "runtimeCodeHash": "0x70b492b840c8d5f3c3ef6c17f38ab12926d1ce4bbe4500209394b5c566a4db4c",
+        "attester()": "0x84068C51A9236A869E5F05FBA96323E97597DDEd"
+      }
+    },
+    "SafeSetup": {
+      "constructorArg": "0x29fcB43b46531BcA003ddC8FCB67FFE91900C762",
+      "initCodeKeccak256": "0x5b593af29b3ea5d22ab83d04043639224f42e0392ae71824e57ebc96a0782b16",
+      "gasLimit": 2234707,
+      "receipt": {
+        "type": "0x2",
+        "status": "0x1",
+        "cumulativeGasUsed": "0x1af12e",
+        "logs": [],
+        "logsBloom": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+        "transactionHash": "0xb8f34f2b425cd80ac512ee44d7cc18f9301a25a71a2223e0a79e4334e79f4adb",
+        "transactionIndex": "0x1",
+        "blockHash": "0x4ea3014efb724f8445f6bebd9b3c4f0e52e5ce8a911c03ff1aa2ef43aac7acf5",
+        "blockNumber": "0xbd77f7",
+        "gasUsed": "0x1a3cd4",
+        "effectiveGasPrice": "0x12a05f201",
+        "blobGasUsed": "0x150b80",
+        "from": "0x10d8c1d6359f0694203924182d3da83843a4e052",
+        "to": null,
+        "contractAddress": "0x153406cd0509e71d302ed49e787051bb98231558"
+      },
+      "readback": {
+        "runtimeCodeHash": "0xa28a95ebf012388ba5eaf564bc873f3d3b8da6eb69946ba29aa25d3a1721d35d",
+        "singleton()": "0x29fcB43b46531BcA003ddC8FCB67FFE91900C762"
+      }
+    }
+  },
+  "canonicalCheck": {
+    "atBlock": 12417031,
+    "12417009": "0x772c0332dbdda1d3e038dcc7ac8e10397e42fd39c08412ae248eed2244ccaff5",
+    "12417015": "0x4ea3014efb724f8445f6bebd9b3c4f0e52e5ce8a911c03ff1aa2ef43aac7acf5"
+  },
+  "deployerAfter": {
+    "wbt": "0.790133699997888051",
+    "nonce": 2
+  },
+  "canonicalCreationRecords": {
+    "source": "Blockscout explorer.testnet.whitechain.io API v2 (indexer, not RPC trace)",
+    "singleton": {
+      "tx": "0x4c296f740fe3fdd0bea056c40ee5522d00ea65e5a58a45304d9386429fb68f84",
+      "block": 2509810,
+      "internal": "create2"
+    },
+    "factory": {
+      "tx": "0xa1994d4c061ac168a223873875a0255d225165643dd0104dd4b6ed3f288abd24",
+      "block": 2509796,
+      "internal": "create2"
+    },
+    "token": {
+      "tx": "0xabf14f3df9f912b513edff9ec77fbfa9bf80ea5a5e9186e76f3e647df5b999f5",
+      "block": 10321991,
+      "receiptContractAddress": true
+    },
+    "tokenImplementation": {
+      "tx": "0xb73e02b23eacaea76bb2845ba5f71003095f7c498e378bd324e414e33a6406b9",
+      "block": 7957063,
+      "receiptContractAddress": true
+    },
+    "strictProvenance": "MANIFEST_CREATION_UNPROVEN (public RPC: debug_traceTransaction not whitelisted; historical state pruned)"
+  }
+}

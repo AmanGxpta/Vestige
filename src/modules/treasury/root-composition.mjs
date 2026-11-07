@@ -11,8 +11,14 @@ import {registerTreasuryRuntime} from './runtime.mjs';
 import {RpcIO} from '../relayer/rpc-io.mjs';
 import {createReviewedRelayer} from '../relayer/configured.mjs';
 import {readFile} from 'node:fs/promises';
-/** Read-only root composition. No summary port, signer, password or broadcast grant. */
-export function createRootComposition({identityModule,env,client,readbackVersion=0}){
+import {attesterSignerFromEnv} from './attester-signer.mjs';
+/**
+ * Root composition. Relay stays disabled (no relayer signer, authorizeSend:false).
+ * The ONLY broadcast grant is the H-approved attester transport: SeatRegistry.attestSeat
+ * from VESTIGE_ATTESTER_PRIVATE_KEY (server-only, never logged). Unset key => attestation disabled.
+ * CR-X-002 v1 readback is the default (C2 ACKed); readbackVersion:0 keeps the legacy shape.
+ */
+export function createRootComposition({identityModule,env,client,readbackVersion=1}){
  let ready;
  return {ready(){return ready ||= (async()=>{
   if(!env.VESTIGE_DB_PATH||!env.VESTIGE_AUTH_URI||!env.WHITECHAIN_RPC_URL)throw new Error('ROOT_CONFIG_REQUIRED');
@@ -33,7 +39,10 @@ export function createRootComposition({identityModule,env,client,readbackVersion
   }
   const publicClient=client||createPublicClient({transport:http(env.WHITECHAIN_RPC_URL)});
   const relay=createReviewedRelayer({env,io:new RpcIO({client:publicClient}),manifests:flat,token,authorizeSend:()=>false});
-  port=new SeatAttester({store,client:publicClient,registry:artifact?.contracts.registry,authorizeSend:async()=>false});
+  const registry=artifact?.contracts.registry;let signer=null,attesterMode='DISABLED';
+  try{signer=attesterSignerFromEnv(env,{client:publicClient,registry,expectedAddress:env.ATTESTER_ADDRESS});if(signer)attesterMode='ENABLED';}
+  catch(e){attesterMode=/^ATTESTER_[A-Z_]+$/.test(e?.message||'')?e.message:'ATTESTER_KEY_INVALID';} // Attestation-only failure; reads stay up.
+  port=new SeatAttester({store,client:publicClient,registry,attester:signer?.address,send:signer?.send,authorizeSend:async()=>signer!==null});
   const readConfirmedSeats=async(ventureId,wallets)=>{
    if(!artifact)return false;
    await verifyManifestProvenance(publicClient,artifact);
@@ -51,6 +60,6 @@ export function createRootComposition({identityModule,env,client,readbackVersion
   }
   registerTreasuryRuntime(treasury);
   // CR-ID-05 deliberately not injected. Actual C1 publicList keeps null summaries.
-  return {identity,treasury,store,seatAttester:port,client:publicClient,mode:'READ_ONLY'};
+  return {identity,treasury,store,seatAttester:port,client:publicClient,mode:'READ_ONLY',attesterMode};
  })();}};
 }
