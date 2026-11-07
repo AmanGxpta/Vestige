@@ -1,9 +1,9 @@
 {
   "label": "READ_ONLY_LIVE_READBACK",
-  "block": "12079721",
+  "block": "12079942",
   "parentName": "vestige.eth",
   "parentExpiry": "1825560312",
-  "ok": false,
+  "ok": true,
   "checks": [
     {
       "id": "parent-name-registered",
@@ -12,8 +12,8 @@
     },
     {
       "id": "P2-subregistry-points-to-parent",
-      "ok": false,
-      "detail": "getSubregistry(\"vestige\")=0x0000000000000000000000000000000000000000"
+      "ok": true,
+      "detail": "getSubregistry(\"vestige\")=0x61Dc50fE2099012bD1d0A684192071Ef51d7Aa73"
     },
     {
       "id": "P1-parent-has-code",
