@@ -1,0 +1,12 @@
+# C2 tests on agent/product = main f6a8858 + C2 (2026-11-07T01:37:53Z)
+typecheck errors: 0
+      Tests  115 passed | 3 skipped (118)
+      Tests  2 passed (2)
+  6 passed (1.1m)
+[1/1] [integration] › tests/e2e/integration-real.spec.ts:86:1 › integrated: real C1 auth/ventures/invite/listing/World gate + X treasury readback + public page
+[integration] › tests/e2e/integration-real.spec.ts:86:1 › integrated: real C1 auth/ventures/invite/listing/World gate + X treasury readback + public page
+[integration] public page: 0 of 2 founders · ens-unresolved=1
+  1 passed (4.3s)
+live ENS northstar:
+      Tests  1 passed | 1 skipped (2)
+real-env server (H .env.local, read-only snapshot of C1 DB, port 3400): GET /api/identity/public/northstar.vestige.eth → humans=1; aman HUMAN_VERIFIED staging seat 0x4c12…cec2; ravi SELF_REPORTED demoOverride seat 0x2d18…28de; X readback treasury=null UNKNOWN

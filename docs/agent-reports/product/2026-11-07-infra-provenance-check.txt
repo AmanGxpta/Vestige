@@ -1,0 +1,11 @@
+# C2 read-only provenance check of contracts/manifests/whitechain-1874/infrastructure.json against https://rpc.testnet.whitechain.io
+# at 2026-11-07T01:27:47.939589Z head block 12418500
+# Method: current runtime code keccak vs manifest; deployment receipt status/block; creation attribution from public data only (no trace, no archive state).
+registry             0xe91BF256Afa7c5453e715c39Ab2431EAd492bcBA code MATCH | tx status true block 12417009 (manifest 12417009) | creation: receipt.contractAddress == address (direct CREATE)
+setup                0x153406cd0509E71d302eD49E787051Bb98231558 code MATCH | tx status true block 12417015 (manifest 12417015) | creation: receipt.contractAddress == address (direct CREATE)
+singleton            0x29fcB43b46531BcA003ddC8FCB67FFE91900C762 code MATCH | tx status true block 2509810 (manifest 2509810) | creation: CREATE2 via 0x914d…43d7: keccak(0xff‖deployer‖salt‖keccak(initcode)) = 0x29fcb43b46531bca003ddc8fcb67ffe91900c762 → MATCH
+factory              0x4e1DCf7AD4e460CfD30791CCC4F9c8a4f820ec67 code MATCH | tx status true block 2509796 (manifest 2509796) | creation: CREATE2 via 0x914d…43d7: keccak(0xff‖deployer‖salt‖keccak(initcode)) = 0x4e1dcf7ad4e460cfd30791ccc4f9c8a4f820ec67 → MATCH
+token                0xcedfB56113143d55b2358b8CFbB0dEB5Ad2f55a7 code MATCH | tx status true block 10321991 (manifest 10321991) | creation: receipt.contractAddress == address (direct CREATE)
+tokenImplementation  0x26425662D126412128967ECf0a02EC48573026F7 code MATCH | tx status true block 7957063 (manifest 7957063) | creation: receipt.contractAddress == address (direct CREATE)
+registry.attester() = 0x84068C51A9236A869E5F05FBA96323E97597DDEd
+setup.singleton()   = 0x29fcB43b46531BcA003ddC8FCB67FFE91900C762
