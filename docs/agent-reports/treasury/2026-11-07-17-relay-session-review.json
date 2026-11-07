@@ -1,0 +1,32 @@
+{
+ "scope": "LIVE",
+ "chainId": 1874,
+ "reference": "H 2026-11-07 pre-approved northstar sequence steps 4-5; session-only relay; quotedL1FeeWei = measured receipt l1Fee (no pre-send quote recorded); per-send live quote still enforced against reserve",
+ "expiresAt": "2026-11-07T02:49:52.434Z",
+ "marginBps": 10000,
+ "limitsDigest": "e960e68ba594682d6d89eff0bdcaac3bbb9ffb9fcb1786c1aa9a6d760fbd7077",
+ "measurements": [
+  {
+   "txHash": "0x4b3303aaec451196264af6ef4faf0df072d24456311c99fec98cc97b6e72d6ff",
+   "blockHash": "0x772c0332dbdda1d3e038dcc7ac8e10397e42fd39c08412ae248eed2244ccaff5",
+   "l1FeeWei": "24874",
+   "evmFeeWei": "1268760000253752",
+   "quotedL1FeeWei": "24874"
+  },
+  {
+   "txHash": "0xb8f34f2b425cd80ac512ee44d7cc18f9301a25a71a2223e0a79e4334e79f4adb",
+   "blockHash": "0x4ea3014efb724f8445f6bebd9b3c4f0e52e5ce8a911c03ff1aa2ef43aac7acf5",
+   "l1FeeWei": "113815",
+   "evmFeeWei": "8597540001719508",
+   "quotedL1FeeWei": "113815"
+  },
+  {
+   "txHash": "0x93ef21464c92d8a903df9b885cc4801386b39d76f9d0808bf26e8f36b9116293",
+   "blockHash": "0x4b89b0e67c560ada7181e6705b9780eb97d44f48a55b83c2b558f741c0c57449",
+   "l1FeeWei": "8427",
+   "evmFeeWei": "5784015001156803",
+   "quotedL1FeeWei": "8427"
+  }
+ ],
+ "alerts": "SESSION_LOCAL_FILE_ONLY (no remote alert destination)"
+}
