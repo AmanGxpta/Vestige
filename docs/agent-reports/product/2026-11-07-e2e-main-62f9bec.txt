@@ -1,0 +1,41 @@
+# C2 browser E2E on agent/product = main 62f9bec + C2 override labels (2026-11-07T01:05:43Z)
+
+        pnpm exec playwright show-trace node_modules/.cache/vestige-e2e/live-wallet-live-build-con-5f41d-n-sign-in-is-not-configured-live/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+
+[4/6] [live] › tests/e2e/live-wallet.spec.ts:99:1 › live build: rejected network switch stays actionable
+[5/6] [live] › tests/e2e/live-wallet.spec.ts:109:1 › live build: signing founding terms requires an explicit switch to Sepolia; payload checked; C1-shaped fixtures
+[6/6] [live] › tests/e2e/live-wallet.spec.ts:184:1 › live build: public page and funder page read real Sepolia; unregistered name stays unresolved; no manifest → never ACTIVE
+  1 failed
+    [live] › tests/e2e/live-wallet.spec.ts:72:1 › live build: connect injected wallet, explicit switch both ways, honest refusal when sign-in is not configured 
+  5 passed (1.5m)
+
+[1/1] [integration] › tests/e2e/integration-real.spec.ts:86:1 › integrated: real C1 auth/ventures/invite/listing/World gate + X treasury readback + public page
+[integration] › tests/e2e/integration-real.spec.ts:86:1 › integrated: real C1 auth/ventures/invite/listing/World gate + X treasury readback + public page
+[integration] World outcome: BLOCKED: !
+Not connected yet
+World ID is not configured on this server. (server code CONFIG_MISSING)
+
+[integration] treasury page: Treasury | Set up the treasury | vestige deploys a Safe on Whitechain owned by both founders, with a 2-of-2 rule: every payment needs both of you. The vestige Guard is attached so the owners can only ever be verified-human seats. | You don't sign a transaction or pay gas — vestige's operator deploys it after H approves the exact parameters.
+
+[integration] public page: 0 of 2 founders · ens-unresolved=1
+
+  1 passed (4.9s)
+
+## rerun after accepting bare-500 refusal (ROOT_CONFIG_REQUIRED from src/shared/composition.ts, H) — no personal_sign asserted
+[3/4] [live] › tests/e2e/live-wallet.spec.ts:111:1 › live build: signing founding terms requires an explicit switch to Sepolia; payload checked; C1-shaped fixtures
+[4/4] [live] › tests/e2e/live-wallet.spec.ts:186:1 › live build: public page and funder page read real Sepolia; unregistered name stays unresolved; no manifest → never ACTIVE
+  4 passed (6.5s)
+
+## final run after override labels + workspace treasury note (2026-11-07T01:13:41Z)
+      Tests  2 passed (2)
+[6/6] [live] › tests/e2e/live-wallet.spec.ts:186:1 › live build: public page and funder page read real Sepolia; unregistered name stays unresolved; no manifest → never ACTIVE
+  6 passed (1.0m)
+[1/1] [integration] › tests/e2e/integration-real.spec.ts:86:1 › integrated: real C1 auth/ventures/invite/listing/World gate + X treasury readback + public page
+[integration] › tests/e2e/integration-real.spec.ts:86:1 › integrated: real C1 auth/ventures/invite/listing/World gate + X treasury readback + public page
+[integration] public page: 0 of 2 founders · ens-unresolved=1
+  1 passed (4.7s)
+live ENS northstar:
+      Tests  1 passed (1)
