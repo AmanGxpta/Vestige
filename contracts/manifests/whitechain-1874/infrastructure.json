@@ -28,7 +28,8 @@
       "deploymentBlock": 2509810,
       "runtimeCodeHash": "0xb1f926978a0f44a2c0ec8fe822418ae969bd8c3f18d61e5103100339894f81ff",
       "abiPath": "contracts/abi/SafeL2.json",
-      "abiSha256": "7cefae6c6eb086457998fc603cf7d93faf8af7c8d659d93548a4bffa642e34dc"
+      "abiSha256": "7cefae6c6eb086457998fc603cf7d93faf8af7c8d659d93548a4bffa642e34dc",
+      "provenance": "EXPLORER_ATTESTED"
     },
     "factory": {
       "address": "0x4e1DCf7AD4e460CfD30791CCC4F9c8a4f820ec67",
@@ -36,7 +37,8 @@
       "deploymentBlock": 2509796,
       "runtimeCodeHash": "0x50c3cdc4074750a7a974204a716c999edd37482f907608d960b2b025ee0b3317",
       "abiPath": "contracts/abi/SafeProxyFactory.json",
-      "abiSha256": "433ac586e353818573487746829e29b0531fd06e851fa2f7fb708ca9af3e003b"
+      "abiSha256": "433ac586e353818573487746829e29b0531fd06e851fa2f7fb708ca9af3e003b",
+      "provenance": "EXPLORER_ATTESTED"
     },
     "token": {
       "address": "0xcedfB56113143d55b2358b8CFbB0dEB5Ad2f55a7",
@@ -59,8 +61,10 @@
         "deploymentBlock": 7957063,
         "runtimeCodeHash": "0xb5c69874a061f6c8750294eefc2de2f45a7c229e961b03fc901f3612010822d6",
         "abiPath": "contracts/abi/TestUSDT.json",
-        "abiSha256": "1c34195c66cd83e69a6f63136b0b599d211157e5610baee4cd32eeabc08700a3"
-      }
+        "abiSha256": "1c34195c66cd83e69a6f63136b0b599d211157e5610baee4cd32eeabc08700a3",
+        "provenance": "EXPLORER_ATTESTED"
+      },
+      "provenance": "EXPLORER_ATTESTED"
     }
   }
 }

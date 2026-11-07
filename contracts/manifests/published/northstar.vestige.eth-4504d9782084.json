@@ -1,0 +1,95 @@
+{
+  "schemaVersion": 1,
+  "network": "whitechain-sepolia",
+  "chainId": 1874,
+  "deploymentBlock": 12418659,
+  "sourceCommit": "4504d9782084bfe1981b223807a08cdcf1f77060",
+  "explorerBaseUrl": "https://explorer.testnet.whitechain.io",
+  "ventureId": "0xe68b1b43989080cfe7581731204a977009d67e3b3660062d24157562cc93e3ff",
+  "ensName": "northstar.vestige.eth",
+  "owners": [
+    "0xfc2e2350DbE6cC7281C8A0412dd65cCE56519f3E",
+    "0x1711c70699d3D2040861677A277C365C9C283454"
+  ],
+  "threshold": 2,
+  "setupInitializerHash": "0x32909ef6c6238ba6d6e9c893c53b0a9ca89c9b611648f27e05d4165a48f0086b",
+  "approvedAt": "2026-11-07T01:32:03Z",
+  "contracts": {
+    "safe": {
+      "address": "0xE707e3e99Da85B0D8F3814a640976b3B08A123A2",
+      "deploymentTxHash": "0x93ef21464c92d8a903df9b885cc4801386b39d76f9d0808bf26e8f36b9116293",
+      "deploymentBlock": 12418659,
+      "runtimeCodeHash": "0xd7d408ebcd99b2b70be43e20253d6d92a8ea8fab29bd3be7f55b10032331fb4c",
+      "abiPath": "contracts/abi/SafeL2.json",
+      "abiSha256": "7cefae6c6eb086457998fc603cf7d93faf8af7c8d659d93548a4bffa642e34dc"
+    },
+    "guard": {
+      "address": "0x3255A0C5d39167FC55b6dE917DCf6F014F6efa6B",
+      "deploymentTxHash": "0x93ef21464c92d8a903df9b885cc4801386b39d76f9d0808bf26e8f36b9116293",
+      "deploymentBlock": 12418659,
+      "runtimeCodeHash": "0x30fc4fd8ee8a96fa116a6a471172868ca9f62a5c5beb8d26d7e12dd1d1574863",
+      "abiPath": "contracts/abi/VestigeGuard.json",
+      "abiSha256": "bd2ade62b43c0fe0d84c14bfe9ae7eb4bb3893cfcd2e111af7a5603abae8cf4a"
+    },
+    "registry": {
+      "address": "0xe91BF256Afa7c5453e715c39Ab2431EAd492bcBA",
+      "deploymentTxHash": "0x4b3303aaec451196264af6ef4faf0df072d24456311c99fec98cc97b6e72d6ff",
+      "deploymentBlock": 12417009,
+      "runtimeCodeHash": "0x70b492b840c8d5f3c3ef6c17f38ab12926d1ce4bbe4500209394b5c566a4db4c",
+      "abiPath": "contracts/abi/SeatRegistry.json",
+      "abiSha256": "a9e5b83b4e2192784dd1c6104f85759027754b8f62f8e42d65be0ac9bbb9cfb2"
+    },
+    "singleton": {
+      "address": "0x29fcB43b46531BcA003ddC8FCB67FFE91900C762",
+      "deploymentTxHash": "0x4c296f740fe3fdd0bea056c40ee5522d00ea65e5a58a45304d9386429fb68f84",
+      "deploymentBlock": 2509810,
+      "runtimeCodeHash": "0xb1f926978a0f44a2c0ec8fe822418ae969bd8c3f18d61e5103100339894f81ff",
+      "abiPath": "contracts/abi/SafeL2.json",
+      "abiSha256": "7cefae6c6eb086457998fc603cf7d93faf8af7c8d659d93548a4bffa642e34dc",
+      "provenance": "EXPLORER_ATTESTED"
+    },
+    "factory": {
+      "address": "0x4e1DCf7AD4e460CfD30791CCC4F9c8a4f820ec67",
+      "deploymentTxHash": "0xa1994d4c061ac168a223873875a0255d225165643dd0104dd4b6ed3f288abd24",
+      "deploymentBlock": 2509796,
+      "runtimeCodeHash": "0x50c3cdc4074750a7a974204a716c999edd37482f907608d960b2b025ee0b3317",
+      "abiPath": "contracts/abi/SafeProxyFactory.json",
+      "abiSha256": "433ac586e353818573487746829e29b0531fd06e851fa2f7fb708ca9af3e003b",
+      "provenance": "EXPLORER_ATTESTED"
+    },
+    "setup": {
+      "address": "0x153406cd0509E71d302eD49E787051Bb98231558",
+      "deploymentTxHash": "0xb8f34f2b425cd80ac512ee44d7cc18f9301a25a71a2223e0a79e4334e79f4adb",
+      "deploymentBlock": 12417015,
+      "runtimeCodeHash": "0xa28a95ebf012388ba5eaf564bc873f3d3b8da6eb69946ba29aa25d3a1721d35d",
+      "abiPath": "contracts/abi/SafeSetup.json",
+      "abiSha256": "613611a8a03d4af00324ffebdfc655563d569d94c86b40c7ca80f97fc624ce67"
+    },
+    "token": {
+      "address": "0xcedfB56113143d55b2358b8CFbB0dEB5Ad2f55a7",
+      "deploymentTxHash": "0xabf14f3df9f912b513edff9ec77fbfa9bf80ea5a5e9186e76f3e647df5b999f5",
+      "deploymentBlock": 10321991,
+      "runtimeCodeHash": "0x4d9be648c5bf39973670d9f8b481d5d0b971e6a2db2deccc6b98cde21c5dd83e",
+      "abiPath": "contracts/abi/TestUSDT.json",
+      "abiSha256": "1c34195c66cd83e69a6f63136b0b599d211157e5610baee4cd32eeabc08700a3",
+      "decimals": 6,
+      "eip712Domain": {
+        "name": "Tether USD",
+        "version": "1",
+        "chainId": 1874,
+        "verifyingContract": "0xcedfB56113143d55b2358b8CFbB0dEB5Ad2f55a7"
+      },
+      "domainSeparator": "0xcdcfacb6b15c8238b4e5fbb47bdb83b7f83f50a531d264bf9763d2bd1d3d2a25",
+      "implementation": {
+        "address": "0x26425662D126412128967ECf0a02EC48573026F7",
+        "deploymentTxHash": "0xb73e02b23eacaea76bb2845ba5f71003095f7c498e378bd324e414e33a6406b9",
+        "deploymentBlock": 7957063,
+        "runtimeCodeHash": "0xb5c69874a061f6c8750294eefc2de2f45a7c229e961b03fc901f3612010822d6",
+        "abiPath": "contracts/abi/TestUSDT.json",
+        "abiSha256": "1c34195c66cd83e69a6f63136b0b599d211157e5610baee4cd32eeabc08700a3",
+        "provenance": "EXPLORER_ATTESTED"
+      },
+      "provenance": "EXPLORER_ATTESTED"
+    }
+  }
+}

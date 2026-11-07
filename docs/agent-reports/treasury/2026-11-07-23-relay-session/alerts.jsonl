@@ -1,0 +1,8 @@
+{"event":"relay_healthcheck","metrics":{},"at":"2026-11-07T01:35:43.343Z"}
+{"event":"budget_reserved","metrics":{"reservedWei":"674544682000000","dailyReservedWei":"674544682000000"},"at":"2026-11-07T01:35:44.462Z"}
+{"event":"receipt_fee","metrics":{"evmWei":"509731926000000","l1Wei":"6450"},"at":"2026-11-07T01:49:39.399Z"}
+{"event":"confirmation_latency","metrics":{"latencyMs":"835000"},"at":"2026-11-07T01:49:39.427Z"}
+{"event":"relay_healthcheck","metrics":{},"at":"2026-11-07T01:50:10.677Z"}
+{"event":"budget_reserved","metrics":{"reservedWei":"1115992954000000","dailyReservedWei":"1790537636000000"},"at":"2026-11-07T01:50:12.931Z"}
+{"event":"receipt_fee","metrics":{"evmWei":"874709907000000","l1Wei":"7628"},"at":"2026-11-07T01:50:22.938Z"}
+{"event":"confirmation_latency","metrics":{"latencyMs":"10000"},"at":"2026-11-07T01:50:22.954Z"}
