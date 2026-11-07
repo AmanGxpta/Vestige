@@ -109,7 +109,7 @@ export default function StartVenturePage() {
                 <span className="affix">.vestige.eth</span>
               </div>
             </Field>
-            <Field label="Your founder name" htmlFor="v-label" error={labelError} hint={label && !labelError ? <>Your seat: <span className="mono">{label}.{effectiveSlug || "…"}.vestige.eth</span> — non-transferable.</> : "A short handle, not your legal name. It is public."}>
+            <Field label="Your founder name" htmlFor="v-label" error={labelError} hint={label && !labelError ? <>Your seat: <span className="mono">{label}.{effectiveSlug || "…"}.vestige.eth</span>, non-transferable.</> : "A short handle, not your legal name. It is public."}>
               <input id="v-label" className="input mono" value={label} onChange={(e) => setLabel(e.target.value.toLowerCase())} placeholder="asha" data-testid="founder-label-input" required />
             </Field>
             {action.error && <AdapterErrorNotice error={action.error} />}

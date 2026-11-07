@@ -50,7 +50,7 @@ export function deriveTreasuryVerdict(r: PublicChainReport): TreasuryVerdict {
   // ventureId: ENS is the source; the API value is only a cross-check (CR-C2-002).
   if (r.ens.ventureId.status !== "VERIFIED" || !ensVid) add("ventureId", "Name publishes its vestige ventureId", r.ens.ventureId.status, r.ens.ventureId.note ?? "Not read", "consistency");
   else if (r.apiVentureId && !eq(r.apiVentureId, ensVid))
-    add("ventureId", "Name publishes its vestige ventureId", "FAILED", `ENS says ${ensVid.slice(0, 12)}…, the vestige API says ${r.apiVentureId.slice(0, 12)}… — they must match`, "consistency");
+    add("ventureId", "Name publishes its vestige ventureId", "FAILED", `ENS says ${ensVid.slice(0, 12)}…, the vestige API says ${r.apiVentureId.slice(0, 12)}…. They must match`, "consistency");
   else add("ventureId", "Name publishes its vestige ventureId", "VERIFIED", `vestige.ventureId ${ensVid.slice(0, 12)}…${r.apiVentureId ? " (matches the vestige API)" : ""}`, "consistency");
 
   // Reviewed manifest: required trust anchor for expected Guard/Registry/code hashes.

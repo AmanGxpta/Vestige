@@ -222,7 +222,7 @@ describe("CR-ID-06 demo override labels", () => {
       ...base,
       founders: [],
       events: [
-        { kind: "seat_attested", label: "CHAIN_VERIFIED", status: "VERIFIED", chainId: 1874, txHash: `0x${"ab".repeat(32)}`, at: "2026-11-07T02:00:00Z", source: "seat-registry:demo-override-hash (MOCK_ONLY — not World ID)" },
+        { kind: "seat_attested", label: "CHAIN_VERIFIED", status: "VERIFIED", chainId: 1874, txHash: `0x${"ab".repeat(32)}`, at: "2026-11-07T02:00:00Z", source: "seat-registry:demo-override-hash (MOCK_ONLY, not World ID)" },
         { kind: "seat_attested", label: "CHAIN_VERIFIED", status: "VERIFIED", chainId: 1874, txHash: `0x${"cd".repeat(32)}`, at: "2026-11-07T02:00:00Z", source: "seat-registry:world-nullifier-digest" },
       ],
     });

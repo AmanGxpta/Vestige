@@ -73,7 +73,7 @@ export function WorldIdKitPrompt({ params, ventureName, onDone }: { params: Worl
   return (
     <div className="stack" data-testid="idkit-prompt">
       {staging && (
-        <Notice tone="mock" title="World ID staging — TESTED IN SIMULATOR">
+        <Notice tone="mock" title="World ID staging · TESTED IN SIMULATOR">
           This venture&apos;s server is configured for World&apos;s staging environment. Use the World ID Simulator. The result proves the flow works, not that
           a real unique human verified.
         </Notice>

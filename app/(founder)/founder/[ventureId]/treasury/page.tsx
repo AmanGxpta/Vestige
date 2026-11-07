@@ -42,14 +42,14 @@ export default function TreasuryPage() {
             <ul className="small stack-sm" style={{ margin: 0, paddingLeft: 18 }}>
               <li>Owners: the two founder wallets ({attested}/2 attested on Whitechain)</li>
               <li>Token: Whitechain test USDT</li>
-              <li>You don&apos;t sign a transaction or pay gas — vestige&apos;s operator deploys it after H approves the exact parameters.</li>
+              <li>You don&apos;t sign a transaction or pay gas. vestige&apos;s operator deploys it after H approves the exact parameters.</li>
             </ul>
             <Notice tone="warn" title="No recovery path, by design" testId="no-recovery">
               The Guard refuses owner changes except a swap to another verified-human seat, and there is no admin or recovery key. If a founder loses their
               wallet key, the funds in this treasury can become permanently inaccessible. Keep your key safe.
             </Notice>
             {deploy.error?.detail?.startsWith("operation") ? (
-              <Notice tone="info" title="Deployment requested — waiting for operator approval" testId="deploy-requested">
+              <Notice tone="info" title="Deployment requested · waiting for operator approval" testId="deploy-requested">
                 {deploy.error.message} <span className="tiny faint">({deploy.error.detail})</span>
               </Notice>
             ) : (
@@ -145,9 +145,9 @@ export default function TreasuryPage() {
                 ) : t?.balanceRaw !== undefined ? (
                   <strong>{formatTokenAmount(t.balanceRaw, t.tokenDecimals ?? 6)} USDT</strong>
                 ) : (
-                  <span className="faint">—</span>
+                  <span className="faint">-</span>
                 )}
-                <span className="tiny faint"> (test USDT — not real money)</span>
+                <span className="tiny faint"> (test USDT, not real money)</span>
               </dd>
               {t?.worldSource && (
                 <>
@@ -173,13 +173,13 @@ export default function TreasuryPage() {
         <Card title="Get funded" testId="card-funding-link">
           <div className="stack">
             <p className="small">
-              Send your funder this link. They approve a USDT deposit by signing one message on Whitechain — no gas token needed, though their wallet may
+              Send your funder this link. They approve a USDT deposit by signing one message on Whitechain. No gas token needed, though their wallet may
               ask to switch network. The deposit goes straight to your Safe.
             </p>
             <input className="input mono small" readOnly value={`${origin}/funder/${v.ensName}`} aria-label="Funding link" data-testid="funding-link" />
             {t?.depositsStatus && t.depositsStatus !== "VERIFIED" && (
               <span className="small faint" data-testid="deposits-incomplete">
-                Deposit history from the treasury service is {t.depositsStatus === "PENDING" ? "still catching up" : "unknown"} — not a zero balance.
+                Deposit history from the treasury service is {t.depositsStatus === "PENDING" ? "still catching up" : "unknown"}, not a zero balance.
               </span>
             )}
             {t && t.deposits.length > 0 && (

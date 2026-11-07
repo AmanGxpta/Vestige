@@ -15,12 +15,12 @@ function SummaryChip({ ok, yes, no, unknown = "Unknown", source }: { ok: boolean
   // API summaries are cached and founder-consented — never a green "verified" claim.
   if (source !== "DEV_MOCK")
     return (
-      <span className="chip" title="Reported by the vestige API — confirm on the evidence page">
+      <span className="chip" title="Reported by the vestige API. Confirm on the evidence page">
         {yes} <span className="faint">· reported</span>
       </span>
     );
   return (
-    <span className={`pill pill-VERIFIED${source === "DEV_MOCK" ? " pill-mock" : ""}`} title={source === "DEV_MOCK" ? "DEV MOCK — simulated" : "Reported by the vestige API — confirm on the evidence page"}>
+    <span className={`pill pill-VERIFIED${source === "DEV_MOCK" ? " pill-mock" : ""}`} title={source === "DEV_MOCK" ? "DEV MOCK: simulated" : "Reported by the vestige API. Confirm on the evidence page"}>
       {yes}
       {source === "DEV_MOCK" && <span className="pill-mock-tag">MOCK</span>}
     </span>

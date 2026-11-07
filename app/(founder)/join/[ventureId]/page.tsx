@@ -45,7 +45,7 @@ export default function JoinPage() {
           you&apos;re a unique human and sign the founding terms. You won&apos;t need gas or a seed phrase.
         </p>
       </div>
-      <Notice tone="legal" title="Workspace — not legally incorporated" />
+      <Notice tone="legal" title="Workspace · not legally incorporated" />
       {!frag.code && <Notice tone="error" title="This link is missing its invite code." testId="join-missing-code" />}
       {venture.status === "error" && !["UNAUTHENTICATED", "NOT_A_FOUNDER", "NOT_FOUND"].includes(venture.error.code) && <AdapterErrorNotice error={venture.error} />}
       {already ? (

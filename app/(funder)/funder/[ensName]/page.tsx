@@ -100,7 +100,7 @@ export default function FundVenturePage() {
             {ensName}
           </h1>
         </div>
-        <Notice tone="legal" title="Workspace — not legally incorporated">
+        <Notice tone="legal" title="Workspace · not legally incorporated">
           You are funding a team&apos;s shared treasury, not buying equity in a company.
         </Notice>
         {pub.status === "error" && <AdapterErrorNotice error={pub.error} />}
@@ -163,7 +163,7 @@ export default function FundVenturePage() {
                     : chainVerdict === null
                       ? "Reading Sepolia and Whitechain…"
                       : chainVerdict === "error"
-                        ? "Chain reads failed — try again"
+                        ? "Chain reads failed. Try again"
                         : active
                           ? `Verified from chain reads only: ${cvPassed} of ${cvRequired} checks (ENS, Safe, Guard, SeatRegistry, code, USDT)`
                           : cv?.state === "UNRESOLVED"
@@ -242,7 +242,7 @@ export default function FundVenturePage() {
               {fund.cancelled && <Notice tone="info">Cancelled. Nothing was signed and no money moved.</Notice>}
               {done && (
                 <Notice tone="success" title={`Deposit of ${done} USDT submitted`} testId="fund-submitted">
-                  The relayer is settling it on Whitechain. Submitted is not settled — watch the status below.
+                  The relayer is settling it on Whitechain. Submitted is not settled. Watch the status below.
                 </Notice>
               )}
               <div>
@@ -306,7 +306,7 @@ export default function FundVenturePage() {
             <div style={{ fontSize: 28, fontFamily: "var(--serif)", fontWeight: 600 }} data-testid="funder-balance">
               {formatTokenAmount(chain.value.balanceRaw, chain.value.decimals)} USDT
             </div>
-            <span className="tiny faint">Read from Whitechain at block {chain.value.blockNumber} · test USDT — not real money</span>
+            <span className="tiny faint">Read from Whitechain at block {chain.value.blockNumber} · test USDT, not real money</span>
           </Card>
         )}
         {mock && active && t?.balanceRaw !== undefined && (
@@ -314,7 +314,7 @@ export default function FundVenturePage() {
             <div style={{ fontSize: 28, fontFamily: "var(--serif)", fontWeight: 600 }} data-testid="funder-balance">
               {formatTokenAmount(t.balanceRaw, decimals)} USDT
             </div>
-            <span className="tiny faint">Test USDT — not real money{mock ? " · DEV MOCK" : " · reported by vestige; the evidence page reads it from chain"}</span>
+            <span className="tiny faint">Test USDT, not real money{mock ? " · DEV MOCK" : " · reported by vestige; the evidence page reads it from chain"}</span>
           </Card>
         )}
         <RelayerExplainer />

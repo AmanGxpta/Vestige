@@ -127,7 +127,7 @@ export default function TeamPage() {
         <Card title="Public venture list" testId="card-listing" actions={v.listing ? <StatusPill status={v.listing.listed ? "VERIFIED" : "NONE"} mock={v.source === "DEV_MOCK"}>{v.listing.listed ? "Listed" : "Not listed"}</StatusPill> : <StatusPill status="UNKNOWN">Status not reported</StatusPill>}>
           <div className="stack">
             <p className="small muted">
-              Funders can browse ventures whose founders all agreed to be listed. The list shows only your venture name, ENS name and verification counts — no
+              Funders can browse ventures whose founders all agreed to be listed. The list shows only your venture name, ENS name and verification counts. No
               personal data, never the terms text. It is off by default and any founder can withdraw.
             </p>
             {v.listing ? (

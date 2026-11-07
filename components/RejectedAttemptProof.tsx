@@ -49,7 +49,7 @@ export function RejectedAttemptProof({ txHash }: { txHash?: Hex }) {
                 <EvidenceBadge label="CHAIN_VERIFIED" source="CHAIN" />
               </>
             )}
-            {state.status === "success" && <StatusPill status="UNKNOWN">This transaction succeeded — it is not a rejection</StatusPill>}
+            {state.status === "success" && <StatusPill status="UNKNOWN">This transaction succeeded, so it is not a rejection</StatusPill>}
             {state.status === "unknown" && <StatusPill status="UNKNOWN">Receipt unavailable</StatusPill>}
           </div>
         )}

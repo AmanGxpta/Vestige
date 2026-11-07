@@ -113,7 +113,7 @@ export function CheckIcon({ status, mock, size = 22 }: { status: "VERIFIED" | "F
     <span
       className={`check-icon check-${status}${mock && status === "VERIFIED" ? " check-mock" : ""}`}
       style={{ width: size, height: size, fontSize: Math.round(size / 2) }}
-      title={mock && status === "VERIFIED" ? "DEV MOCK — simulated, not verified" : undefined}
+      title={mock && status === "VERIFIED" ? "DEV MOCK: simulated, not verified" : undefined}
       data-mock={(mock && status === "VERIFIED") || undefined}
     >
       {glyph}
@@ -146,7 +146,7 @@ export function EvidenceBadge({ label, source, qualifier }: { label: EvidenceLab
     <span className="row" style={{ gap: 4 }}>
       <span
         className={`badge badge-${label}${weak ? " badge-mock" : ""}`}
-        title={mock ? `DEV MOCK — would be ${label} with real data. ${LABEL_HELP[label]}` : qualifier ? `${LABEL_HELP[label]} ${QUALIFIER_TEXT[qualifier].help}` : LABEL_HELP[label]}
+        title={mock ? `DEV MOCK: would be ${label} with real data. ${LABEL_HELP[label]}` : qualifier ? `${LABEL_HELP[label]} ${QUALIFIER_TEXT[qualifier].help}` : LABEL_HELP[label]}
         data-testid="evidence-badge"
         data-label={label}
         data-source={source}
@@ -186,7 +186,7 @@ export function SeatWorldBadge({ seat, source }: { seat: { worldProofStatus: str
 /* ---------------- Hash / address with explorer link (real data only) ---------------- */
 export function HashLink({ value, chainId, kind = "tx", source, head = 6, tail = 4 }: { value?: string; chainId?: number; kind?: "tx" | "address"; source: DataSource; head?: number; tail?: number }) {
   const [copied, setCopied] = useState(false);
-  if (!value) return <span className="faint">—</span>;
+  if (!value) return <span className="faint">-</span>;
   const href = source !== "DEV_MOCK" && chainId ? (kind === "tx" ? explorerTx(chainId, value) : explorerAddress(chainId, value)) : undefined;
   const text = shortHex(value, head, tail);
   return (

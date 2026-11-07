@@ -13,7 +13,7 @@ export interface PublicIdentitySummary {
   ensName: string;
   ventureId: Hex;
   status: "workspace";
-  legalNotice: "Workspace — not legally incorporated";
+  legalNotice: "Workspace · not legally incorporated";
   founders: {
     subname: string;
     wallet: Address;
@@ -72,7 +72,7 @@ export function publicSummary(db: SqlDb, ventures: VentureService, agreements: A
     ensName: v.ensName,
     ventureId,
     status: "workspace",
-    legalNotice: "Workspace — not legally incorporated",
+    legalNotice: "Workspace · not legally incorporated",
     founders: v.seats.map((s) => ({
       subname: s.founderSubname,
       wallet: s.wallet,

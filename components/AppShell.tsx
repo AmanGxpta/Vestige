@@ -18,7 +18,7 @@ const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "sw
 export function TestnetBanner() {
   return (
     <div className="banner-testnet" data-testid="banner-testnet">
-      Testnet — not real money
+      Testnet · not real money
       <span>Ethereum Sepolia (identity) · Whitechain testnet 1874 (treasury)</span>
     </div>
   );
@@ -28,7 +28,7 @@ export function DevMockBanner() {
   if (ADAPTER_KIND !== "dev-mock") return null;
   return (
     <div className="banner-mock" data-testid="banner-devmock">
-      <strong>DEV MOCK</strong> — backend responses are simulated in this browser. Nothing on this screen is verified, signed or on-chain.
+      <strong>DEV MOCK</strong>: backend responses are simulated in this browser. Nothing on this screen is verified, signed or on-chain.
     </div>
   );
 }
@@ -253,7 +253,7 @@ function Frame({ children }: { children: ReactNode }) {
             <span className="row" style={{ gap: 8 }}>
               <Wordmark size={15} /> <span>The verified startup layer · workspaces, not legally incorporated companies.</span>
             </span>
-            <span>Build · Verify · Fund — ETHGlobal Mumbai 2026</span>
+            <span>Build · Verify · Fund · ETHGlobal Mumbai 2026</span>
           </div>
         </footer>
       </>

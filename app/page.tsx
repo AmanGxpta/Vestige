@@ -74,7 +74,7 @@ function HeroIllustration() {
           </div>
         </div>
       </div>
-      <span className="glass-label">Illustration — not a real venture</span>
+      <span className="glass-label">Illustration, not a real venture</span>
     </div>
   );
 }
@@ -91,7 +91,7 @@ export default function LandingPage() {
             Know who you&apos;re funding, from <span className="mark">day zero.</span>
           </h1>
           <p className="lead">
-            A verified startup layer for the earliest stage — real human founders, signed founding terms, and a shared treasury you can trust. A 2-of-2
+            A verified startup layer for the earliest stage: real human founders, signed founding terms, and a shared treasury you can trust. A 2-of-2
             treasury means nothing if one person holds both keys; vestige proves the two signers are two different people.
           </p>
           <div className="row">
@@ -150,7 +150,7 @@ export default function LandingPage() {
             </span>
             <span>
               <h3>Verify any venture</h3>
-              <span className="small muted">We resolve its ENS name on Ethereum, then read the treasury straight from Whitechain — not from our database.</span>
+              <span className="small muted">We resolve its ENS name on Ethereum, then read the treasury straight from Whitechain, not from our database.</span>
             </span>
           </span>
           <EnsLookupForm compact />

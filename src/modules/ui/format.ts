@@ -1,7 +1,7 @@
 import type { Address, Hex } from "./types";
 
 export function shortHex(value: string | undefined, head = 6, tail = 4): string {
-  if (!value) return "—";
+  if (!value) return "-";
   if (value.length <= head + tail + 2) return value;
   return `${value.slice(0, head)}…${value.slice(-tail)}`;
 }
@@ -52,7 +52,7 @@ export function isValidSlug(slug: string): boolean {
 }
 
 export function relativeTime(iso: string | undefined, now = Date.now()): string {
-  if (!iso) return "—";
+  if (!iso) return "-";
   const s = Math.round((now - new Date(iso).getTime()) / 1000);
   if (s < 60) return `${Math.max(s, 0)}s ago`;
   if (s < 3600) return `${Math.round(s / 60)}m ago`;

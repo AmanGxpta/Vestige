@@ -143,7 +143,7 @@ export function PromptHost() {
         </div>
         <div className="modal-body">
           <p className="small muted">
-            For a seat in <strong>{w.ventureName}</strong>. World ID Proof of Human reveals no name, email or document — only that this person has not
+            For a seat in <strong>{w.ventureName}</strong>. World ID Proof of Human reveals no name, email or document, only that this person has not
             already taken a seat in this venture.
           </p>
           {w.request.kind === "idkit" ? (

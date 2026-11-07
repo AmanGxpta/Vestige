@@ -77,7 +77,7 @@ function Workspace({ children }: { children: ReactNode }) {
       </header>
       <div className="stack-lg" style={{ minWidth: 0 }}>
         {children}
-        <Notice tone="legal" title="Workspace — not legally incorporated">
+        <Notice tone="legal" title="Workspace · not legally incorporated">
           This venture is a verified team workspace, not a company. Founding terms here record intent between founders; they are not a legal entity.
         </Notice>
       </div>

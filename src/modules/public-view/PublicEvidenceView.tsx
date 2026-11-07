@@ -177,8 +177,8 @@ export function PublicEvidenceView({ ensName, requestedSource }: { ensName: stri
         {(
           [
             ["ens", "Resolve the name on Ethereum Sepolia", "ENS resolver, ENSIP-11 Whitechain address, vestige records"],
-            ["whitechain", "Read the treasury on Whitechain", "Safe owners, threshold, Guard binding, code, modules, SeatRegistry, USDT — checked against the reviewed manifest"],
-            ["offchain", "Join off-chain evidence from vestige", "World ID results and agreement signatures — no personal data"],
+            ["whitechain", "Read the treasury on Whitechain", "Safe owners, threshold, Guard binding, code, modules, SeatRegistry and USDT, checked against the reviewed manifest"],
+            ["offchain", "Join off-chain evidence from vestige", "World ID results and agreement signatures, no personal data"],
           ] as const
         ).map(([key, title, sub], i) => {
           const order: Phase[] = ["ens", "whitechain", "offchain", "done"];
@@ -219,7 +219,7 @@ export function PublicEvidenceView({ ensName, requestedSource }: { ensName: stri
       </ol>
         </div>
       </div>
-      <Notice tone="legal" title="Workspace — not legally incorporated">
+      <Notice tone="legal" title="Workspace · not legally incorporated">
         A vestige venture is a team workspace with verifiable records. It is not a company and confers no legal rights.
       </Notice>
 
@@ -284,7 +284,7 @@ export function PublicEvidenceView({ ensName, requestedSource }: { ensName: stri
             <Card title="2 · Treasury on Whitechain" testId="card-whitechain" actions={<span className="tiny faint">chain 1874</span>}>
               {!w ? (
                 <div className="stack-sm">
-                  <p className="muted small">Not read — the name did not lead to a treasury address.</p>
+                  <p className="muted small">Not read: the name did not lead to a treasury address.</p>
                   {report?.manifest.status === "LOADED" && report.manifest.manifest.ensName === (report.normalizedName ?? ensName) && (
                     <p className="small" data-testid="manifest-unlinked">
                       A reviewed deployment manifest names Safe{" "}
@@ -307,7 +307,7 @@ export function PublicEvidenceView({ ensName, requestedSource }: { ensName: stri
                             <span className="small muted">{c.detail}</span>
                             {c.id === "seats" && overrideOwners.length > 0 && (
                               <span className="small" style={{ display: "block", color: "var(--warn, #8a5a00)" }} data-testid="seats-override-qualifier">
-                                {overrideOwners.length} owner seat{overrideOwners.length > 1 ? "s were" : " was"} attested from a MOCK_ONLY demo-override hash — not a World ID proof.
+                                {overrideOwners.length} owner seat{overrideOwners.length > 1 ? "s were" : " was"} attested from a MOCK_ONLY demo-override hash, not a World ID proof.
                               </span>
                             )}
                           </span>
@@ -492,7 +492,7 @@ export function PublicEvidenceView({ ensName, requestedSource }: { ensName: stri
                   {report.manifest.status === "LOADED"
                     ? `${report.manifest.url} · approved ${report.manifest.manifest.approvedAt.slice(0, 10)}`
                     : report.manifest.status === "NOT_CONFIGURED"
-                      ? "not configured — Guard, registry and code cannot be confirmed"
+                      ? "not configured: Guard, registry and code cannot be confirmed"
                       : report.manifest.status === "INVALID"
                         ? `rejected: ${report.manifest.problems[0]}`
                         : `unreachable: ${report.manifest.error}`}
@@ -503,7 +503,7 @@ export function PublicEvidenceView({ ensName, requestedSource }: { ensName: stri
                   <>
                     <dt>Transfers scanned from</dt>
                     <dd className="tiny">
-                      block {w.scanFrom.block} {w.scanFrom.fromManifest ? "(manifest deploymentBlock)" : "(recent blocks only — no manifest)"}
+                      block {w.scanFrom.block} {w.scanFrom.fromManifest ? "(manifest deploymentBlock)" : "(recent blocks only, no manifest)"}
                     </dd>
                   </>
                 )}

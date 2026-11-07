@@ -161,7 +161,7 @@ export default function TermsPage() {
                 <span className="small">
                   Version {nextVersion} hash (preview, C1 algorithm):{" "}
                   <span className="mono" data-testid="terms-preview-hash">
-                    {preview?.ok ? shortHex(preview.hash, 10, 8) : "—"}
+                    {preview?.ok ? shortHex(preview.hash, 10, 8) : "-"}
                   </span>
                   {agreement && <span className="muted"> · was {shortHex(agreement.docHash, 10, 8)}</span>}
                 </span>
@@ -213,7 +213,7 @@ export default function TermsPage() {
                   {doc.founders.map((f) => (
                     <div key={f.wallet}>
                       <h3>
-                        <span className="mono">{subnameOf(f.wallet)}</span> — {f.role} · {bpsToPercent(f.ownershipBps)}
+                        <span className="mono">{subnameOf(f.wallet)}</span>: {f.role} · {bpsToPercent(f.ownershipBps)}
                       </h3>
                       <p>{f.contribution}</p>
                       <p className="small muted">Vesting intent: {f.vestingIntent}</p>

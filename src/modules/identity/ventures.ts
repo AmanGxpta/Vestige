@@ -241,7 +241,7 @@ export class VentureService {
    */
   attestationSource(ventureId: string, wallet: Address): string {
     return this.overriddenWallets(ventureId).includes(wallet)
-      ? "seat-registry:demo-override-hash (MOCK_ONLY — not World ID)"
+      ? "seat-registry:demo-override-hash (MOCK_ONLY, not World ID)"
       : "seat-registry:world-nullifier-digest";
   }
 

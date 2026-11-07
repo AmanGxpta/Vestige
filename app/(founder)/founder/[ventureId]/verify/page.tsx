@@ -43,7 +43,7 @@ export default function VerifyPage() {
             <div className="page-head" style={{ alignItems: "center" }}>
               <h1>Verify as a real human</h1>
               <p style={{ maxWidth: "52ch" }}>
-                Each founder proves they&apos;re a unique human with World ID. The same person can&apos;t take both seats in {v.displayName} — that is what
+                Each founder proves they&apos;re a unique human with World ID. The same person can&apos;t take both seats in {v.displayName}. That is what
                 makes a 2-of-2 treasury mean two people.
               </p>
             </div>
@@ -54,7 +54,7 @@ export default function VerifyPage() {
                 <span className="ico">
                   <Icon name="user" />
                 </span>
-                Proves you&apos;re a real human — Proof of Human, nothing more
+                Proves you&apos;re a real human. Proof of Human, nothing more
               </div>
               <div>
                 <span className="ico">
@@ -72,7 +72,7 @@ export default function VerifyPage() {
           </div>
 
           {seat?.demoOverride ? (
-            <Notice tone="mock" title="Demo override — not World-verified" testId="verify-override">
+            <Notice tone="mock" title="Demo override · not World-verified" testId="verify-override">
               An operator marked this seat ready for the demo (CR-ID-06) so the terms and treasury flow can be shown. No World ID proof exists for it, it is
               labelled SELF_REPORTED, and it is not counted as a human here or in the ENS <span className="mono">vestige.humans</span> record.
             </Notice>
@@ -84,10 +84,10 @@ export default function VerifyPage() {
                   v.source === "DEV_MOCK"
                     ? "Simulated verification accepted (DEV MOCK)"
                     : env === "staging"
-                      ? "Verified in World staging — TESTED IN SIMULATOR"
+                      ? "Verified in World staging · TESTED IN SIMULATOR"
                       : env === "production"
                         ? "You're verified as a unique human"
-                        : "World ID proof accepted — environment not reported"
+                        : "World ID proof accepted · environment not reported"
                 }
                 testId="verify-success"
               >
@@ -123,7 +123,7 @@ export default function VerifyPage() {
               )}
               {action.cancelled && (
                 <Notice tone="info" title="Verification cancelled" testId="verify-cancelled">
-                  Nothing changed. Your seat is waiting — verify whenever you&apos;re ready.
+                  Nothing changed. Your seat is waiting. Verify whenever you&apos;re ready.
                 </Notice>
               )}
               {action.error && !duplicate && <AdapterErrorNotice error={action.error} />}

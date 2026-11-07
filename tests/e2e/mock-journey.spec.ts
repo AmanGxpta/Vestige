@@ -36,7 +36,7 @@ test("founder A + founder B + funder + public verifier (DEV MOCK)", async ({ con
   await a.getByTestId("founder-label-input").fill("asha");
   await a.getByTestId("create-venture-submit").click();
   await expect(a.getByTestId("venture-ens")).toHaveText(`${slug}.vestige.eth`);
-  await expect(a.getByText("Workspace — not legally incorporated").first()).toBeVisible();
+  await expect(a.getByText("Workspace · not legally incorporated").first()).toBeVisible();
   const ventureUrl = a.url();
   await a.getByTestId("invite-create").click();
   const inviteUrl = await a.getByTestId("invite-url").inputValue();

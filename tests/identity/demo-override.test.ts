@@ -99,7 +99,7 @@ describe("attestation of a demo-override seat (CR-ID-06 labelling)", () => {
     expect(v.seats.find((s) => s.wallet === b)).toMatchObject({ demoOverride: true, attestationBasis: "demo-override-hash" });
     expect(v.seats.find((s) => s.wallet === a)).toMatchObject({ attestationBasis: "world-nullifier-digest" });
     const ev = h.db.all<{ actor: string; source: string; kind: string }>("SELECT actor, source, kind FROM identity_events WHERE kind LIKE 'seat_attest%'");
-    for (const e of ev.filter((x) => x.actor === b)) expect(e.source).toBe("seat-registry:demo-override-hash (MOCK_ONLY — not World ID)");
+    for (const e of ev.filter((x) => x.actor === b)) expect(e.source).toBe("seat-registry:demo-override-hash (MOCK_ONLY, not World ID)");
     for (const e of ev.filter((x) => x.actor === a)) expect(e.source).toBe("seat-registry:world-nullifier-digest");
     const pub = await (await handlers(h).publicSummary(req(), "northstar-labs.vestige.eth")).json();
     expect(pub.founders.find((f: { wallet: string }) => f.wallet === b)).toMatchObject({ humanVerified: false, label: "SELF_REPORTED", demoOverride: true, attestationBasis: "demo-override-hash" });

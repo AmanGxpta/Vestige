@@ -100,7 +100,7 @@ export default function FunderListPage() {
         </div>
       )}
       {list.status === "ok" && list.data.length > 0 && rows.length === 0 && <p className="muted small">No ventures match “{q}”.</p>}
-      <p className="small muted">Badges are summaries — the evidence page is the source of truth.</p>
+      <p className="small muted">Badges are summaries. The evidence page is the source of truth.</p>
     </div>
   );
 }

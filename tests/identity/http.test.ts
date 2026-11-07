@@ -65,7 +65,7 @@ describe("HTTP handlers", () => {
     await h.flush();
     const pub = await (await api.publicSummary(req(), "northstar-labs.vestige.eth")).json();
     expect(pub.humansVerified).toBe(2);
-    expect(pub.legalNotice).toBe("Workspace — not legally incorporated");
+    expect(pub.legalNotice).toBe("Workspace · not legally incorporated");
     expect(pub.agreement.version).toBe(1);
     const s = JSON.stringify(pub);
     expect(s).not.toContain("PRIVATE-NOTE-XYZ");

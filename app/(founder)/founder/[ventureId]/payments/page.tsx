@@ -56,7 +56,7 @@ function PaymentCard({ p, decimals, owners, source, approvalsReported = true }: 
             })}
             {approvalsReported && (
               <span className="tiny faint">
-                {p.signerWallets.length} of {owners.length} — both founders must sign.
+                {p.signerWallets.length} of {owners.length}. Both founders must sign.
               </span>
             )}
           </dd>

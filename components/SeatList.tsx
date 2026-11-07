@@ -52,7 +52,7 @@ export function SeatList({ seats, source, me }: { seats: FounderSeat[]; source: 
           {seats.length < 2 && (
             <tr>
               <td colSpan={3} className="muted small">
-                Seat 2 is empty — waiting for your co-founder to accept the invite.
+                Seat 2 is empty, waiting for your co-founder to accept the invite.
               </td>
             </tr>
           )}
