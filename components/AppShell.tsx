@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { Inter } from "next/font/google";
+import { usePathname, useRouter } from "next/navigation";
 import type { ReactNode } from "react";
 import { useState } from "react";
 import { ADAPTER_KIND } from "@/src/modules/ui/config";
@@ -10,6 +11,9 @@ import { chainName } from "@/src/modules/ui/wallet/eip1193";
 import { shortHex } from "@/src/modules/ui/format";
 import { MOCK_ROLES, useVestige, VestigeProvider, type MockRole } from "@/src/modules/ui/provider";
 import { PromptHost } from "./PromptHost";
+import { Icon, Wordmark } from "./brand";
+
+const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "swap" });
 
 export function TestnetBanner() {
   return (
@@ -146,22 +150,32 @@ function RoleSwitcher() {
   );
 }
 
-const NAV = [
-  { href: "/founder", label: "Founders" },
-  { href: "/funder", label: "Funders" },
+const PUBLIC_NAV = [
+  { href: "/founder", label: "For Founders" },
+  { href: "/funder", label: "For Funders" },
   { href: "/v", label: "Verify a venture" },
 ];
 
-function Header() {
+const SIDE_NAV = [
+  { href: "/", label: "Home", icon: "home" as const, match: (p: string) => p === "/" },
+  { href: "/founder", label: "Create Venture", icon: "plus" as const, match: (p: string) => p === "/founder" },
+  { href: "/funder", label: "Discover", icon: "compass" as const, match: (p: string) => p.startsWith("/funder") },
+  { href: "/v", label: "Verify a venture", icon: "shield" as const, match: (p: string) => p.startsWith("/v") },
+];
+
+/** Landing + public verification use the open top-nav layout; working pages use the sidebar app layout. */
+const isPublic = (p: string) => p === "/" || p === "/v" || p.startsWith("/v/");
+
+function PublicHeader() {
   const path = usePathname() ?? "/";
   return (
     <header className="header">
       <div className="header-inner">
-        <Link href="/" className="brand" aria-label="vestige home">
-          vestige <small>day-zero ventures</small>
+        <Link href="/" aria-label="vestige home" style={{ textDecoration: "none" }}>
+          <Wordmark />
         </Link>
         <nav className="nav" aria-label="Main">
-          {NAV.map((n) => (
+          {PUBLIC_NAV.map((n) => (
             <Link key={n.href} href={n.href} aria-current={path === n.href || path.startsWith(`${n.href}/`) ? "page" : undefined}>
               {n.label}
             </Link>
@@ -169,25 +183,99 @@ function Header() {
         </nav>
         <div className="header-spacer" />
         <RoleSwitcher />
+        <Link className="btn" href="/founder" data-testid="header-create">
+          Create a Venture <Icon name="arrow" size={16} />
+        </Link>
       </div>
     </header>
+  );
+}
+
+function Sidebar() {
+  const path = usePathname() ?? "/";
+  const ventureMatch = /^\/founder\/(0x[0-9a-fA-F]{64})/.exec(path);
+  return (
+    <aside className="sidebar" aria-label="App navigation">
+      <Link href="/" aria-label="vestige home" style={{ textDecoration: "none", padding: "2px 10px" }}>
+        <Wordmark />
+      </Link>
+      <nav className="side-nav">
+        {SIDE_NAV.map((n) => (
+          <Link key={n.href} href={n.href} aria-current={n.match(path) ? "page" : undefined}>
+            <Icon name={n.icon} />
+            {n.label}
+          </Link>
+        ))}
+        {ventureMatch && (
+          <Link href={`/founder/${ventureMatch[1]}`} aria-current="page">
+            <Icon name="layers" />
+            This venture
+          </Link>
+        )}
+      </nav>
+      <div className="side-foot">
+        Testnet only. vestige ventures are workspaces, not legally incorporated companies.
+      </div>
+    </aside>
+  );
+}
+
+function SheetTop() {
+  const router = useRouter();
+  const path = usePathname() ?? "/";
+  return (
+    <div className="sheet-top">
+      <button type="button" className="back btn-ghost" aria-label="Back" onClick={() => router.back()} style={{ cursor: "pointer", background: "transparent" }}>
+        <Icon name="back" />
+      </button>
+      <div className="header-spacer" />
+      <RoleSwitcher />
+      <nav className="mobile-nav" aria-label="App navigation (mobile)">
+        {SIDE_NAV.map((n) => (
+          <Link key={n.href} href={n.href} aria-current={n.match(path) ? "page" : undefined}>
+            {n.label}
+          </Link>
+        ))}
+      </nav>
+    </div>
+  );
+}
+
+function Frame({ children }: { children: ReactNode }) {
+  const path = usePathname() ?? "/";
+  if (isPublic(path))
+    return (
+      <>
+        <PublicHeader />
+        <main className="main">{children}</main>
+        <footer className="footer">
+          <div className="footer-inner">
+            <span className="row" style={{ gap: 8 }}>
+              <Wordmark size={15} /> <span>The verified startup layer · workspaces, not legally incorporated companies.</span>
+            </span>
+            <span>Build · Verify · Fund — ETHGlobal Mumbai 2026</span>
+          </div>
+        </footer>
+      </>
+    );
+  return (
+    <div className="app">
+      <Sidebar />
+      <div className="sheet">
+        <SheetTop />
+        <main className="sheet-main">{children}</main>
+      </div>
+    </div>
   );
 }
 
 export function AppShell({ children }: { children: ReactNode }) {
   return (
     <VestigeProvider>
-      <div className="shell">
+      <div className={`shell ${inter.variable}`}>
         <TestnetBanner />
         <DevMockBanner />
-        <Header />
-        <main className="main">{children}</main>
-        <footer className="footer">
-          <div className="footer-inner">
-            <span>vestige ventures are workspaces, not legally incorporated companies.</span>
-            <span>Open evidence format · Built at ETHGlobal Mumbai 2026</span>
-          </div>
-        </footer>
+        <Frame>{children}</Frame>
         <PromptHost />
       </div>
     </VestigeProvider>

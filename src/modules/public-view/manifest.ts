@@ -130,6 +130,23 @@ export function validateManifest(m: unknown): string[] {
   return p;
 }
 
+/**
+ * CR-C2-008: NEXT_PUBLIC_VESTIGE_DEPLOYMENT_MANIFEST_URL may contain "{ensName}", e.g.
+ * "/manifests/{ensName}.json", so each venture resolves its own reviewed manifest.
+ * The name is lowercased and must be a vestige venture name (<label>.vestige.eth); it is
+ * URI-encoded into the path. A URL without the token is used as-is (single manifest).
+ * Hosting convention: operator-reviewed JSON at public/manifests/<ensName>.json (same
+ * origin), byte-identical to X's VESTIGE_DEPLOYMENT_MANIFEST_PATH file for that venture.
+ */
+export const ENS_NAME_TOKEN = "{ensName}";
+export function manifestUrlFor(template: string | undefined, ensName: string | undefined): string | undefined {
+  if (!template) return undefined;
+  if (!template.includes(ENS_NAME_TOKEN)) return template;
+  const name = (ensName ?? "").trim().toLowerCase();
+  if (!/^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.vestige\.eth$/.test(name)) return undefined; // no guessing for other names
+  return template.split(ENS_NAME_TOKEN).join(encodeURIComponent(name));
+}
+
 export type ManifestLoad =
   | { status: "NOT_CONFIGURED" }
   | { status: "INVALID"; problems: string[]; url: string }

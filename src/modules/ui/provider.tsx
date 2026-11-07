@@ -6,7 +6,7 @@ import type { AdapterError, Result, TypedDataSigner, VestigeClient, WorldProofPa
 import { ADAPTER_KIND, CONFIG } from "./config";
 import { createLiveAdapter } from "./live-adapter";
 import { browserStorage, createMockAdapter } from "./mock/mock-adapter";
-import { loadManifest } from "@/src/modules/public-view/manifest";
+import { loadManifest, manifestUrlFor } from "@/src/modules/public-view/manifest";
 import type { Address, Hex } from "./types";
 import {
   discoverInjectedWallets,
@@ -96,8 +96,8 @@ export function VestigeProvider({ children }: { children: ReactNode }) {
         ? createMockAdapter({ storage: browserStorage() })
         : createLiveAdapter({
             usdtAddress: CONFIG.usdtAddress,
-            getManifest: async () => {
-              const m = await loadManifest(CONFIG.manifestUrl);
+            getManifest: async (ensName) => {
+              const m = await loadManifest(manifestUrlFor(CONFIG.manifestUrl, ensName));
               return m.status === "LOADED" ? m.manifest : null;
             },
           }),

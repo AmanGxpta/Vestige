@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { deriveTreasuryVerdict } from "./verdict";
-import { validateManifest, type DeploymentManifestV1 } from "./manifest";
+import { manifestUrlFor, validateManifest, type DeploymentManifestV1 } from "./manifest";
 import type { PublicChainReport, Step } from "./chain-reader";
 
 const P = { chainId: 1874, method: "x", source: "CHAIN" as const };
@@ -174,5 +174,21 @@ describe("validateManifest (fail closed)", () => {
   it("rejects a token domain that is not the approved Tether USD domain", () => {
     const bad = { ...MANIFEST, contracts: { ...MANIFEST.contracts, token: { ...MANIFEST.contracts.token, eip712Domain: { ...MANIFEST.contracts.token.eip712Domain, name: "Fake USD" } } } };
     expect(validateManifest(bad).some((p) => p.includes("eip712Domain"))).toBe(true);
+  });
+});
+
+describe("CR-C2-008 manifest URL templates", () => {
+  it("substitutes {ensName} per venture, encoded and lowercased", () => {
+    expect(manifestUrlFor("/manifests/{ensName}.json", "Northstar.Vestige.ETH")).toBe("/manifests/northstar.vestige.eth.json");
+    expect(manifestUrlFor("https://cdn.example/m/{ensName}/manifest.json", "a-b.vestige.eth")).toBe("https://cdn.example/m/a-b.vestige.eth/manifest.json");
+  });
+  it("keeps a token-free URL unchanged (single-manifest deployments)", () => {
+    expect(manifestUrlFor("/manifest.json", "northstar.vestige.eth")).toBe("/manifest.json");
+    expect(manifestUrlFor(undefined, "northstar.vestige.eth")).toBeUndefined();
+  });
+  it("never guesses a manifest for non-venture names or path tricks", () => {
+    expect(manifestUrlFor("/manifests/{ensName}.json", "vitalik.eth")).toBeUndefined();
+    expect(manifestUrlFor("/manifests/{ensName}.json", "../etc.vestige.eth")).toBeUndefined();
+    expect(manifestUrlFor("/manifests/{ensName}.json", undefined)).toBeUndefined();
   });
 });

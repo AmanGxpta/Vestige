@@ -143,7 +143,9 @@ export type Evidence = {
   status: ReadStatus;
   chainId?: number;
   txHash?: Hex;
-  blockNumber?: string | number;
+  /** Decimal string per v0 JSON convention (CR-X-002); older C1 events use a number. */
+  blockNumber?: number | string;
+  blockHash?: Hex;
   confirmedAt?: string;
   source: DataSource;
   /** World evidence from the staging environment (CONTRACTS: separate qualifier, not a label). */
@@ -170,13 +172,18 @@ export type VentureDetail = {
 
 /** Contract v0 `GET /api/treasury/ventures/:id` — "chain readback + pending payments". */
 export type TreasuryState = {
-  depositsStatus?: "UNKNOWN" | "PENDING" | "VERIFIED";
   treasury?: Treasury;
   /** raw USDT balance string from chain readback */
   balanceRaw?: string;
   tokenDecimals?: number;
   payments: Payment[];
-  deposits: { from: Address; amountRaw: string; txHash: Hex; status: ReadStatus }[];
+  deposits: { from: Address; amountRaw: string; txHash: Hex; status: ReadStatus; blockNumber?: string; blockHash?: Hex; logIndex?: number; confirmedAt?: string }[];
+  /** CR-X-002: completeness of `deposits` (PENDING = bounded scan still catching up; UNKNOWN ≠ zero). */
+  depositsStatus?: ReadStatus;
+  /** CR-X-002 top-level status, kept even when `treasury` is null (e.g. manifest present, checks failed → UNVERIFIED). */
+  readStatus?: TreasuryStatus;
+  /** 1 when the response is CR-X-002 TreasuryReadV1; undefined for the v0 flat shape. */
+  schemaVersion?: 1;
   /** Receipt-backed evidence from X's readback (e.g. the mined GS020 REJECTED_ATTEMPT). CR-C2-009. */
   evidence?: Evidence[];
   /** X operation log (RESERVED/UNKNOWN/SUBMITTED/EXECUTED/FAILED), as returned. */

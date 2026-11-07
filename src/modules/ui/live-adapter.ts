@@ -36,8 +36,8 @@ import { SEPOLIA_CHAIN_ID, WHITECHAIN_CHAIN_ID } from "./types";
 export type LiveDeps = {
   baseUrl?: string;
   fetchImpl?: typeof fetch;
-  /** Reviewed deployment manifest (needed for funding domain checks). */
-  getManifest?: () => Promise<DeploymentManifestV1 | null>;
+  /** Reviewed deployment manifest for a venture (CR-C2-008: resolved per ENS name). */
+  getManifest?: (ensName?: string) => Promise<DeploymentManifestV1 | null>;
   /** Approved test USDT anchor (CONTRACTS "Network and approved runtime anchors"). */
   usdtAddress?: Address;
   now?: () => number;
@@ -312,10 +312,13 @@ export function createLiveAdapter(deps: LiveDeps = {}): VestigeClient {
   };
 
   /** Server-built SafeTx typed data from proposals this tab made (until X's readback reloads it, CR-C2-009). */
+  const proposalTypedData = new Map<string, unknown>();
   const treasuryState = async (id: VentureId): Promise<Result<TreasuryState>> => {
     const r = await call<Record<string, unknown>>("GET", "GET /api/treasury/ventures/:id", `/api/treasury/ventures/${id}`, { auth: "optional" });
     if (!r.ok) return r;
     const t = toTreasuryState(r.value);
+    // Tab cache only fills v0 gaps; a v1 null means stale/terminal and must stay unsignable.
+    if (t.schemaVersion !== 1) for (const p of t.payments) if (!p.safeTypedData && proposalTypedData.has(p.paymentId)) p.safeTypedData = proposalTypedData.get(p.paymentId);
     return ok(t);
   };
 
@@ -517,7 +520,7 @@ export function createLiveAdapter(deps: LiveDeps = {}): VestigeClient {
       return treasuryState(ventureId);
     },
 
-    async fundTreasury(ventureId, { from, to, amountRaw }, sign) {
+    async fundTreasury(ventureId, { from, to, amountRaw, ensName }, sign) {
       const s = requireSessionFor(from);
       if (!s.ok) return s;
       // Check the route and the treasury BEFORE asking for any signature.
@@ -527,12 +530,14 @@ export function createLiveAdapter(deps: LiveDeps = {}): VestigeClient {
       if (!tr || tr.verificationStatus !== "ACTIVE") return err("NOT_READY", "This venture's treasury is not active yet.");
       if (!same(tr.safeAddress, to)) return err("INVALID_INPUT", "The destination does not match this venture's treasury. Nothing was signed.");
       if (!/^\d+$/.test(amountRaw) || BigInt(amountRaw) <= 0n) return err("INVALID_INPUT", "Enter an amount greater than zero.");
-      const m = (await deps.getManifest?.()) ?? null;
+      const m = (await deps.getManifest?.(ensName)) ?? null;
       if (!m) return err("BLOCKED", "Not connected yet", "Funding needs the reviewed deployment manifest (NEXT_PUBLIC_VESTIGE_DEPLOYMENT_MANIFEST_URL).");
       const tok = m.contracts.token;
       const d = tok.eip712Domain;
       if (
         !same(m.contracts.safe.address, to) ||
+        !same(m.ventureId, ventureId) ||
+        (ensName !== undefined && m.ensName.toLowerCase() !== ensName.toLowerCase()) ||
         !same(tok.address, deps.usdtAddress ?? tok.address) ||
         d.name !== "Tether USD" ||
         d.version !== "1" ||
@@ -570,12 +575,15 @@ export function createLiveAdapter(deps: LiveDeps = {}): VestigeClient {
     async proposePayment(ventureId, { recipient, amountRaw, reason, wallet }) {
       const s = requireSessionFor(wallet);
       if (!s.ok) return s;
-      const r = await call<{ paymentId?: string; safeTypedData?: unknown }>("POST", "POST /api/treasury/ventures/:id/payments", `/api/treasury/ventures/${ventureId}/payments`, {
+      const r = await call<{ paymentId?: string; safeTypedData?: unknown; typedData?: unknown }>("POST", "POST /api/treasury/ventures/:id/payments", `/api/treasury/ventures/${ventureId}/payments`, {
         auth: true,
         idempotent: true,
         body: { recipient, amountRaw, reason },
       });
       if (!r.ok) return r;
+      // v0 only: the readback cannot reload the payload, so keep it for this tab. Under CR-X-002 the readback carries it.
+      const created = r.value.safeTypedData ?? r.value.typedData;
+      if (r.value.paymentId && created) proposalTypedData.set(r.value.paymentId, created);
       return treasuryState(ventureId);
     },
 
@@ -588,11 +596,13 @@ export function createLiveAdapter(deps: LiveDeps = {}): VestigeClient {
       const p = t.value.payments.find((x) => x.paymentId === paymentId);
       if (!tr || !p) return err("NOT_FOUND", "No such payment.");
       if (!p.safeTypedData)
-        return err(
-          "BLOCKED",
-          "Not connected yet",
-          "The treasury readback does not return this payment's approval payload yet (CR-C2-009), so it can only be approved from the tab that proposed it.",
-        );
+        return t.value.schemaVersion === 1
+          ? err("NOT_READY", "This payment can no longer be signed: its Safe nonce is stale or it is already final. Propose it again if it is still needed.")
+          : err(
+              "BLOCKED",
+              "Not connected yet",
+              "The treasury readback does not return this payment's approval payload yet (CR-X-002 pending), so it can only be approved from the tab that proposed it.",
+            );
       const td = p.safeTypedData as TypedDataDefinition | undefined;
       const dom = (td?.domain ?? {}) as { chainId?: number | string; verifyingContract?: string };
       const msg = (td?.message ?? {}) as { to?: string; operation?: number | string; value?: string | number };
@@ -684,7 +694,8 @@ export function toPublic(p: C1Public): PublicOffchainEvidence {
  * are NOT in X's readback — the UI reads them from Whitechain directly (useChainTreasury).
  */
 export function toTreasuryState(raw: Record<string, unknown>): TreasuryState {
-  const t = (raw.treasury && typeof raw.treasury === "object" ? raw.treasury : raw) as Record<string, unknown>;
+  const v1 = raw.schemaVersion === 1; // CR-X-002 TreasuryReadV1 (nested); else v0 flat
+  const t = (v1 ? (raw.treasury ?? {}) : raw.treasury && typeof raw.treasury === "object" ? raw.treasury : raw) as Record<string, unknown>;
   const status = TREASURY_STATUSES.includes(t.verificationStatus as TreasuryStatus) ? (t.verificationStatus as TreasuryStatus) : "UNKNOWN";
   const manifest = (raw.manifest ?? null) as { contracts?: { token?: { address?: string } } } | null;
   const mTok = manifest?.contracts?.token?.address;
@@ -704,7 +715,7 @@ export function toTreasuryState(raw: Record<string, unknown>): TreasuryState {
       }
     : undefined;
   const rawPayments = Array.isArray(raw.payments) ? (raw.payments as Record<string, unknown>[]) : [];
-  const approvalsReported = rawPayments.every((p) => Array.isArray(p.signerWallets));
+  const approvalsReported = v1 || rawPayments.every((p) => Array.isArray(p.signerWallets));
   const payments: Payment[] = rawPayments
     .filter((p) => typeof p.paymentId === "string")
     .map((p) => ({
@@ -717,19 +728,23 @@ export function toTreasuryState(raw: Record<string, unknown>): TreasuryState {
       reason: typeof p.reason === "string" ? p.reason : "(reason visible to owners only)",
       signerWallets: Array.isArray(p.signerWallets) ? (p.signerWallets as Address[]) : [],
       status: (["AWAITING_APPROVALS", "READY", "EXECUTED", "FAILED"].includes(p.status as string) ? p.status : "FAILED") as Payment["status"],
-      safeTypedData: p.safeTypedData ?? null,
-      relay: p.relay && typeof p.relay === "object" ? p.relay as Payment["relay"] : null,
+      // CR-X-002: canonical `safeTypedData` (null = stale/terminal → not signable). v0 `typedData` accepted until H switches.
+      ...(p.safeTypedData || p.typedData ? { safeTypedData: p.safeTypedData ?? p.typedData } : {}),
       ...(typeof p.safeNonce === "string" ? { safeNonce: p.safeNonce } : {}),
       ...(isHex32(p.executedTxHash) ? { executedTxHash: p.executedTxHash } : {}),
+      ...(p.relay && typeof p.relay === "object" ? { relay: p.relay as Payment["relay"] } : {}),
     }));
   const prov = (raw.provenance ?? null) as { blockNumber?: string; source?: string } | null;
   const ops = Array.isArray(raw.operations) ? (raw.operations as TreasuryState["operations"]) : undefined;
   return {
     treasury,
-    balanceRaw: typeof raw.balanceRaw === "string" ? raw.balanceRaw : undefined,
-    tokenDecimals: typeof raw.tokenDecimals === "number" ? raw.tokenDecimals : undefined,
+    // null = unknown (never zero), per CR-X-002.
+    balanceRaw: typeof raw.balanceRaw === "string" && /^\d+$/.test(raw.balanceRaw) ? raw.balanceRaw : undefined,
+    tokenDecimals: raw.tokenDecimals === 6 ? 6 : undefined,
+    ...(v1 ? { schemaVersion: 1 as const } : {}),
+    ...(["UNKNOWN", "PENDING", "VERIFIED", "FAILED"].includes(raw.depositsStatus as string) ? { depositsStatus: raw.depositsStatus as ReadStatus } : {}),
+    ...(TREASURY_STATUSES.includes(raw.verificationStatus as TreasuryStatus) ? { readStatus: raw.verificationStatus as TreasuryStatus } : {}),
     payments,
-    depositsStatus: (["PENDING", "VERIFIED"].includes(String(raw.depositsStatus)) ? raw.depositsStatus : "UNKNOWN") as TreasuryState["depositsStatus"],
     deposits: Array.isArray(raw.deposits) ? (raw.deposits as TreasuryState["deposits"]) : [],
     evidence: Array.isArray(raw.evidence)
       ? (raw.evidence as Evidence[]).filter((e) => e && typeof e.kind === "string" && (!e.txHash || isHex32(e.txHash))).map((e) => ({ ...e, source: "API" as const }))

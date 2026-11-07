@@ -55,6 +55,12 @@ export default function TreasuryPage() {
             ) : (
               deploy.error && <AdapterErrorNotice error={deploy.error} />
             )}
+            {t?.readStatus === "UNVERIFIED" && (
+              <Notice tone="warn" title="Treasury not verified" testId="treasury-unverified">
+                A reviewed manifest exists for this venture, but the treasury service&apos;s independent on-chain checks did not pass, so no Safe is shown as
+                active.
+              </Notice>
+            )}
             {!deploy.error && requested.length > 0 && (
               <Notice tone="info" title="A treasury request is recorded" testId="deploy-recorded">
                 {requested.length} operation{requested.length > 1 ? "s" : ""} RESERVED. No transaction has been sent; the Safe appears here only after deployment and chain read-back.
@@ -171,7 +177,11 @@ export default function TreasuryPage() {
               ask to switch network. The deposit goes straight to your Safe.
             </p>
             <input className="input mono small" readOnly value={`${origin}/funder/${v.ensName}`} aria-label="Funding link" data-testid="funding-link" />
-            {t?.depositsStatus === "PENDING" && <p role="status">Deposit history is still syncing; the records shown may be incomplete.</p>}
+            {t?.depositsStatus && t.depositsStatus !== "VERIFIED" && (
+              <span className="small faint" data-testid="deposits-incomplete">
+                Deposit history from the treasury service is {t.depositsStatus === "PENDING" ? "still catching up" : "unknown"} — not a zero balance.
+              </span>
+            )}
             {t && t.deposits.length > 0 && (
               <ul className="stack-sm small" style={{ listStyle: "none", padding: 0, margin: 0 }}>
                 {t.deposits.map((d) => (
