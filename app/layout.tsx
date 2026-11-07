@@ -3,7 +3,10 @@ import "./globals.css";
 import { AppShell } from "@/components/AppShell";
 
 export const metadata: Metadata = {
-  title: "vestige — know who you're funding, from day zero",
+  title: {
+    default: "Vestige · Know who you're funding",
+    template: "%s · Vestige",
+  },
   description: "Verified-human founders, signed terms and a 2-of-2 USDT treasury, checkable by anyone from one ENS name.",
 };
 
