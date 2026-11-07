@@ -171,6 +171,7 @@ export default function TreasuryPage() {
               ask to switch network. The deposit goes straight to your Safe.
             </p>
             <input className="input mono small" readOnly value={`${origin}/funder/${v.ensName}`} aria-label="Funding link" data-testid="funding-link" />
+            {t?.depositsStatus === "PENDING" && <p role="status">Deposit history is still syncing; the records shown may be incomplete.</p>}
             {t && t.deposits.length > 0 && (
               <ul className="stack-sm small" style={{ listStyle: "none", padding: 0, margin: 0 }}>
                 {t.deposits.map((d) => (

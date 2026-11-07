@@ -312,12 +312,10 @@ export function createLiveAdapter(deps: LiveDeps = {}): VestigeClient {
   };
 
   /** Server-built SafeTx typed data from proposals this tab made (until X's readback reloads it, CR-C2-009). */
-  const proposalTypedData = new Map<string, unknown>();
   const treasuryState = async (id: VentureId): Promise<Result<TreasuryState>> => {
     const r = await call<Record<string, unknown>>("GET", "GET /api/treasury/ventures/:id", `/api/treasury/ventures/${id}`, { auth: "optional" });
     if (!r.ok) return r;
     const t = toTreasuryState(r.value);
-    for (const p of t.payments) if (!p.safeTypedData && proposalTypedData.has(p.paymentId)) p.safeTypedData = proposalTypedData.get(p.paymentId);
     return ok(t);
   };
 
@@ -572,13 +570,12 @@ export function createLiveAdapter(deps: LiveDeps = {}): VestigeClient {
     async proposePayment(ventureId, { recipient, amountRaw, reason, wallet }) {
       const s = requireSessionFor(wallet);
       if (!s.ok) return s;
-      const r = await call<{ paymentId?: string; typedData?: unknown }>("POST", "POST /api/treasury/ventures/:id/payments", `/api/treasury/ventures/${ventureId}/payments`, {
+      const r = await call<{ paymentId?: string; safeTypedData?: unknown }>("POST", "POST /api/treasury/ventures/:id/payments", `/api/treasury/ventures/${ventureId}/payments`, {
         auth: true,
         idempotent: true,
         body: { recipient, amountRaw, reason },
       });
       if (!r.ok) return r;
-      if (r.value.paymentId && r.value.typedData) proposalTypedData.set(r.value.paymentId, r.value.typedData);
       return treasuryState(ventureId);
     },
 
@@ -720,7 +717,8 @@ export function toTreasuryState(raw: Record<string, unknown>): TreasuryState {
       reason: typeof p.reason === "string" ? p.reason : "(reason visible to owners only)",
       signerWallets: Array.isArray(p.signerWallets) ? (p.signerWallets as Address[]) : [],
       status: (["AWAITING_APPROVALS", "READY", "EXECUTED", "FAILED"].includes(p.status as string) ? p.status : "FAILED") as Payment["status"],
-      ...(p.typedData || p.safeTypedData ? { safeTypedData: p.typedData ?? p.safeTypedData } : {}),
+      safeTypedData: p.safeTypedData ?? null,
+      relay: p.relay && typeof p.relay === "object" ? p.relay as Payment["relay"] : null,
       ...(typeof p.safeNonce === "string" ? { safeNonce: p.safeNonce } : {}),
       ...(isHex32(p.executedTxHash) ? { executedTxHash: p.executedTxHash } : {}),
     }));
@@ -731,6 +729,7 @@ export function toTreasuryState(raw: Record<string, unknown>): TreasuryState {
     balanceRaw: typeof raw.balanceRaw === "string" ? raw.balanceRaw : undefined,
     tokenDecimals: typeof raw.tokenDecimals === "number" ? raw.tokenDecimals : undefined,
     payments,
+    depositsStatus: (["PENDING", "VERIFIED"].includes(String(raw.depositsStatus)) ? raw.depositsStatus : "UNKNOWN") as TreasuryState["depositsStatus"],
     deposits: Array.isArray(raw.deposits) ? (raw.deposits as TreasuryState["deposits"]) : [],
     evidence: Array.isArray(raw.evidence)
       ? (raw.evidence as Evidence[]).filter((e) => e && typeof e.kind === "string" && (!e.txHash || isHex32(e.txHash))).map((e) => ({ ...e, source: "API" as const }))

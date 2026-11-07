@@ -111,7 +111,7 @@ export type Payment = {
   reason: string;
   signerWallets: Address[];
   status: PaymentStatus;
-  relay?: { operationId: string; status: RelayStatus; txHash?: Hex; error?: string };
+  relay?: { operationId: string; status: RelayStatus; txHash?: Hex; error?: string } | null;
   /** Exact Safe EIP-712 typed data from X's proposal; signed as-is (never rebuilt by C2 in live mode). */
   safeTypedData?: unknown;
   safeNonce?: string;
@@ -143,7 +143,7 @@ export type Evidence = {
   status: ReadStatus;
   chainId?: number;
   txHash?: Hex;
-  blockNumber?: number;
+  blockNumber?: string | number;
   confirmedAt?: string;
   source: DataSource;
   /** World evidence from the staging environment (CONTRACTS: separate qualifier, not a label). */
@@ -170,6 +170,7 @@ export type VentureDetail = {
 
 /** Contract v0 `GET /api/treasury/ventures/:id` — "chain readback + pending payments". */
 export type TreasuryState = {
+  depositsStatus?: "UNKNOWN" | "PENDING" | "VERIFIED";
   treasury?: Treasury;
   /** raw USDT balance string from chain readback */
   balanceRaw?: string;

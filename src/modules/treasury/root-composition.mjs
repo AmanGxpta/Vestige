@@ -1,3 +1,5 @@
+import {treasuryReadV1,paymentCreatedV1} from './readback-payload.mjs';
+import {TreasuryChainReadPort} from './readback-port.mjs';
 import {createPublicClient,http} from 'viem';
 import {TreasuryStore} from './store.mjs';
 import {c1SessionAuthentication} from './auth-port.mjs';
@@ -10,7 +12,7 @@ import {RpcIO} from '../relayer/rpc-io.mjs';
 import {createReviewedRelayer} from '../relayer/configured.mjs';
 import {readFile} from 'node:fs/promises';
 /** Read-only root composition. No summary port, signer, password or broadcast grant. */
-export function createRootComposition({identityModule,env,client}){
+export function createRootComposition({identityModule,env,client,readbackVersion=0}){
  let ready;
  return {ready(){return ready ||= (async()=>{
   if(!env.VESTIGE_DB_PATH||!env.VESTIGE_AUTH_URI||!env.WHITECHAIN_RPC_URL)throw new Error('ROOT_CONFIG_REQUIRED');
@@ -41,6 +43,12 @@ export function createRootComposition({identityModule,env,client}){
   };
   const treasury=new TreasuryService({store,relay,manifests,readConfirmedSeats});
   treasury.authenticate=c1SessionAuthentication(identity.auth);
+  if(readbackVersion===1){
+   treasury.readPort=new TreasuryChainReadPort({client:publicClient,store});
+   treasury.read=(id,actor)=>treasuryReadV1(treasury,id,actor);
+   const mutate=treasury.mutate.bind(treasury);
+   treasury.mutate=async(action,args)=>{const result=await mutate(action,args);return action==='payments'?paymentCreatedV1(result):result;};
+  }
   registerTreasuryRuntime(treasury);
   // CR-ID-05 deliberately not injected. Actual C1 publicList keeps null summaries.
   return {identity,treasury,store,seatAttester:port,client:publicClient,mode:'READ_ONLY'};
