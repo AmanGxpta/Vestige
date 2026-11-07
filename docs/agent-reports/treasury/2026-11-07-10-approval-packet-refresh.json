@@ -1,0 +1,176 @@
+{
+  "claim": "READ_ONLY_APPROVAL_PACKET_REFRESH",
+  "broadcastAuthorized": false,
+  "note": "Predictions, not deployments. No keystore read, no signature, no broadcast.",
+  "buildReview": {
+    "kind": "UNAPPROVED_BUILD_REVIEW",
+    "sourceCommit": "4504d9782084bfe1981b223807a08cdcf1f77060",
+    "chainId": 1874,
+    "compiler": "v0.8.24+commit.e11b9ed9",
+    "optimizerRuns": 200,
+    "evmVersion": "paris",
+    "broadcastAuthorized": false,
+    "deployments": [
+      {
+        "contract": "contracts/SeatRegistry.sol:SeatRegistry",
+        "sourceSha256": "a06551c3a673e3e4afe871814b1016bb551801febb491e4f56433988c9ed125b",
+        "constructorArgs": [
+          "0x84068C51A9236A869E5F05FBA96323E97597DDEd"
+        ],
+        "encodedConstructorArgs": "0x00000000000000000000000084068c51a9236a869e5f05fba96323e97597dded",
+        "creationBytecodeKeccak256": "0xcd87a6dd6244b5a81563f18bfcd8b580b9c69f4421a87a7f71838808617a37a1",
+        "initCodeKeccak256": "0xc45ff6c2d7fa0c03ee852ab1a1a9a2d8a7ed00a7b70e9cc91f12bda7a81ee6d0",
+        "compiledRuntimeTemplateKeccak256": "0x88e6e1eb607de9b6b7e7a216b503a5e6b463db698e5f6aa91829dce948a92083",
+        "immutableReferences": {
+          "106": [
+            {
+              "start": 159,
+              "length": 32
+            },
+            {
+              "start": 324,
+              "length": 32
+            }
+          ]
+        }
+      },
+      {
+        "contract": "contracts/SafeSetup.sol:SafeSetup",
+        "sourceSha256": "99b6728302694e5b505819440581ca07acae0c495b6292a2fe37af7fff7fa1b5",
+        "constructorArgs": [
+          "0x29fcB43b46531BcA003ddC8FCB67FFE91900C762"
+        ],
+        "encodedConstructorArgs": "0x00000000000000000000000029fcb43b46531bca003ddc8fcb67ffe91900c762",
+        "creationBytecodeKeccak256": "0x76ed7805fa60d6e213aec4a3aa5e550fd111340afaca7f97b6e35753b22f40d3",
+        "initCodeKeccak256": "0x5b593af29b3ea5d22ab83d04043639224f42e0392ae71824e57ebc96a0782b16",
+        "compiledRuntimeTemplateKeccak256": "0xe5eeb040ed08eb3a9116619c79f15f30c047ac83830a5b7225248145459824b3",
+        "immutableReferences": {
+          "9": [
+            {
+              "start": 166,
+              "length": 32
+            }
+          ],
+          "11": [
+            {
+              "start": 94,
+              "length": 32
+            },
+            {
+              "start": 299,
+              "length": 32
+            }
+          ]
+        }
+      }
+    ],
+    "warning": "Runtime template hashes are not live code hashes: constructor immutables must be read from actual deployed code."
+  },
+  "buildDigestsUnchangedSince": "10af5047c9730175d35f62e788c392a56717e3cc (only sourceCommit field differs; contracts/ foundry.toml DeployInfrastructure.s.sol unchanged)",
+  "infrastructureReview": {
+    "kind": "INFRASTRUCTURE_REVIEW_PLAN",
+    "codeHashes": {
+      "singleton": "0xb1f926978a0f44a2c0ec8fe822418ae969bd8c3f18d61e5103100339894f81ff",
+      "factory": "0x50c3cdc4074750a7a974204a716c999edd37482f907608d960b2b025ee0b3317"
+    },
+    "chainId": 1874,
+    "observedAt": "2026-11-07T00:04:27.553Z",
+    "blockNumber": "12413498",
+    "blockHash": "0xed9259c166676789858770fac1df139ad14bc1a5ffbdbf263b319fb7de4c99f2",
+    "sender": "0x10d8C1d6359F0694203924182d3da83843a4e052",
+    "nonce": 0,
+    "pendingNonce": 0,
+    "wbtWei": "800000000000000000",
+    "gasPriceWei": "5001000000",
+    "broadcastAuthorized": false,
+    "deployments": [
+      {
+        "contract": "contracts/SeatRegistry.sol:SeatRegistry",
+        "nonce": 0,
+        "predictedAddress": "0xe91BF256Afa7c5453e715c39Ab2431EAd492bcBA",
+        "constructorArgs": [
+          "0x84068C51A9236A869E5F05FBA96323E97597DDEd"
+        ],
+        "encodedConstructorArgs": "0x00000000000000000000000084068c51a9236a869e5f05fba96323e97597dded",
+        "proposedGasCeiling": "400000"
+      },
+      {
+        "contract": "contracts/SafeSetup.sol:SafeSetup",
+        "nonce": 1,
+        "predictedAddress": "0x153406cd0509E71d302eD49E787051Bb98231558",
+        "constructorArgs": [
+          "0x29fcB43b46531BcA003ddC8FCB67FFE91900C762"
+        ],
+        "encodedConstructorArgs": "0x00000000000000000000000029fcb43b46531bca003ddc8fcb67ffe91900c762",
+        "proposedGasCeiling": "2500000"
+      }
+    ],
+    "verification": {
+      "compiler": "v0.8.24+commit.e11b9ed9",
+      "optimizer": true,
+      "runs": 200,
+      "evmVersion": "paris",
+      "verifier": "blockscout",
+      "url": "https://explorer.testnet.whitechain.io/api/"
+    },
+    "approvalRequired": [
+      "source/build",
+      "bounded funding",
+      "gas ceilings vs simulation",
+      "OP L1 measured policy",
+      "exact nonce/constructors before any signing"
+    ],
+    "warning": "Predicted addresses are not deployed contracts. No receipt/manifest exists."
+  },
+  "publicFunding": {
+    "claim": "READ_ONLY_PUBLIC_BALANCES",
+    "chainId": 1874,
+    "at": "2026-11-07T00:04:31.848Z",
+    "blockNumber": "12413500",
+    "blockHash": "0x07b09a80c3d9bed41738616f7bd2ae1274056bdf5c95506b057897e52aed92af",
+    "wallets": {
+      "deployer": {
+        "address": "0x10d8C1d6359F0694203924182d3da83843a4e052",
+        "wbtWei": "800000000000000000",
+        "nonce": 0
+      },
+      "attester": {
+        "address": "0x84068C51A9236A869E5F05FBA96323E97597DDEd",
+        "wbtWei": "200000000000000000",
+        "nonce": 0
+      },
+      "relayer": {
+        "address": "0xc57f2f78997e35fc2C1E0BA06249B499cD293116",
+        "wbtWei": "800000000000000000",
+        "nonce": 0
+      },
+      "funder": {
+        "address": "0xD613312b630C9359EcE15dBF3969c47261d8d43A",
+        "wbtWei": "0",
+        "nonce": 0,
+        "usdtRaw": "100000000"
+      },
+      "payee": {
+        "address": "0xabDC5035CEa855Ec7Cf8A7259eA26E131f0BA8D8",
+        "wbtWei": "0",
+        "nonce": 0
+      },
+      "failedTx": {
+        "address": "0xd03ce7DAE6c4B75fE26213Cb08CEB9286D1FC852",
+        "wbtWei": "50000000000000000",
+        "nonce": 0
+      }
+    },
+    "broadcastAuthorized": false
+  },
+  "unsignedSimulation": {
+    "command": "ATTESTER_ADDRESS=0x84068C51A9236A869E5F05FBA96323E97597DDEd forge script script/treasury/DeployInfrastructure.s.sol:DeployInfrastructure --rpc-url https://rpc.testnet.whitechain.io --sender 0x10d8C1d6359F0694203924182d3da83843a4e052 --non-interactive",
+    "result": "SIMULATION COMPLETE",
+    "registry": "0xe91BF256Afa7c5453e715c39Ab2431EAd492bcBA",
+    "helper": "0x153406cd0509E71d302eD49E787051Bb98231558",
+    "estimatedTotalGas": "2564488",
+    "estimatedMaxFeePerGasGwei": "10.000000001",
+    "estimatedBaseFeeGwei": "5",
+    "estimatedWbt": "0.025644880002564488"
+  }
+}
