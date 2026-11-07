@@ -63,6 +63,7 @@ export const IDENTITY_MIGRATIONS = [
   join(here, "../../../db/migrations/010_identity.sql"),
   join(here, "../../../db/migrations/010_identity_agreements.sql"),
   join(here, "../../../db/migrations/010_identity_v0_followthrough.sql"),
+  join(here, "../../../db/migrations/010_identity_demo_override.sql"),
 ];
 
 /** Applies C1's migrations (idempotent: CREATE ... IF NOT EXISTS). */

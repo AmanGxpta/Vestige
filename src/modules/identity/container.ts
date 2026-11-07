@@ -13,7 +13,7 @@ import { AuthService } from "./auth";
 import { migrateIdentity, SqliteDb } from "./db";
 import { EnsReader, ViemEnsRegistrar } from "./ens/registrar";
 import type { IdentityServices } from "./http";
-import { UnconfiguredPort, type EnsPort, type SeatAttestationPort, type TreasurySummaryPort } from "./ports";
+import { ApprovalGatedEnsPort, UnconfiguredPort, type EnsPort, type SeatAttestationPort, type TreasurySummaryPort } from "./ports";
 import { VentureService } from "./ventures";
 import type { WorldConfig } from "./world";
 import { ENS_KEYS } from "./config";
@@ -68,7 +68,9 @@ export function getIdentityServices(env: NodeJS.ProcessEnv = process.env): Ident
   const world = worldConfigFromEnv(env);
 
   const parentName = env.VESTIGE_ENS_PARENT ?? "vestige.eth";
-  let ens: EnsPort = new UnconfiguredPort("ENS registrar");
+  // No registrar key in the server env ⇒ approval-gated: the API never broadcasts ENS writes;
+  // H-approved digest-bound plans are broadcast by the operator and reconciled by read-back.
+  let ens: EnsPort = new ApprovalGatedEnsPort();
   let reader: EnsReader | null = null;
   if (env.SEPOLIA_RPC_URL) {
     const client = createPublicClient({ chain: sepolia, transport: http(env.SEPOLIA_RPC_URL) });

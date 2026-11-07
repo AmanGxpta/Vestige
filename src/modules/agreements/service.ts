@@ -11,7 +11,7 @@ import { systemClock, type Clock } from "../identity/auth";
 import { isUniqueViolation, type SqlDb } from "../identity/db";
 import { fail } from "../identity/errors";
 import { assertVentureId, newBytes32, type Bytes32 } from "../identity/ids";
-import type { EnsPort } from "../identity/ports";
+import { EnsAwaitingApproval, type EnsPort } from "../identity/ports";
 import type { ReadStatus, VentureService } from "../identity/ventures";
 import { canonicalize, docHash } from "./canonical";
 import { buildTermsDoc, FOUNDING_TERMS_DOMAIN, FOUNDING_TERMS_TYPES, typedDataFor, type FoundingTermsMessage } from "./terms";
@@ -303,6 +303,11 @@ export class AgreementService {
         txHash: txHashes.at(-1), ...(c.state === "CONFIRMED" ? { chainId: c.chainId, blockNumber: c.blockNumber, confirmedAt: c.confirmedAt } : {}), source: "ens-sepolia",
       });
     } catch (e) {
+      if (e instanceof EnsAwaitingApproval) {
+        set("PENDING");
+        this.ventures.event({ ventureId, kind: "ens_agreement_record", label: "CHAIN_VERIFIED", status: "PENDING", source: "ens-sepolia", detail: "awaiting H-approved ENS plan (no broadcast)" });
+        return;
+      }
       set("FAILED");
       this.ventures.event({ ventureId, kind: "ens_agreement_record", label: "CHAIN_VERIFIED", status: "FAILED", source: "ens-sepolia", detail: (e as Error).message.slice(0, 200) });
     }

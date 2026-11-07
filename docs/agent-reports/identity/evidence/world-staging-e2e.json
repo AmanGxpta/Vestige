@@ -1,5 +1,12 @@
 {
-  "label": "TESTED_IN_SIMULATOR",
+  "label": "TESTED_IN_SIMULATOR (per-case labels in caseLabels; ID-02 is MOCK_ONLY)",
+  "caseLabels": {
+    "ID-02 two distinct founders": "MOCK_ONLY (D-024: simulator returned the same 4.0 nullifier for two selected test identities; case s2 refused DUPLICATE_HUMAN)",
+    "ID-03 same identity, second wallet, same venture → refused": "TESTED_IN_SIMULATOR",
+    "ID-04 same identity, different venture → allowed": "TESTED_IN_SIMULATOR",
+    "realHumans": "NONE — simulator identities are not people; no production World ID uniqueness is claimed"
+  },
+  "relabelledAt": "2026-11-07 per D-024; recorded portal exchanges and outcomes below are unchanged from the 2026-11-06T22:32–22:36Z run",
   "disclaimer": "World ID Simulator (staging) identities. Not real people, not proof of two distinct humans, not production World ID.",
   "environment": "staging",
   "protocolPinned": "4.0",
