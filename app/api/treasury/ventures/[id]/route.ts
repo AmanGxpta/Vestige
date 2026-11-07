@@ -3,6 +3,5 @@ import { dispatchTreasuryRequest } from "../../../../../src/modules/treasury/rou
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export async function GET(req: Request, ctx: { params: Promise<{ id: string; pid?: string }> }) {
-  await services();
-  return dispatchTreasuryRequest(req, "read", await ctx.params);
+  return dispatchTreasuryRequest(req, "read", await ctx.params, services);
 }

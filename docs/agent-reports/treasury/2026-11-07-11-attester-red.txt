@@ -1,0 +1,3 @@
+Error [ERR_MODULE_NOT_FOUND]: Cannot find module '/Users/amang/Code/NovemberRush/ethglobal/vestige/vestige-treasury/src/modules/treasury/attester-signer.mjs' imported from /Users/amang/Code/NovemberRush/ethglobal/vestige/vestige-treasury/tests/treasury/attester-signer.test.mjs
+ℹ pass 0
+ℹ fail 1

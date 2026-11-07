@@ -35,7 +35,10 @@ export class SeatAttester {
    if(!/^0x[0-9a-fA-F]{64}$/.test(txHash))throw new Error('INVALID_HASH');
    db.run('UPDATE treasury_attestations SET status=?,tx_hash=? WHERE venture_id=? AND wallet=?','SUBMITTED',txHash,input.ventureId,wallet);
    return {txHash,chainId:1874};
-  }catch{db.run('UPDATE treasury_attestations SET status=? WHERE venture_id=? AND wallet=?','UNKNOWN',input.ventureId,wallet);fail('ATTESTATION_SUBMISSION_UNKNOWN',503);}
+  }catch(e){
+   // Only a transport-declared refusal before any network write may release the reservation.
+   if(e?.preBroadcast===true&&/^ATTESTER_[A-Z_]+$/.test(e.message)){db.run("DELETE FROM treasury_attestations WHERE venture_id=? AND wallet=? AND status='RESERVED' AND tx_hash IS NULL",input.ventureId,wallet);fail(e.message,503);}
+   db.run('UPDATE treasury_attestations SET status=? WHERE venture_id=? AND wallet=?','UNKNOWN',input.ventureId,wallet);fail('ATTESTATION_SUBMISSION_UNKNOWN',503);}
  }
  async confirm(input){
   try{inputCheck(input);}catch{return {state:'FAILED',reason:'INVALID_SEAT'};}

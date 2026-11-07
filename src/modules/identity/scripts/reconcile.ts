@@ -23,7 +23,15 @@ export interface ReconcileReport {
   stillOpen: string[];
 }
 
-export async function reconcileIdentity(s: IdentityServices, opts: { retry?: boolean; now?: () => number } = {}): Promise<ReconcileReport> {
+export async function reconcileIdentity(
+  s: IdentityServices,
+  opts: {
+    retry?: boolean;
+    now?: () => number;
+    /** Demo-override seats are NOT attested on retry unless H opts in explicitly (CR-ID-06). */
+    attestDemoOverrides?: boolean;
+  } = {},
+): Promise<ReconcileReport> {
   const base = await s.ventures.reconcile();
   const agr = await s.agreements.reconcile({ retry: opts.retry });
   const retried = [...agr.retried];
@@ -35,6 +43,10 @@ export async function reconcileIdentity(s: IdentityServices, opts: { retry?: boo
     for (const r of s.db.all<{ venture_id: string; wallet: string }>(
       "SELECT venture_id, wallet FROM identity_seats WHERE world_status = 'VERIFIED' AND onchain_status = 'FAILED' AND attestation_tx_hash IS NULL",
     )) {
+      if (!opts.attestDemoOverrides && s.ventures.overriddenWallets(r.venture_id).includes(r.wallet as `0x${string}`)) {
+        needsManualReview.push(`attestation:${r.venture_id}:${r.wallet}:demo-override-not-attested (set attestDemoOverrides to include)`);
+        continue;
+      }
       await s.ventures.retryAttestation(r.venture_id as `0x${string}`, r.wallet as `0x${string}`);
       retried.push(`attestation:${r.venture_id}:${r.wallet}`);
     }

@@ -18,6 +18,6 @@
       "vitest/*": ["./node_modules/vitest/*"]
     }
   },
-  "include": ["./**/*.ts", "../../src/modules/identity/**/*.ts", "../../src/modules/agreements/**/*.ts", "../../app/api/identity/**/*.ts", "../../app/api/agreements/**/*.ts"],
+  "include": ["./**/*.ts", "../../src/modules/identity/**/*.ts", "../../src/modules/agreements/**/*.ts"],
   "exclude": ["./node_modules"]
 }
