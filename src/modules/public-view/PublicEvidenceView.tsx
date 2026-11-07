@@ -206,7 +206,7 @@ export function PublicEvidenceView({ ensName, requestedSource }: { ensName: stri
                     <strong>
                       {" · "}
                       {key === "ens" && outcome === "partial" && report?.ens.treasury.status === "UNKNOWN" && report.ens.texts.value?.["vestige.status"] === "workspace"
-                        ? "name resolved · no treasury published yet"
+                        ? "name resolved · no treasury linked yet"
                         : outcomeText[outcome]}
                     </strong>
                   )}
@@ -283,7 +283,16 @@ export function PublicEvidenceView({ ensName, requestedSource }: { ensName: stri
             {/* 2. Whitechain */}
             <Card title="2 · Treasury on Whitechain" testId="card-whitechain" actions={<span className="tiny faint">chain 1874</span>}>
               {!w ? (
-                <p className="muted small">Not read — the name did not lead to a treasury address.</p>
+                <div className="stack-sm">
+                  <p className="muted small">Not read — the name did not lead to a treasury address.</p>
+                  {report?.manifest.status === "LOADED" && report.manifest.manifest.ensName === (report.normalizedName ?? ensName) && (
+                    <p className="small" data-testid="manifest-unlinked">
+                      A reviewed deployment manifest names Safe{" "}
+                      <HashLink value={report.manifest.manifest.contracts.safe.address} chainId={1874} kind="address" source="CHAIN" /> for this venture, but{" "}
+                      {ensName} does not point to it on ENS yet (ENSIP-11 address not set), so it cannot be verified from the name.
+                    </p>
+                  )}
+                </div>
               ) : (
                 <div className="stack">
                   <ul className="checks" data-testid="treasury-checks">

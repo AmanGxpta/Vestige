@@ -17,7 +17,10 @@ import { manifestUrlFor, validateManifest } from "./manifest";
 
 const DIR = join(process.cwd(), "public", "manifests");
 /** X-published SHA-256 over the exact file bytes. Filled only from X's report — never computed locally and pasted. */
-const PINNED_SHA256: Record<string, string> = {};
+const PINNED_SHA256: Record<string, string> = {
+  // X: agent/treasury contracts/manifests/published/northstar.vestige.eth-4504d9782084.json (H-relayed digest)
+  "northstar.vestige.eth.json": "ebee268619a6bc5075f5ee41aed1d66aa5516d590c5b7b892e99274b50e602ef",
+};
 const files = existsSync(DIR) ? readdirSync(DIR).filter((f) => !f.startsWith(".")) : [];
 
 describe("public/manifests drop-in", () => {

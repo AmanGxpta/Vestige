@@ -7,7 +7,7 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { validateManifest as xValidate } from "../treasury/manifest.mjs";
+import * as xManifest from "../treasury/manifest.mjs";
 import { validateManifest } from "./manifest";
 
 const infra = JSON.parse(readFileSync(join(process.cwd(), "contracts/manifests/whitechain-1874/infrastructure.json"), "utf8"));
@@ -37,6 +37,9 @@ function northstarShaped() {
     contracts: { safe, guard: placeholder("3", "VestigeGuard"), registry: infra.contracts.registry, singleton: infra.contracts.singleton, factory: infra.contracts.factory, setup: infra.contracts.setup, token: infra.contracts.token },
   };
 }
+const xValidate = xManifest.validateManifest;
+/** X's H-decision-A provenance support lives on agent/treasury until H merges it; until then those parity cases are skipped. */
+const xHasProvenance = "EXPLORER_ATTESTED_ANCHORS" in xManifest;
 const xOk = (m: unknown) => {
   try {
     xValidate(m as Parameters<typeof xValidate>[0]); // X throws on any violation, returns the manifest otherwise
@@ -52,6 +55,22 @@ describe("manifest validator parity with X", () => {
     expect(validateManifest(m)).toEqual([]);
     expect(xOk(m)).toBe(true);
   });
+  it.skipIf(!xHasProvenance)("both accept EXPLORER_ATTESTED on the four pinned anchors (H decision A)", () => {
+    const m = northstarShaped();
+    for (const k of ["singleton", "factory", "token"] as const) Object.assign(m.contracts[k], { provenance: "EXPLORER_ATTESTED" });
+    Object.assign(m.contracts.token.implementation, { provenance: "EXPLORER_ATTESTED" });
+    expect(validateManifest(m)).toEqual([]);
+    expect(xOk(m)).toBe(true);
+  });
+  it("C2 accepts X's published northstar manifest", () => {
+    const m = JSON.parse(readFileSync(join(process.cwd(), "public/manifests/northstar.vestige.eth.json"), "utf8"));
+    expect(validateManifest(m)).toEqual([]);
+  });
+  it.skipIf(!xHasProvenance)("X accepts the same published northstar manifest", () => {
+    const m = JSON.parse(readFileSync(join(process.cwd(), "public/manifests/northstar.vestige.eth.json"), "utf8"));
+    expect(validateManifest(m)).toEqual([]);
+    expect(xOk(m)).toBe(true);
+  });
   const mutations: [string, (m: ReturnType<typeof northstarShaped>) => void][] = [
     ["wrong chain", (m) => (m.chainId = 1)],
     ["threshold 1", (m) => (m.threshold = 1)],
@@ -59,6 +78,9 @@ describe("manifest validator parity with X", () => {
     ["non-canonical singleton", (m) => (m.contracts.singleton = { ...m.contracts.singleton, address: `0x${"9".repeat(40)}` })],
     ["deploymentBlock ≠ safe block", (m) => (m.deploymentBlock = 1)],
     ["bad ventureId", (m) => (m.ventureId = "0x1234")],
+    ["provenance on a vestige-deployed contract", (m) => Object.assign(m.contracts.safe, { provenance: "EXPLORER_ATTESTED" })],
+    ["provenance with a wrong value", (m) => (m.contracts.singleton = { ...m.contracts.singleton, provenance: "SELF_ATTESTED" })],
+    ["provenance on an anchor with a different code hash", (m) => (m.contracts.factory = { ...m.contracts.factory, provenance: "EXPLORER_ATTESTED", runtimeCodeHash: `0x${"8".repeat(64)}` })],
   ];
   for (const [name, mutate] of mutations)
     it(`both refuse: ${name}`, () => {

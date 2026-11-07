@@ -215,7 +215,7 @@ export async function readPublicChainReport(ensName: string, cfg: ReaderConfig, 
   if (treasury.status === "FAILED" && !treasury.value && resolver.status === "VERIFIED" && texts.value?.["vestige.status"] === "workspace") {
     Object.assign(treasury, {
       status: "UNKNOWN",
-      note: 'No treasury published yet — vestige.status is "workspace" (no Safe deployed or linked to this name).',
+      note: 'No treasury linked from this name yet: its ENSIP-11 Whitechain address and vestige.treasury record are not set (vestige.status is "workspace").',
     } satisfies Partial<Step<{ address: Address; via: "ENSIP-11" | "TEXT_FALLBACK" }>>);
   }
 

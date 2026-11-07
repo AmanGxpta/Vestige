@@ -34,7 +34,7 @@ describe.skipIf(!process.env.VESTIGE_LIVE)("live ENS: northstar.vestige.eth", ()
     expect(r.ens.ventureId.value).toBe("0xe68b1b43989080cfe7581731204a977009d67e3b3660062d24157562cc93e3ff");
     expect(t["vestige.status"]).toBe("workspace");
     expect(t["vestige.humans"]).toBe("1");
-    expect(r.ens.treasury.status).toBe("UNKNOWN"); // workspace: no Safe published yet
+    expect(r.ens.treasury.status).toBe("UNKNOWN"); // workspace: no Safe linked from ENS yet
     expect(deriveTreasuryVerdict(r).state).not.toBe("ACTIVE");
   }, 60_000);
 });
